@@ -23,21 +23,27 @@ namespace Keyblock
 
         static void Main()
         {
-            XmlConfigurator.Configure(new FileInfo("Log4net.config"));
-            var prog = new Program();
-            prog.LoadIni();
-            prog.load_clientId();
-            prog.load_machineid();
-            if (!prog.API_GetSessionKey())
+            try
             {
-                Console.WriteLine("Failed to get the session key");
-                return;
+                XmlConfigurator.Configure(new FileInfo("Log4net.config"));
+                var prog = new Program();
+                prog.LoadIni();
+                prog.load_clientId();
+                prog.load_machineid();
+                if (!prog.API_GetSessionKey())
+                {
+                    Console.WriteLine("Failed to get the session key");
+                    return;
+                }
+                prog.API_GetCertificate();
+                prog.Close();
+                Logger.Info("Done: Exit");
+
             }
-            Logger.Info("Give the server some time to process");
-            //Task.Delay(1000).Wait();
-            prog.API_GetCertificate();
-            prog.Close();
-            Logger.Info("Done: Exit");
+            catch (Exception ex)
+            {
+                Logger.Fatal("An unhandled exception occured", ex);
+            }
             Console.ReadKey();
         }
 
@@ -48,7 +54,7 @@ namespace Keyblock
 
         private void Close()
         {
-            _sslClient.Close();
+            _settings.Save();
         }
 
         private void API_GetCertificate()
@@ -68,8 +74,8 @@ namespace Keyblock
 
             Logger.Debug($"[API] Requesting Certificate: {msg}");
 
-            /******* Send the request *******/
-            var response = _sslClient.Send(msg, _settings.VcasServer, _settings.VcasPort);
+            /******* SendAndReceive the request *******/
+            var response = _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort);
 
             if (response == null || response.Length < 12)
             {
@@ -106,7 +112,7 @@ namespace Keyblock
             
             var resp = noConnect ?
                 File.ReadAllBytes("Session.txt")
-                : _sslClient.Send(msg, _settings.VcasServer, _settings.VcasPort);
+                : _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort);
 
             if (resp == null) return false;
 

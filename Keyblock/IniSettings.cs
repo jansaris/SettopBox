@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using log4net;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace Keyblock
 {
@@ -35,9 +37,16 @@ namespace Keyblock
         public string Company { get; set; }
         public string MessageFormat { get; set; }
 
+        //Decode if ini contains flag
+        private const string DecodeFlag = "-- Encoded from here --";
+        private readonly Func<string, string> _noDecode = value => value;
+        private readonly Func<string, string> _decode = value => string.IsNullOrWhiteSpace(value) ? value : Encoding.UTF8.GetString(Convert.FromBase64String(value));
+        private Func<string, string> _decoder;
+
         public void Load()
         {
             Logger.Info("Read Keyblock.ini");
+            _decoder = _noDecode;
             try
             {
                 using (var reader = new StreamReader("Keyblock.ini"))
@@ -46,6 +55,11 @@ namespace Keyblock
                         var line = reader.ReadLine();
                         if (string.IsNullOrWhiteSpace(line)) continue;
                         if (line.StartsWith("#")) continue;
+                        if (line.Equals(DecodeFlag))
+                        {
+                            _decoder = _decode;
+                            continue;
+                        }
                         Logger.DebugFormat("Process line {0}", line);
                         ReadConfigItem(line);
                     }
@@ -57,20 +71,51 @@ namespace Keyblock
             }
         }
 
+        public void Save()
+        {
+            Logger.Info("Save Keyblock.ini");
+            try
+            {
+                using (var writer = new StreamWriter("Keyblock.ini"))
+                {
+                    writer.WriteLine("#[Keyblock.ini]");
+                    writer.WriteLine(DecodeFlag);
+                    var properties = GetType().GetProperties(PropertyFlags);
+                    foreach (var property in properties)
+                    {
+                        var key = property.Name;
+                        var value = property.GetValue(this);
+                        if (value == null)
+                        {
+                            Logger.Debug($"Key '{key}' has no value, skip writing to ini file");
+                            continue;
+                        }
+                        var converted = Convert.ToBase64String(Encoding.UTF8.GetBytes(value.ToString()));
+                        Logger.Debug($"Write '{key}' with value '{value}' to disk as '{converted}'");
+                        writer.WriteLine($"{key}|{converted}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to save the configuration", ex);
+            }
+        }
+
         private void ReadConfigItem(string line)
         {
-            var keyvalue = line.Split('=');
+            var keyvalue = line.Split('|');
             if (keyvalue.Length < 2)
             {
                 Logger.WarnFormat("Failed to read configuration line: {0}", line);
                 return;
             }
-            SetValue(keyvalue[0], keyvalue[1]);
+            SetValue(keyvalue[0], _decoder(keyvalue[1]));
         }
 
         private void SetValue(string key, string value)
         {
-            var propertyInfo = GetType().GetProperty(key, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Public);
+            var propertyInfo = GetType().GetProperty(key, PropertyFlags);
             if (propertyInfo == null)
             {
                 Logger.WarnFormat("Unknown configuration key: {0}", key);
@@ -86,5 +131,7 @@ namespace Keyblock
                 Logger.Error($"Failed to read {key} into {value} as {propertyInfo.PropertyType}", ex);
             }
         }
+
+        private const BindingFlags PropertyFlags = BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Public;
     }
 }

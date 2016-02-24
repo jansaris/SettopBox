@@ -1,9 +1,5 @@
-﻿using System;
-using System.IO;
-using Org.BouncyCastle.OpenSsl;
+﻿using System.IO;
 using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.Utilities.IO.Pem;
-using PemWriter = Org.BouncyCastle.Utilities.IO.Pem.PemWriter;
 
 namespace Keyblock
 {
@@ -22,18 +18,15 @@ namespace Keyblock
 
         public string CsrPem()
         {
-            var pemObject = new PemObject("CERTIFICATE REQUEST", _pkcs10CertificationRequest.GetEncoded());
             var str = new StringWriter();
             var pwriter = new Org.BouncyCastle.OpenSsl.PemWriter(str);
             pwriter.WriteObject(_pkcs10CertificationRequest);
-            //var pemWriter = new PemWriter(str);
-            //pemWriter.WriteObject(pemObject);
             return str.ToString();
         }
 
         public override string ToString()
         {
-            return $"-----BEGIN CERTIFICATE REQUEST-----{Csr}-----END CERTIFICATE REQUEST-----";
+            return CsrPem();
         }
     }
 }
