@@ -10,9 +10,14 @@ using System.Text;
 
 namespace Keyblock
 {
-    public class SslTcpClient
+    public class SslTcpClient : IDisposable
     {
         private static Hashtable certificateErrors = new Hashtable();
+        private bool _clientOpen;
+        private TcpClient _client;
+        private SslStream _sslStream;
+        private string _activeServer;
+        private int _activePort;
 
         // The following method is invoked by the RemoteCertificateValidationDelegate.
         public bool ValidateServerCertificate(
@@ -30,51 +35,87 @@ namespace Keyblock
             return true;
         }
 
-        public byte[] ssl_client_send(string msg, string server, int port)
+        private void Open(string server, int port)
         {
+            if (_clientOpen && ServerMatch(server, port)) return;
+            if(_clientOpen && !ServerMatch(server,port)) Close();
             // Create a TCP/IP client socket.
             // machineName is the host running the server application.
-            TcpClient client = new TcpClient(server, port);
+            _client = new TcpClient(server, port);
             Console.WriteLine("Client connected.");
             // Create an SSL stream that will close the client's stream.
-            using (SslStream sslStream = new SslStream(client.GetStream(), true, ValidateServerCertificate, null))
+            _sslStream = new SslStream(_client.GetStream(), true, ValidateServerCertificate, null);
+            
+            // The server name must match the name on the server certificate.
+            try
             {
-                // The server name must match the name on the server certificate.
-                try
-                {
-                    sslStream.AuthenticateAsClient(server);
+                _sslStream.AuthenticateAsClient(server);
 
-                    var cert = sslStream.RemoteCertificate;
-                    Console.WriteLine($"Got certificate from server {cert.Issuer} with subject {cert.Subject}");
-                }
-                catch (AuthenticationException e)
+                var cert = _sslStream.RemoteCertificate;
+                Console.WriteLine($"Got certificate from server {cert.Issuer} with subject {cert.Subject}");
+            }
+            catch (AuthenticationException e)
+            {
+                Console.WriteLine("Exception: {0}", e.Message);
+                if (e.InnerException != null)
                 {
-                    Console.WriteLine("Exception: {0}", e.Message);
-                    if (e.InnerException != null)
-                    {
-                        Console.WriteLine("Inner exception: {0}", e.InnerException.Message);
-                    }
-                    Console.WriteLine("Authentication failed - closing the connection.");
-                    client.Close();
-                    return null;
+                    Console.WriteLine("Inner exception: {0}", e.InnerException.Message);
                 }
-                // Encode a test message into a byte array.
-                // Signal the end of the message using the "<EOF>".
-                byte[] messsage = Encoding.ASCII.GetBytes(msg);
-                // Send hello message to the server. 
-                sslStream.Write(messsage);
-                sslStream.Flush();
-                // Read message from the server.
-                var serverMessage = ReadMessage(sslStream);
+                Console.WriteLine("Authentication failed - closing the connection.");
+                _client.Close();
+                _clientOpen = false;
+            }
+            _clientOpen = true;
+            _activeServer = server;
+            _activePort = port;
+        }
 
-                // Close the client connection.
-                client.Close();
+        private bool ServerMatch(string server, int port)
+        {
+            return _activeServer == server && _activePort == port;
+        }
+
+        public void Close()
+        {
+            if (!_clientOpen) return;
+            try
+            {
+                _clientOpen = false;
+                _activePort = -1;
+                _activeServer = string.Empty;
+                _sslStream.Close();
+                _client.Close();
                 Console.WriteLine("Client closed.");
-                return serverMessage;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex.Message}");
             }
         }
+
+        public byte[] Send(string msg, string server, int port)
+        {
+            Open(server, port);
+            // Encode a test message into a byte array.
+            // Signal the end of the message using the "<EOF>".
+            byte[] messsage = Encoding.ASCII.GetBytes(msg);
+            // Send hello message to the server. 
+            _sslStream.Write(messsage);
+            _sslStream.Flush();
+            // Read message from the server.
+            var serverMessage = ReadMessage();
+            Close();
+
+            return serverMessage;
+        }
+
+        public void Dispose()
+        {
+            Close();
+        }
+    
         
-        byte[] ReadMessage(SslStream sslStream)
+        byte[] ReadMessage()
         {
             // Read the  message sent by the server.
             // The end of the message is signaled using the
@@ -84,20 +125,8 @@ namespace Keyblock
             int bytes;
             do
             {
-                bytes = sslStream.Read(buffer, 0, buffer.Length);
+                bytes = _sslStream.Read(buffer, 0, buffer.Length);
                 receivedBytes.AddRange(buffer.Take(bytes));
-
-                //// Use Decoder class to convert from bytes to UTF8
-                //// in case a character spans two buffers.
-                //Decoder decoder = Encoding.ASCII.GetDecoder();
-                //char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
-                //decoder.GetChars(buffer, 0, bytes, chars, 0);
-                //messageData.Append(chars);
-                // Check for EOF.
-                //if (messageData.ToString().IndexOf("<EOF>") != -1)
-                //{
-                //    break;
-                //}
             } while (bytes != 0);
 
             return receivedBytes.ToArray();

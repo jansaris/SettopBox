@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.X509;
 
 namespace Keyblock
 {
     class Program
     {
+        private bool noConnect = false;
+
         private int DEBUG = 1;
         private readonly Random _random = new Random();
         private readonly SslTcpClient _sslClient = new SslTcpClient();
@@ -22,6 +27,7 @@ namespace Keyblock
         const string szOrganization = "vr2.3.1-candidate-amino-A130.11-hwonly";
         const string szCommon = "STB";
         const string szTelephone = "858-677-7800";
+        string szEmail = "VODPassword";
         const string szChallengePassword = "VODPassword";
 
         // Connection data
@@ -53,17 +59,87 @@ namespace Keyblock
             if (!prog.API_GetSessionKey())
             {
                 Console.WriteLine("Failed to get the session key");
+                return;
             }
             Console.WriteLine("Give the server some time to process");
-            Task.Delay(1000).Wait();
+            //Task.Delay(1000).Wait();
             prog.API_GetCertificate();
+            prog.Close();
             Console.WriteLine("Done: Exit");
             Console.ReadKey();
         }
 
-        private void API_GetCertificate()
+        private void Close()
         {
-            throw new NotImplementedException();
+            _sslClient.Close();
+        }
+
+        private bool API_GetCertificate()
+        {
+            //FILE* fp;
+            //const uchar* cert;
+            //char* csr;
+            //int response_len;
+            //int msglen;
+            //uchar msg[2048];
+            //uchar* response_buffer = calloc(2048, 1);
+            /******* Get the current time64 *******/
+            var t64 = (long)(DateTime.UtcNow - new DateTime (1970, 1, 1)).TotalSeconds;
+
+            /******* Generate the CSR *******/
+            LOG(DEBUG, "[API] Generating CSR");
+            //szEmail = calloc(64, 1);
+            szEmail = $"{_apiMachineId}.{t64}@Verimatrix.com";
+            //sprintf(szEmail, "%s.%llu@Verimatrix.com", api_machineId, t64);
+            LOG(DEBUG, $"[API] Using email: {szEmail}");
+            var csr = generate_csr();
+            var pem = csr.CsrPem();
+
+            /******* Generate the request string *******/
+            var msg = $"{api_msgformat}~{_apiClientId}~getCertificate~{api_company}~NA~NA~{pem}~{szCommon}~{szAddress}~ ~{szCity}~{szProvince}~{szZipCode}~{szCountry}~{szTelephone}~{szEmail}~{_apiMachineId}~{szChallengePassword}~";
+            //msglen = sprintf((char*)msg,
+            //                "%s~%s~getCertificate~%s~NA~NA~%s~%s~%s~ ~%s~%s~%s~%s~%s~%s~%s~%s~",
+            //                api_msgformat, api_clientID, api_company, csr,
+            //                szCommon, szAddress, szCity, szProvince, szZipCode, szCountry, szTelephone, szEmail,
+            //                api_machineID, szChallengePassword);
+            File.WriteAllText("winCert.txt", msg);
+            File.WriteAllText("cert.der", pem);
+            File.WriteAllText("csr.cer",$"-----BEGIN CERTIFICATE REQUEST-----{csr.Csr}-----END CERTIFICATE REQUEST-----");
+            LOG(DEBUG, $"[API] Requesting Certificate: {msg}");
+
+            /******* Send the request *******/
+            var response = _sslClient.Send(msg, vcasServerAddress, VCAS_Port_SSL);
+
+            if (response == null || response.Length < 12)
+            {
+                return false;
+            }
+
+            /******* Get the Signed cert from the response *******/
+            var cert = new List<byte>(response).GetRange(12, (response.Length - 12)).ToArray();
+            File.WriteAllBytes("signed_cert.cer",cert);
+            //cert = response_buffer + 12;
+            
+            return true;
+        }
+
+        private X509CertificateRequest generate_csr()
+        {
+            var subject = new X509SubjectAttributes();
+            subject.Add(X509Name.C,szCountry);
+            subject.Add(X509Name.ST, szProvince);
+            subject.Add(X509Name.L, szCity);
+            subject.Add(X509Name.O, api_company);
+            subject.Add(X509Name.OU, szOrganization);
+            subject.Add(X509Name.CN,szCommon);
+            subject.Add(X509Name.EmailAddress,szEmail);
+            subject.ChallangePassword(szChallengePassword);
+            //subject.Add(X509Name.,szCountry);
+
+            var cer = X509Certificate2Builder.GeneratePkcs10(subject);
+            //var ca2 = new X509Certificate2Builder { SubjectName = subject }.Build();
+            //return ca2.Thumbprint;
+            return cer;
         }
 
         bool API_GetSessionKey()
@@ -71,7 +147,11 @@ namespace Keyblock
             var msg = $"{api_msgformat}~{_apiClientId}~CreateSessionKey~{api_company}~{_apiMachineId}~";
 
             LOG(DEBUG, $"[API] Requesting Session Key: {msg}");
-            var resp = _sslClient.ssl_client_send(msg, vcasServerAddress, VCAS_Port_SSL);
+            
+            var resp = noConnect ?
+                File.ReadAllBytes("Session.txt")
+                : _sslClient.Send(msg, vcasServerAddress, VCAS_Port_SSL);
+            //var resp = 
 
             if (resp == null) return false;
 
