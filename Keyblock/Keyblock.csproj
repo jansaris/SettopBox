@@ -53,7 +53,7 @@
   <ItemGroup>
     <Compile Include="IniSettings.cs" />
     <Compile Include="X509CertificateRequest.cs" />
-    <Compile Include="X509Certificate2Builder.cs" />
+    <Compile Include="X509CertificateBuilder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SslTcpClient.cs" />

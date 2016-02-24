@@ -4,7 +4,6 @@ using System.IO;
 using System.Text;
 using log4net;
 using log4net.Config;
-using Org.BouncyCastle.Asn1.X509;
 
 namespace Keyblock
 {
@@ -28,8 +27,8 @@ namespace Keyblock
                 XmlConfigurator.Configure(new FileInfo("Log4net.config"));
                 var prog = new Program();
                 prog.LoadIni();
-                prog.load_clientId();
-                prog.load_machineid();
+                prog.LoadClientId();
+                prog.LoadMachineId();
                 if (!prog.API_GetSessionKey())
                 {
                     Console.WriteLine("Failed to get the session key");
@@ -90,16 +89,16 @@ namespace Keyblock
         private X509CertificateRequest generate_csr()
         {
             var subject = new X509SubjectAttributes();
-            subject.Add(X509Name.C, _settings.Country);
-            subject.Add(X509Name.ST, _settings.Province);
-            subject.Add(X509Name.L, _settings.City);
-            subject.Add(X509Name.O, _settings.Company);
-            subject.Add(X509Name.OU, _settings.Organization);
-            subject.Add(X509Name.CN, _settings.Common);
-            subject.Add(X509Name.EmailAddress,_settings.Email);
+            subject.AddCountry(_settings.Country);
+            subject.AddProvice(_settings.Province);
+            subject.AddCity(_settings.City);
+            subject.AddCompany(_settings.Company);
+            subject.AddOrganization(_settings.Organization);
+            subject.AddCommon(_settings.Common);
+            subject.AddEmail(_settings.Email);
             subject.ChallangePassword(_settings.ChallengePassword);
 
-            var cer = X509Certificate2Builder.GeneratePkcs10(subject);
+            var cer = X509CertificateBuilder.GeneratePkcs10(subject);
 
             return cer;
         }
@@ -126,7 +125,7 @@ namespace Keyblock
             return true;
         }
 
-        void load_machineid()
+        void LoadMachineId()
         {
             _settings.MachineId = string.Empty;
             
@@ -145,7 +144,7 @@ namespace Keyblock
             File.WriteAllText("machineId",_settings.MachineId);
         }
 
-        void load_clientId()
+        void LoadClientId()
         {
             _settings.ClientId = string.Empty;
 
