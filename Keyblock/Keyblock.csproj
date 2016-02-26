@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IKeyblock.cs" />
     <Compile Include="IniSettings.cs" />
     <Compile Include="Keyblock.cs" />
     <Compile Include="KeyblockException.cs" />
