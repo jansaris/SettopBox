@@ -52,12 +52,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IniSettings.cs" />
+    <Compile Include="Keyblock.cs" />
+    <Compile Include="KeyblockException.cs" />
     <Compile Include="X509CertificateRequest.cs" />
-    <Compile Include="X509CertificateBuilder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SslTcpClient.cs" />
-    <Compile Include="X509SubjectAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
