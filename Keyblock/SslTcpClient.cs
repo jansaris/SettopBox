@@ -20,26 +20,44 @@ namespace Keyblock
             return true;
         }
 
-        private SslStream OpenPort(string server, int port)
+        private Stream OpenPort(string server, int port, bool useSsl)
         {
             //Open a tcp connection with the server
             Logger.Debug($"Open a TCP connection with {server}:{port}");
             var client = new TcpClient(server, port);
             // Create an SSL stream that will close the client's stream.
-            Logger.Debug("Wrap the TCP connection in a SSL stream");
-            var sslStream = new SslStream(client.GetStream(), true, ValidateServerCertificate, null);
-            sslStream.AuthenticateAsClient(server);
+            Stream stream;
+            if (useSsl)
+            {
+                Logger.Debug("Wrap the TCP connection in a SSL stream");
+                var sslStream = new SslStream(client.GetStream(), true, ValidateServerCertificate, null);
+                sslStream.AuthenticateAsClient(server);
+                stream = sslStream;
+            }
+            else
+            {
+                Logger.Debug("Use TCP connection stream");
+                stream = client.GetStream();
+            }
             Logger.Debug($"Succesfully connected to {server}:{port}");
-            return sslStream;
+            return stream;
         }
 
-        public byte[] SendAndReceive(string msg, string server, int port)
+        public byte[] SendAndReceive(string msg, string server, int port, bool useSsl = true)
+        {
+            Logger.Debug("Convert ASCII message into bytes");
+            // Encode a test message into a byte array.
+            var messsage = Encoding.ASCII.GetBytes(msg);
+            return SendAndReceive(messsage,server,port,useSsl);
+        }
+
+        public byte[] SendAndReceive(byte[] msg, string server, int port, bool useSsl = true)
         {
             byte[] response = null;
             try
             {
                 Logger.Info($"Send message to {server}:{port}");
-                using (var stream = OpenPort(server, port))
+                using (var stream = OpenPort(server, port, useSsl))
                 {
                     Send(stream, msg);
                     response = Read(stream);
@@ -68,14 +86,11 @@ namespace Keyblock
             return receivedBytes.ToArray();
         }
 
-        private static void Send(SslStream stream, string msg)
+        private static void Send(Stream stream, byte[] message)
         {
-            Logger.Debug("Convert ASCII message into bytes");
-            // Encode a test message into a byte array.
-            var messsage = Encoding.ASCII.GetBytes(msg);
-            // And send the bytes to the server
-            Logger.Debug($"Write {messsage.Length} bytes to the server");
-            stream.Write(messsage);
+            //Send the bytes to the server
+            Logger.Debug($"Write {message.Length} bytes to the server");
+            stream.Write(message, 0, message.Length);
             stream.Flush();
         }
     }
