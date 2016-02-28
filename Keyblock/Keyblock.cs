@@ -25,6 +25,7 @@ namespace Keyblock
         byte[] _sessionKey;
         string _timestamp;
         string _ski;
+        byte[] _password;
 
         public Keyblock(IniSettings settings, SslTcpClient sslClient)
         {
@@ -101,20 +102,29 @@ namespace Keyblock
 
         bool GenerateSki()
         {
-            var parser = new X509CertificateParser();
-            var cert = parser.ReadCertificate(File.ReadAllBytes(SignedCertificateFile));
-            var identifier = new SubjectKeyIdentifierStructure(cert.GetPublicKey());
-            var bytes = identifier.GetKeyIdentifier();
-            _ski = BytesAsHex(bytes);
-            return true;
+            try
+            {
+                Logger.Debug($"Resolve SKI from {SignedCertificateFile}");
+                var parser = new X509CertificateParser();
+                var cert = parser.ReadCertificate(File.ReadAllBytes(SignedCertificateFile));
+                var identifier = new SubjectKeyIdentifierStructure(cert.GetPublicKey());
+                var bytes = identifier.GetKeyIdentifier();
+                _ski = BytesAsHex(bytes);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Failed to get the SKI from {SignedCertificateFile}", ex);
+                return false;
+            }
         }
 
         bool SaveEncryptedPassword()
         {
-            var bytes = new byte[32];
-            new Random().NextBytes(bytes);
+            _password = new byte[32];
+            new Random().NextBytes(_password);
 
-            var encodedBytes = RC4.Encrypt(_sessionKey, bytes);
+            var encodedBytes = RC4.Encrypt(_sessionKey, _password);
             var password = BytesAsHex(encodedBytes).ToLower();
             
             var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{_timestamp}~{_settings.MachineId}~";
@@ -137,23 +147,75 @@ namespace Keyblock
             return true;
         }
 
+        bool GetEncryptedPassword()
+        {
+            var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{_timestamp}~{_settings.MachineId}~";
+            /*
+            msglen = sprintf((char*)msg,
+                    "%s~%s~%s~%s~%s~GetEncryptedPassword~%s~%s~", api_msgformat,
+                    api_company, timestamp, api_machineID, api_clientID, api_company, ski);
+            */
+            var encryptedMsgPart = $"{_settings.ClientId}~GetEncryptedPassword~{_settings.Company}~{_ski}~";
+
+            Logger.Debug($"Get encryption password: {unencryptedMsgPart}{encryptedMsgPart}");
+
+            var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
+            msg.AddRange(RC4.Encrypt(_sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
+
+            var response = _sslClient.SendAndReceive(msg.ToArray(), _settings.VcasServer, _settings.VcasPort + 1, false);
+
+            if (response == null || response.Length < 8)
+            {
+                Logger.Error("Failed to GetEncryptedPassword, no valid response!");
+                return false;
+            }
+
+            var encryptedPassword = response.Skip(4).Take(response.Length - 4).ToArray();
+            var decrypted = RC4.Decrypt(_sessionKey, encryptedPassword);
+            var passwordHex = Encoding.ASCII.GetString(decrypted.Skip(4).ToArray());
+
+            Logger.Debug($"GetEncryptedPassword completed: {passwordHex}");
+            return true;
+        }
+
+        bool LoadKeyBlock()
+        {
+            return false;
+        }
+
         public bool DownloadNew()
         {
-            return RunInOrder(
-                GetSessionKey,
-                GetCertificate,
-                GenerateSki,
-                SaveEncryptedPassword
-            );
-        }
-        static bool RunInOrder(params Func<bool>[] functions)
-        {
-            return functions.All(function => function());
+            var retValue = GetSessionKey();
+            if (!retValue) return false;
+            //Look if we already have a valid certificate
+            if (GenerateSki())
+            {
+                //Load password
+                retValue = GetEncryptedPassword();
+            }
+            else
+            {
+                //Get a certificate
+                retValue = GetCertificate();
+                retValue = retValue && GenerateSki();
+                //And save the password
+                retValue = retValue && SaveEncryptedPassword();
+            }
+            retValue = retValue && LoadKeyBlock();
+            return retValue;
         }
 
         static string BytesAsHex(byte[] bytes)
         {
             return BitConverter.ToString(bytes).Replace("-", "");
+        }
+
+        static byte[] HexAsBytes(string hex)
+        {
+            return Enumerable.Range(0, hex.Length)
+                     .Where(x => x % 2 == 0)
+                     .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                     .ToArray();
         }
     }
 }

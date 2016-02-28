@@ -10,6 +10,7 @@ namespace Keyblock
     public class IniSettings
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(IniSettings));
+        readonly Random _random = new Random();
 
         public string MachineId { get; set; }
         public string ClientId { get; set; }
@@ -63,13 +64,37 @@ namespace Keyblock
                         Logger.DebugFormat("Process line {0}", line);
                         ReadConfigItem(line);
                     }
-
+                if (string.IsNullOrWhiteSpace(ClientId)) GenerateClientId();
+                if (string.IsNullOrWhiteSpace(MachineId)) GenerateMachineId();
             }
             catch (Exception ex)
             {
                 throw new Exception("Failed to load the configuration", ex);
             }
         }
+
+        void GenerateMachineId()
+        {
+            Logger.Debug("No MachineId found, generating MachineID");
+            var buf = new byte[20];
+            _random.NextBytes(buf);
+            MachineId = Convert.ToBase64String(buf);
+            Logger.Debug($"Your MachineID is: {MachineId}");
+        }
+
+        void GenerateClientId()
+        {
+            Logger.Debug("No ClientId found, generating ClientId");
+            var buf = new byte[28];
+            _random.NextBytes(buf);
+            ClientId = string.Empty;
+            foreach (var b in buf)
+            {
+                ClientId += (b & 0xFF).ToString("X2");
+            }
+            Logger.Debug($"Your ClientID is: {ClientId}");
+        }
+
 
         public void Save()
         {
