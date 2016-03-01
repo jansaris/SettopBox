@@ -56,6 +56,7 @@
     <Compile Include="Keyblock.cs" />
     <Compile Include="KeyblockException.cs" />
     <Compile Include="RC4.cs" />
+    <Compile Include="Signer.cs" />
     <Compile Include="X509CertificateRequest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

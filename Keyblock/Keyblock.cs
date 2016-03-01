@@ -2,8 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using log4net;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.Pkcs;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
 
@@ -126,7 +134,7 @@ namespace Keyblock
             new Random().NextBytes(_password);
 
             var encodedBytes = RC4.Encrypt(_sessionKey, _password);
-            var password = BytesAsHex(encodedBytes).ToLower();
+            var password = BytesAsHex(encodedBytes);
             
             var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{_timestamp}~{_settings.MachineId}~";
             var encryptedMsgPart = $"{_settings.ClientId}~SaveEncryptedPassword~{_settings.Company}~{_ski}~64~{password}~";
@@ -181,7 +189,23 @@ namespace Keyblock
 
         string GenerateSignedHash()
         {
-            throw new NotImplementedException();
+            //_timestamp = "03/01/2016 20:28:59";
+            var timestampBytes = Encoding.ASCII.GetBytes(_timestamp);
+
+            AsymmetricCipherKeyPair keyPair;
+            using (var stream = File.OpenText("RC4/priv_key.pem"))
+                keyPair = (AsymmetricCipherKeyPair) new PemReader(stream).ReadObject();
+            // Use the generated key
+            var sig = SignerUtilities.GetSigner(PkcsObjectIdentifiers.MD5WithRsaEncryption);
+            sig.Init(true, keyPair.Private);
+            sig.BlockUpdate(timestampBytes,0, timestampBytes.Length);
+            var signature = sig.GenerateSignature();
+            //Return the hash as Hex
+            var generated =  BytesAsHex(signature);
+            var expected =
+                "7b50b9b9f96885792308819799fb1950c27b20272cbd990448de72991b7ccf7b779278ffbf65b38dde93b086263b4408f78d2859f37dfa81cdb1e1f97cb59774d1eb7667903e38e823c38f211ee386dd26148f523bade5c950230c87085a2ac32aaf1867532bfd235f0cdae5326e7967d47bfe3c2d249a8bb928e0fab4884167";
+
+            return generated;
         }
 
         bool LoadKeyBlock()
@@ -199,6 +223,8 @@ namespace Keyblock
 
             var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
             msg.AddRange(RC4.Encrypt(_sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
+
+            Logger.Info($"{unencryptedMsgPart}{encryptedMsgPart}");
 
             var response = _sslClient.SendAndReceive(msg.ToArray(), _settings.VksServer, _settings.VksPort + 1, false);
 
@@ -221,6 +247,7 @@ namespace Keyblock
         public bool DownloadNew()
         {
             var retValue = GetSessionKey();
+            //GenerateSignedHash();
             if (!retValue) return false;
             //Look if we already have a valid certificate
             if (GenerateSki())
@@ -242,7 +269,7 @@ namespace Keyblock
 
         static string BytesAsHex(byte[] bytes)
         {
-            return BitConverter.ToString(bytes).Replace("-", "");
+            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
         }
     }
 }

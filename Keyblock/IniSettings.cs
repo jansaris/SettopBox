@@ -90,7 +90,7 @@ namespace Keyblock
             ClientId = string.Empty;
             foreach (var b in buf)
             {
-                ClientId += (b & 0xFF).ToString("X2");
+                ClientId += (b & 0xFF).ToString("x2");
             }
             Logger.Debug($"Your ClientID is: {ClientId}");
         }
