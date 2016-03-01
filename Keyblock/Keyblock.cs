@@ -15,6 +15,7 @@ namespace Keyblock
         const string GetCertificateResponseFile = "getCertificate.response";
         const string GetSessionKeyResponseFile = "CreateSessionKey.response";
         const string SignedCertificateFile = "SignedCert.der";
+        const string KeyblockFile = "Keyblock.dat";
 
         static readonly ILog Logger = LogManager.GetLogger(typeof(Keyblock));
 
@@ -178,8 +179,42 @@ namespace Keyblock
             return true;
         }
 
+        string GenerateSignedHash()
+        {
+            throw new NotImplementedException();
+        }
+
         bool LoadKeyBlock()
         {
+            var hash = GenerateSignedHash();
+
+            var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{_timestamp}~{_settings.MachineId}~";
+            /*
+             msglen = sprintf((char*) msg,
+                            "%s~%s~%s~%s~%s~GetAllChannelKeys~%s~%s~%s~%s~ ~ ~", api_msgformat,
+                            api_company, timestamp, api_machineID, api_clientID, api_company, ski,
+                            signedhash, api_machineID);
+            */
+            var encryptedMsgPart = $"{_settings.ClientId}~GetAllChannelKeys~{_settings.Company}~{_ski}~{hash}~{_settings.MachineId}~ ~ ~";
+
+            var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
+            msg.AddRange(RC4.Encrypt(_sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
+
+            var response = _sslClient.SendAndReceive(msg.ToArray(), _settings.VksServer, _settings.VksPort + 1, false);
+
+            if (response == null || response.Length < 10)
+            {
+                Logger.Error("Failed to GetAllChannelKeys, no valid response!");
+                return false;
+            }
+
+            var encrypted = response.Skip(4).Take(response.Length - 4).ToArray();
+            var decrypted = RC4.Decrypt(_sessionKey, encrypted);
+            
+            File.WriteAllBytes(KeyblockFile, decrypted);
+
+            Logger.Debug($"GetAllChannelKeys completed: {decrypted.Length} bytes");
+
             return false;
         }
 
@@ -208,14 +243,6 @@ namespace Keyblock
         static string BytesAsHex(byte[] bytes)
         {
             return BitConverter.ToString(bytes).Replace("-", "");
-        }
-
-        static byte[] HexAsBytes(string hex)
-        {
-            return Enumerable.Range(0, hex.Length)
-                     .Where(x => x % 2 == 0)
-                     .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
-                     .ToArray();
         }
     }
 }
