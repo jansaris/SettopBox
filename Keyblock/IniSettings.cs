@@ -9,7 +9,8 @@ namespace Keyblock
 {
     public class IniSettings
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(IniSettings));
+        static readonly ILog Logger = LogManager.GetLogger(typeof(IniSettings));
+        const BindingFlags PROPERTY_FLAGS = BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Public;
         readonly Random _random = new Random();
 
         public string MachineId { get; set; }
@@ -38,11 +39,17 @@ namespace Keyblock
         public string Company { get; set; }
         public string MessageFormat { get; set; }
 
+        // Communication data
+        public string DataFolder { get; set; }
+        public bool WriteAllCommunicationToDisk { get; set; }
+        public string CommunicationFolder { get; set; }
+        public bool DontUseRealServerButMessagesFromDisk { get; set; }
+
         //Decode if ini contains flag
-        private const string DecodeFlag = "-- Encoded from here --";
-        private readonly Func<string, string> _noDecode = value => value;
-        private readonly Func<string, string> _decode = value => string.IsNullOrWhiteSpace(value) ? value : Encoding.UTF8.GetString(Convert.FromBase64String(value));
-        private Func<string, string> _decoder;
+        const string DECODE_FLAG = "-- Encoded from here --";
+        readonly Func<string, string> _noDecode = value => value;
+        readonly Func<string, string> _decode = value => string.IsNullOrWhiteSpace(value) ? value : Encoding.UTF8.GetString(Convert.FromBase64String(value));
+        Func<string, string> _decoder;
 
         public void Load()
         {
@@ -56,7 +63,7 @@ namespace Keyblock
                         var line = reader.ReadLine();
                         if (string.IsNullOrWhiteSpace(line)) continue;
                         if (line.StartsWith("#")) continue;
-                        if (line.Equals(DecodeFlag))
+                        if (line.Equals(DECODE_FLAG))
                         {
                             _decoder = _decode;
                             continue;
@@ -73,18 +80,18 @@ namespace Keyblock
             }
         }
 
-        void GenerateMachineId()
+        public void GenerateMachineId()
         {
-            Logger.Debug("No MachineId found, generating MachineID");
+            Logger.Debug("Generate new MachineID");
             var buf = new byte[20];
             _random.NextBytes(buf);
             MachineId = Convert.ToBase64String(buf);
             Logger.Debug($"Your MachineID is: {MachineId}");
         }
 
-        void GenerateClientId()
+        public void GenerateClientId()
         {
-            Logger.Debug("No ClientId found, generating ClientId");
+            Logger.Debug("Generate new ClientId");
             var buf = new byte[28];
             _random.NextBytes(buf);
             ClientId = string.Empty;
@@ -104,8 +111,8 @@ namespace Keyblock
                 using (var writer = new StreamWriter("Keyblock.ini"))
                 {
                     writer.WriteLine("#[Keyblock.ini]");
-                    writer.WriteLine(DecodeFlag);
-                    var properties = GetType().GetProperties(PropertyFlags);
+                    writer.WriteLine(DECODE_FLAG);
+                    var properties = GetType().GetProperties(PROPERTY_FLAGS);
                     foreach (var property in properties)
                     {
                         var key = property.Name;
@@ -126,8 +133,19 @@ namespace Keyblock
                 throw new Exception("Failed to save the configuration", ex);
             }
         }
+        public void EnsureDataFolderExists(string folder)
+        {
+            var directory = new DirectoryInfo(folder);
+            if (directory.Exists) Logger.Debug($"Data folder '{directory.FullName}' exists");
+            else
+            {
+                Logger.Debug($"Data folder '{directory.FullName}' doesn't exist, create it");
+                directory.Create();
+                Logger.Info($"Created data folder '{directory.FullName}'");
+            }
+        }
 
-        private void ReadConfigItem(string line)
+        void ReadConfigItem(string line)
         {
             var keyvalue = line.Split('|');
             if (keyvalue.Length < 2)
@@ -138,9 +156,9 @@ namespace Keyblock
             SetValue(keyvalue[0], _decoder(keyvalue[1]));
         }
 
-        private void SetValue(string key, string value)
+        void SetValue(string key, string value)
         {
-            var propertyInfo = GetType().GetProperty(key, PropertyFlags);
+            var propertyInfo = GetType().GetProperty(key, PROPERTY_FLAGS);
             if (propertyInfo == null)
             {
                 Logger.WarnFormat("Unknown configuration key: {0}", key);
@@ -156,7 +174,5 @@ namespace Keyblock
                 Logger.Error($"Failed to read {key} into {value} as {propertyInfo.PropertyType}", ex);
             }
         }
-
-        private const BindingFlags PropertyFlags = BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Public;
     }
 }

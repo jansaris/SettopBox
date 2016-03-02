@@ -6,9 +6,11 @@ using log4net;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
+using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 
@@ -19,6 +21,7 @@ namespace Keyblock
         static readonly ILog Logger = LogManager.GetLogger(typeof(X509CertificateRequest));
 
         Pkcs10CertificationRequest _pkcs10CertificationRequest;
+        public AsymmetricCipherKeyPair KeyPair { get; private set; }
         List<DerObjectIdentifier> Identifiers => _attributes.Select(a => a.Key).ToList();
         List<object> Values => _attributes.Select(a => a.Value).ToList();
 
@@ -28,9 +31,6 @@ namespace Keyblock
         {
             _attributes.Add(new KeyValuePair<DerObjectIdentifier, object>(identifier, value));
         }
-
-        public string Csr { get; private set; }
-        public string PrivateKey { get; private set; }
 
         public void ChallangePassword(string value)
         {
@@ -91,15 +91,11 @@ namespace Keyblock
 
                 rsaKeyPairGenerator.Init(genParam);
 
-                var pair = rsaKeyPairGenerator.GenerateKeyPair();
+                KeyPair = rsaKeyPairGenerator.GenerateKeyPair();
 
                 var subject = new X509Name(Identifiers, Values);
 
-                _pkcs10CertificationRequest = new Pkcs10CertificationRequest(PkcsObjectIdentifiers.Sha1WithRsaEncryption.Id, subject, pair.Public, null, pair.Private);
-
-                Csr = Convert.ToBase64String(_pkcs10CertificationRequest.GetEncoded());
-                var pkInfo = PrivateKeyInfoFactory.CreatePrivateKeyInfo(pair.Private);
-                PrivateKey = Convert.ToBase64String(pkInfo.GetDerEncoded());
+                _pkcs10CertificationRequest = new Pkcs10CertificationRequest(PkcsObjectIdentifiers.Sha1WithRsaEncryption.Id, subject, KeyPair.Public, null, KeyPair.Private);
             }
             catch (Exception ex)
             {
@@ -115,6 +111,12 @@ namespace Keyblock
             var pwriter = new Org.BouncyCastle.OpenSsl.PemWriter(str);
             pwriter.WriteObject(_pkcs10CertificationRequest);
             return str.ToString();
+        }
+
+        public void LoadKeyPairFromDisk(string file)
+        {
+            using (var stream = File.OpenText(file))
+                KeyPair = (AsymmetricCipherKeyPair) new PemReader(stream).ReadObject();
         }
     }
 }

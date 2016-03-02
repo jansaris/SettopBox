@@ -2,15 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using log4net;
-using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Pkcs;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
@@ -20,21 +14,19 @@ namespace Keyblock
     public class Keyblock : IKeyblock
     {
         //Filenames
-        const string GetCertificateResponseFile = "getCertificate.response";
-        const string GetSessionKeyResponseFile = "CreateSessionKey.response";
-        const string SignedCertificateFile = "SignedCert.der";
-        const string KeyblockFile = "Keyblock.dat";
+        string SignedCertificateFile => Path.Combine(_settings.DataFolder, "SignedCert.der");
+        string KeyblockFile => Path.Combine(_settings.DataFolder, "Keyblock.dat");
 
         static readonly ILog Logger = LogManager.GetLogger(typeof(Keyblock));
 
         readonly IniSettings _settings;
         readonly SslTcpClient _sslClient;
 
-        readonly bool noConnect = false;
         byte[] _sessionKey;
         string _timestamp;
         string _ski;
         byte[] _password;
+        X509CertificateRequest _certificateRequest;
 
         public Keyblock(IniSettings settings, SslTcpClient sslClient)
         {
@@ -44,50 +36,39 @@ namespace Keyblock
 
         bool GetCertificate()
         {
-            /******* Get the current time64 *******/
+            Logger.Debug("Generating message");
             var t64 = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
-
-            /******* Generate the CSR *******/
-            Logger.Debug("Generating CSR");
             _settings.Email = $"{_settings.MachineId}.{t64}@{_settings.EmailHost}";
             Logger.Debug($"Using email: {_settings.Email}");
             var csr = GenerateCertificateRequest();
-
-            /******* Generate the request string *******/
             var msg = $"{_settings.MessageFormat}~{_settings.ClientId}~getCertificate~{_settings.Company}~NA~NA~{csr}~{_settings.Common}~{_settings.Address}~ ~{_settings.City}~{_settings.Province}~{_settings.ZipCode}~{_settings.Country}~{_settings.Telephone}~{_settings.Email}~{_settings.MachineId}~{_settings.ChallengePassword}~";
 
             Logger.Debug($"Requesting Certificate: {msg}");
-
-            /******* SendAndReceive the request *******/
-            var response = noConnect ?
-                File.ReadAllBytes(GetCertificateResponseFile)
-                : _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort);
+            var response = _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort);
 
             if (response == null || response.Length < 12) { return false; }
-
-            File.WriteAllBytes(GetCertificateResponseFile, response);
-
-            /******* Get the Signed cert from the response *******/
             var cert = new List<byte>(response).GetRange(12, (response.Length - 12)).ToArray();
             File.WriteAllBytes(SignedCertificateFile, cert);
 
+            Logger.Debug("Received Certificate");
             return true;
         }
 
         X509CertificateRequest GenerateCertificateRequest()
         {
-            var certificateRequest = new X509CertificateRequest();
-            certificateRequest.AddCountry(_settings.Country);
-            certificateRequest.AddProvice(_settings.Province);
-            certificateRequest.AddCity(_settings.City);
-            certificateRequest.AddCompany(_settings.Company);
-            certificateRequest.AddOrganization(_settings.Organization);
-            certificateRequest.AddCommon(_settings.Common);
-            certificateRequest.AddEmail(_settings.Email);
-            certificateRequest.ChallangePassword(_settings.ChallengePassword);
-            certificateRequest.Generate();
+            if (_certificateRequest != null) return _certificateRequest;
 
-            return certificateRequest;
+            _certificateRequest = new X509CertificateRequest();
+            _certificateRequest.AddCountry(_settings.Country);
+            _certificateRequest.AddProvice(_settings.Province);
+            _certificateRequest.AddCity(_settings.City);
+            _certificateRequest.AddCompany(_settings.Company);
+            _certificateRequest.AddOrganization(_settings.Organization);
+            _certificateRequest.AddCommon(_settings.Common);
+            _certificateRequest.AddEmail(_settings.Email);
+            _certificateRequest.ChallangePassword(_settings.ChallengePassword);
+            _certificateRequest.Generate();
+            return _certificateRequest;
         }
 
         bool GetSessionKey()
@@ -95,13 +76,9 @@ namespace Keyblock
             var msg = $"{_settings.MessageFormat}~{_settings.ClientId}~CreateSessionKey~{_settings.Company}~{_settings.MachineId}~";
             Logger.Debug($"Requesting Session Key: {msg}");
 
-            var response = noConnect ?
-                File.ReadAllBytes(GetSessionKeyResponseFile)
-                : _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort);
+            var response = _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort);
 
             if (response == null) return false;
-            File.WriteAllBytes(GetSessionKeyResponseFile, response);
-
             _sessionKey = response.Skip(4).Take(16).ToArray();
             _timestamp = Encoding.ASCII.GetString(response.Skip(20).Take(19).ToArray());
 
@@ -119,6 +96,8 @@ namespace Keyblock
                 var identifier = new SubjectKeyIdentifierStructure(cert.GetPublicKey());
                 var bytes = identifier.GetKeyIdentifier();
                 _ski = BytesAsHex(bytes);
+
+                Logger.Debug($"Resolved SKI '{_ski}'");
                 return true;
             }
             catch (Exception ex)
@@ -159,11 +138,6 @@ namespace Keyblock
         bool GetEncryptedPassword()
         {
             var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{_timestamp}~{_settings.MachineId}~";
-            /*
-            msglen = sprintf((char*)msg,
-                    "%s~%s~%s~%s~%s~GetEncryptedPassword~%s~%s~", api_msgformat,
-                    api_company, timestamp, api_machineID, api_clientID, api_company, ski);
-            */
             var encryptedMsgPart = $"{_settings.ClientId}~GetEncryptedPassword~{_settings.Company}~{_ski}~";
 
             Logger.Debug($"Get encryption password: {unencryptedMsgPart}{encryptedMsgPart}");
@@ -189,22 +163,19 @@ namespace Keyblock
 
         string GenerateSignedHash()
         {
-            //_timestamp = "03/01/2016 20:28:59";
+            Logger.Debug($"Generate signed hash from {_timestamp}");
             var timestampBytes = Encoding.ASCII.GetBytes(_timestamp);
-
-            AsymmetricCipherKeyPair keyPair;
-            using (var stream = File.OpenText("RC4/priv_key.pem"))
-                keyPair = (AsymmetricCipherKeyPair) new PemReader(stream).ReadObject();
+            
             // Use the generated key
             var sig = SignerUtilities.GetSigner(PkcsObjectIdentifiers.MD5WithRsaEncryption);
-            sig.Init(true, keyPair.Private);
+            var cert = GenerateCertificateRequest();
+            sig.Init(true, cert.KeyPair.Private);
             sig.BlockUpdate(timestampBytes,0, timestampBytes.Length);
             var signature = sig.GenerateSignature();
             //Return the hash as Hex
             var generated =  BytesAsHex(signature);
-            var expected =
-                "7b50b9b9f96885792308819799fb1950c27b20272cbd990448de72991b7ccf7b779278ffbf65b38dde93b086263b4408f78d2859f37dfa81cdb1e1f97cb59774d1eb7667903e38e823c38f211ee386dd26148f523bade5c950230c87085a2ac32aaf1867532bfd235f0cdae5326e7967d47bfe3c2d249a8bb928e0fab4884167";
 
+            Logger.Debug($"Generated signed hash from {generated}");
             return generated;
         }
 
@@ -219,12 +190,20 @@ namespace Keyblock
                             api_company, timestamp, api_machineID, api_clientID, api_company, ski,
                             signedhash, api_machineID);
             */
-            var encryptedMsgPart = $"{_settings.ClientId}~GetAllChannelKeys~{_settings.Company}~{_ski}~{hash}~{_settings.MachineId}~ ~ ~";
+            var encryptedMsgPart = $"{_settings.ClientId}~GetAllChannelKeys~{_settings.Company}~{_ski.ToUpper()}~{hash}~{_settings.MachineId}~ ~ ~";
 
             var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
             msg.AddRange(RC4.Encrypt(_sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
 
+            Logger.Debug($"GetAllChannelKeys from server: {unencryptedMsgPart}{encryptedMsgPart}");
+
+            // Validation
+            var expectedUnEncrypted = File.ReadAllText("RC4/keyblock.unencrypted");
+            var expectedEncrypted = File.ReadAllBytes("RC4/keyblock.encrypted");
             Logger.Info($"{unencryptedMsgPart}{encryptedMsgPart}");
+            Logger.Info($"Messages are unencrypted equal: {expectedUnEncrypted == $"{unencryptedMsgPart}{encryptedMsgPart}"}");
+            Logger.Info($"Messages are encrypted equal: {expectedEncrypted.SequenceEqual(msg)}");
+            // Validation
 
             var response = _sslClient.SendAndReceive(msg.ToArray(), _settings.VksServer, _settings.VksPort + 1, false);
 
@@ -241,13 +220,14 @@ namespace Keyblock
 
             Logger.Debug($"GetAllChannelKeys completed: {decrypted.Length} bytes");
 
-            return false;
+            return true;
         }
 
         public bool DownloadNew()
         {
+            PreLoad();
+            _settings.EnsureDataFolderExists(_settings.DataFolder);
             var retValue = GetSessionKey();
-            //GenerateSignedHash();
             if (!retValue) return false;
             //Look if we already have a valid certificate
             if (GenerateSki())
@@ -265,6 +245,12 @@ namespace Keyblock
             }
             retValue = retValue && LoadKeyBlock();
             return retValue;
+        }
+
+        void PreLoad()
+        {
+            GenerateCertificateRequest();
+            _certificateRequest.LoadKeyPairFromDisk("RC4/priv_key.pem");
         }
 
         static string BytesAsHex(byte[] bytes)
