@@ -108,7 +108,7 @@ namespace Keyblock
         {
             if(_pkcs10CertificationRequest == null) Generate();
             var str = new StringWriter();
-            var pwriter = new Org.BouncyCastle.OpenSsl.PemWriter(str);
+            var pwriter = new PemWriter(str);
             pwriter.WriteObject(_pkcs10CertificationRequest);
             return str.ToString();
         }

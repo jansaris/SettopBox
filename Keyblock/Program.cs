@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 using log4net;
 using log4net.Config;
 
@@ -41,20 +39,31 @@ namespace Keyblock
         void Run()
         {
             LoadIni();
-            if (_keyblock.DownloadNew())
-            {
-                Logger.Info("Succesfully loaded a new keyblock");
-            }
-            else
-            {
-                Logger.Error("Failed to download a new keyblock");
-            }
+            LoadKeyBlock();
             Close();
         }
 
         void LoadIni()
         {
             _settings.Load();
+        }
+
+        void LoadKeyBlock()
+        {
+            for (var i = 1; i <= _settings.MaxRetries; i++)
+            {
+                Logger.Info($"Start loading keyblock at run {i}/{_settings.MaxRetries}");
+                if (_keyblock.DownloadNew())
+                {
+                    Logger.Info($"Succesfully loaded a new keyblock at run {i}/{_settings.MaxRetries}");
+                    return;
+                }
+                Logger.Error($"Failed to download a new keyblock at run {i}/{_settings.MaxRetries}");
+                _keyblock.CleanUp();
+                Logger.Info($"Give the server '{_settings.WaitOnFailingBlockRetrievalInMilliseconds}ms' time");
+                Task.Delay(_settings.WaitOnFailingBlockRetrievalInMilliseconds).Wait();
+            }
+            Logger.Error($"Failed to retrieve the keyblock after {_settings.WaitOnFailingBlockRetrievalInMilliseconds} times, stop trying");
         }
 
         void Close()

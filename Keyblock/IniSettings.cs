@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Text;
 using log4net;
 // ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 namespace Keyblock
 {
@@ -40,10 +42,12 @@ namespace Keyblock
         public string MessageFormat { get; set; }
 
         // Communication data
-        public string DataFolder { get; set; }
-        public bool WriteAllCommunicationToDisk { get; set; }
-        public string CommunicationFolder { get; set; }
-        public bool DontUseRealServerButMessagesFromDisk { get; set; }
+        public string DataFolder { get; set; } = "Data";
+        public bool WriteAllCommunicationToDisk { get; set; } = false;
+        public string CommunicationFolder { get; set; } = "Communication";
+        public bool DontUseRealServerButMessagesFromDisk { get; set; } = false;
+        public int MaxRetries { get; set; } = 3;
+        public int WaitOnFailingBlockRetrievalInMilliseconds { get; set; } = 1000;
 
         //Decode if ini contains flag
         const string DECODE_FLAG = "-- Encoded from here --";
@@ -83,9 +87,14 @@ namespace Keyblock
         public void GenerateMachineId()
         {
             Logger.Debug("Generate new MachineID");
-            var buf = new byte[20];
+            var buf = new byte[10];
             _random.NextBytes(buf);
-            MachineId = Convert.ToBase64String(buf);
+            MachineId = string.Empty;
+            foreach (var b in buf)
+            {
+                MachineId += (b & 0xFF).ToString("x2");
+            }
+            MachineId = Convert.ToBase64String(Encoding.ASCII.GetBytes(MachineId));
             Logger.Debug($"Your MachineID is: {MachineId}");
         }
 
@@ -133,7 +142,7 @@ namespace Keyblock
                 throw new Exception("Failed to save the configuration", ex);
             }
         }
-        public void EnsureDataFolderExists(string folder)
+        public static void EnsureDataFolderExists(string folder)
         {
             var directory = new DirectoryInfo(folder);
             if (directory.Exists) Logger.Debug($"Data folder '{directory.FullName}' exists");

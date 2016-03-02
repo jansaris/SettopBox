@@ -55,7 +55,7 @@ namespace Keyblock
             Logger.Warn($"Read response from disk: {path}");
             if(!File.Exists(path)) throw new FileNotFoundException($"Failed to find communication response file: {path}");
             var response = File.ReadAllBytes(path);
-            Logger.Info($"Received {response.Length} bytes from disk");
+            Logger.Warn($"Received {response.Length} bytes from disk");
             return response;
         }
 
@@ -80,7 +80,7 @@ namespace Keyblock
             {
                 Logger.Debug("WriteAllCommunicationToDisk is disabled in ini file");    
             }
-            _settings.EnsureDataFolderExists(Communicationfolder);
+            IniSettings.EnsureDataFolderExists(Communicationfolder);
             Logger.Debug($"Write {msg.Length} to disk '{path}'");
             File.WriteAllBytes(path, msg);
         }

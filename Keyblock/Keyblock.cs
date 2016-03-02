@@ -50,7 +50,7 @@ namespace Keyblock
             var cert = new List<byte>(response).GetRange(12, (response.Length - 12)).ToArray();
             File.WriteAllBytes(SignedCertificateFile, cert);
 
-            Logger.Debug("Received Certificate");
+            Logger.Info("Received Certificate");
             return true;
         }
 
@@ -82,12 +82,18 @@ namespace Keyblock
             _sessionKey = response.Skip(4).Take(16).ToArray();
             _timestamp = Encoding.ASCII.GetString(response.Skip(20).Take(19).ToArray());
 
-            Logger.Debug($"Session key obtained with timestamp: '{_timestamp}'");
+            Logger.Info($"Session key obtained with timestamp: '{_timestamp}'");
             return true;
         }
 
         bool GenerateSki()
         {
+            if (!File.Exists(SignedCertificateFile))
+            {
+                Logger.Warn($"Can't generate a SKI because there is no certiface at {SignedCertificateFile}");
+                return false;
+            }
+
             try
             {
                 Logger.Debug($"Resolve SKI from {SignedCertificateFile}");
@@ -131,7 +137,7 @@ namespace Keyblock
                 return false;
             }
             
-            Logger.Debug($"SaveEncryptedPassword completed, size: {response.Length}");
+            Logger.Info($"SaveEncryptedPassword completed, size: {response.Length}");
             return true;
         }
 
@@ -157,7 +163,7 @@ namespace Keyblock
             var decrypted = RC4.Decrypt(_sessionKey, encryptedPassword);
             var passwordHex = Encoding.ASCII.GetString(decrypted.Skip(4).ToArray());
 
-            Logger.Debug($"GetEncryptedPassword completed: {passwordHex}");
+            Logger.Info($"GetEncryptedPassword completed: {passwordHex}");
             return true;
         }
 
@@ -200,9 +206,9 @@ namespace Keyblock
             // Validation
             var expectedUnEncrypted = File.ReadAllText("RC4/keyblock.unencrypted");
             var expectedEncrypted = File.ReadAllBytes("RC4/keyblock.encrypted");
-            Logger.Info($"{unencryptedMsgPart}{encryptedMsgPart}");
-            Logger.Info($"Messages are unencrypted equal: {expectedUnEncrypted == $"{unencryptedMsgPart}{encryptedMsgPart}"}");
-            Logger.Info($"Messages are encrypted equal: {expectedEncrypted.SequenceEqual(msg)}");
+            Logger.Debug($"{unencryptedMsgPart}{encryptedMsgPart}");
+            Logger.Debug($"Messages are unencrypted equal: {expectedUnEncrypted == $"{unencryptedMsgPart}{encryptedMsgPart}"}");
+            Logger.Debug($"Messages are encrypted equal: {expectedEncrypted.SequenceEqual(msg)}");
             // Validation
 
             var response = _sslClient.SendAndReceive(msg.ToArray(), _settings.VksServer, _settings.VksPort + 1, false);
@@ -218,7 +224,7 @@ namespace Keyblock
             
             File.WriteAllBytes(KeyblockFile, decrypted);
 
-            Logger.Debug($"GetAllChannelKeys completed: {decrypted.Length} bytes");
+            Logger.Info($"GetAllChannelKeys completed: {decrypted.Length} bytes");
 
             return true;
         }
@@ -226,7 +232,7 @@ namespace Keyblock
         public bool DownloadNew()
         {
             PreLoad();
-            _settings.EnsureDataFolderExists(_settings.DataFolder);
+            IniSettings.EnsureDataFolderExists(_settings.DataFolder);
             var retValue = GetSessionKey();
             if (!retValue) return false;
             //Look if we already have a valid certificate
@@ -245,6 +251,25 @@ namespace Keyblock
             }
             retValue = retValue && LoadKeyBlock();
             return retValue;
+        }
+
+        public void CleanUp()
+        {
+            Logger.Warn("Clean up old data");
+            var keyblock = new FileInfo(KeyblockFile);
+            if (keyblock.Exists)
+            {
+                Logger.Warn($"Remove keyblock file {keyblock.FullName}");
+                keyblock.Delete();
+            }
+            var certificate = new FileInfo(SignedCertificateFile);
+            if (certificate.Exists)
+            {
+                Logger.Warn($"Remove certificate file {certificate.FullName}");
+                certificate.Delete();
+            }
+            _settings.GenerateClientId();
+            _settings.GenerateMachineId();
         }
 
         void PreLoad()
