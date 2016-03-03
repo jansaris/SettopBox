@@ -11,9 +11,9 @@ namespace Keyblock
 {
     public class IniSettings
     {
-        static readonly ILog Logger = LogManager.GetLogger(typeof(IniSettings));
         const BindingFlags PROPERTY_FLAGS = BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Public;
-        readonly Random _random = new Random();
+        readonly ILog _logger;
+        readonly Random _random;
 
         public string MachineId { get; set; }
         public string ClientId { get; set; }
@@ -55,9 +55,15 @@ namespace Keyblock
         readonly Func<string, string> _decode = value => string.IsNullOrWhiteSpace(value) ? value : Encoding.UTF8.GetString(Convert.FromBase64String(value));
         Func<string, string> _decoder;
 
+        public IniSettings(ILog logger)
+        {
+            _logger = logger;
+            _random = new Random();
+        }
+
         public void Load()
         {
-            Logger.Info("Read Keyblock.ini");
+            _logger.Info("Read Keyblock.ini");
             _decoder = _noDecode;
             try
             {
@@ -72,7 +78,7 @@ namespace Keyblock
                             _decoder = _decode;
                             continue;
                         }
-                        Logger.DebugFormat("Process line {0}", line);
+                        _logger.DebugFormat("Process line {0}", line);
                         ReadConfigItem(line);
                     }
                 if (string.IsNullOrWhiteSpace(ClientId)) GenerateClientId();
@@ -86,7 +92,7 @@ namespace Keyblock
 
         public void GenerateMachineId()
         {
-            Logger.Debug("Generate new MachineID");
+            _logger.Debug("Generate new MachineID");
             var buf = new byte[10];
             _random.NextBytes(buf);
             MachineId = string.Empty;
@@ -95,12 +101,12 @@ namespace Keyblock
                 MachineId += (b & 0xFF).ToString("x2");
             }
             MachineId = Convert.ToBase64String(Encoding.ASCII.GetBytes(MachineId));
-            Logger.Debug($"Your MachineID is: {MachineId}");
+            _logger.Debug($"Your MachineID is: {MachineId}");
         }
 
         public void GenerateClientId()
         {
-            Logger.Debug("Generate new ClientId");
+            _logger.Debug("Generate new ClientId");
             var buf = new byte[28];
             _random.NextBytes(buf);
             ClientId = string.Empty;
@@ -108,13 +114,13 @@ namespace Keyblock
             {
                 ClientId += (b & 0xFF).ToString("x2");
             }
-            Logger.Debug($"Your ClientID is: {ClientId}");
+            _logger.Debug($"Your ClientID is: {ClientId}");
         }
 
 
         public void Save()
         {
-            Logger.Info("Save Keyblock.ini");
+            _logger.Info("Save Keyblock.ini");
             try
             {
                 using (var writer = new StreamWriter("Keyblock.ini"))
@@ -128,11 +134,11 @@ namespace Keyblock
                         var value = property.GetValue(this);
                         if (value == null)
                         {
-                            Logger.Debug($"Key '{key}' has no value, skip writing to ini file");
+                            _logger.Debug($"Key '{key}' has no value, skip writing to ini file");
                             continue;
                         }
                         var converted = Convert.ToBase64String(Encoding.UTF8.GetBytes(value.ToString()));
-                        Logger.Debug($"Write '{key}' with value '{value}' to disk as '{converted}'");
+                        _logger.Debug($"Write '{key}' with value '{value}' to disk as '{converted}'");
                         writer.WriteLine($"{key}|{converted}");
                     }
                 }
@@ -142,15 +148,15 @@ namespace Keyblock
                 throw new Exception("Failed to save the configuration", ex);
             }
         }
-        public static void EnsureDataFolderExists(string folder)
+        public void EnsureDataFolderExists(string folder)
         {
             var directory = new DirectoryInfo(folder);
-            if (directory.Exists) Logger.Debug($"Data folder '{directory.FullName}' exists");
+            if (directory.Exists) _logger.Debug($"Data folder '{directory.FullName}' exists");
             else
             {
-                Logger.Debug($"Data folder '{directory.FullName}' doesn't exist, create it");
+                _logger.Debug($"Data folder '{directory.FullName}' doesn't exist, create it");
                 directory.Create();
-                Logger.Info($"Created data folder '{directory.FullName}'");
+                _logger.Info($"Created data folder '{directory.FullName}'");
             }
         }
 
@@ -159,7 +165,7 @@ namespace Keyblock
             var keyvalue = line.Split('|');
             if (keyvalue.Length < 2)
             {
-                Logger.WarnFormat("Failed to read configuration line: {0}", line);
+                _logger.WarnFormat("Failed to read configuration line: {0}", line);
                 return;
             }
             SetValue(keyvalue[0], _decoder(keyvalue[1]));
@@ -170,17 +176,17 @@ namespace Keyblock
             var propertyInfo = GetType().GetProperty(key, PROPERTY_FLAGS);
             if (propertyInfo == null)
             {
-                Logger.WarnFormat("Unknown configuration key: {0}", key);
+                _logger.WarnFormat("Unknown configuration key: {0}", key);
                 return;
             }
             try
             {
-                Logger.DebugFormat("Read configuration item {0} with value {1}", key, value);
+                _logger.DebugFormat("Read configuration item {0} with value {1}", key, value);
                 propertyInfo.SetValue(this, Convert.ChangeType(value, propertyInfo.PropertyType), null);
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to read {key} into {value} as {propertyInfo.PropertyType}", ex);
+                _logger.Error($"Failed to read {key} into {value} as {propertyInfo.PropertyType}", ex);
             }
         }
     }

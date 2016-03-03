@@ -13,18 +13,19 @@ namespace Keyblock
 {
     public class SslTcpClient
     {
-        static readonly ILog Logger = LogManager.GetLogger(typeof(SslTcpClient));
+        readonly ILog _logger;
         readonly IniSettings _settings;
         string Communicationfolder => Path.Combine(_settings.DataFolder, _settings.CommunicationFolder);
 
-        public SslTcpClient(IniSettings settings)
+        public SslTcpClient(IniSettings settings, ILog logger)
         {
             _settings = settings;
+            _logger = logger;
         }
 
         public byte[] SendAndReceive(string msg, string server, int port, bool useSsl = true, [CallerMemberName] string caller = null)
         {
-            Logger.Debug("Convert ASCII message into bytes");
+            _logger.Debug("Convert ASCII message into bytes");
             // Encode a test message into a byte array.
             var messsage = Encoding.ASCII.GetBytes(msg);
 
@@ -44,7 +45,7 @@ namespace Keyblock
             }
             catch (Exception ex)
             {
-                Logger.Error("Failed during send and receive", ex);
+                _logger.Error("Failed during send and receive", ex);
             }
             return response;
         }
@@ -52,16 +53,16 @@ namespace Keyblock
         byte[] CommunicateWithDisk(string caller)
         {
             var path = ResponsePath(caller);
-            Logger.Warn($"Read response from disk: {path}");
+            _logger.Warn($"Read response from disk: {path}");
             if(!File.Exists(path)) throw new FileNotFoundException($"Failed to find communication response file: {path}");
             var response = File.ReadAllBytes(path);
-            Logger.Warn($"Received {response.Length} bytes from disk");
+            _logger.Warn($"Received {response.Length} bytes from disk");
             return response;
         }
 
         byte[] CommunicateWithServer(byte[] msg, string server, int port, bool useSsl, string caller)
         {
-            Logger.Info($"Send message to {server}:{port}");
+            _logger.Info($"Send message to {server}:{port}");
             byte[] response;
             WriteToDisk(RequestPath(caller), msg);
             using (var stream = OpenPort(server, port, useSsl))
@@ -70,7 +71,7 @@ namespace Keyblock
                 response = Read(stream);
             }
             WriteToDisk(ResponsePath(caller), response);
-            Logger.Info($"Received {response.Length} bytes from the server");
+            _logger.Info($"Received {response.Length} bytes from the server");
             return response;
         }
 
@@ -78,33 +79,33 @@ namespace Keyblock
         {
             if (!_settings.WriteAllCommunicationToDisk)
             {
-                Logger.Debug("WriteAllCommunicationToDisk is disabled in ini file");    
+                _logger.Debug("WriteAllCommunicationToDisk is disabled in ini file");    
             }
-            IniSettings.EnsureDataFolderExists(Communicationfolder);
-            Logger.Debug($"Write {msg.Length} to disk '{path}'");
+            _settings.EnsureDataFolderExists(Communicationfolder);
+            _logger.Debug($"Write {msg.Length} to disk '{path}'");
             File.WriteAllBytes(path, msg);
         }
 
-        static Stream OpenPort(string server, int port, bool useSsl)
+        Stream OpenPort(string server, int port, bool useSsl)
         {
             //Open a tcp connection with the server
-            Logger.Debug($"Open a TCP connection with {server}:{port}");
+            _logger.Debug($"Open a TCP connection with {server}:{port}");
             var client = new TcpClient(server, port);
             // Create an SSL stream that will close the client's stream.
             Stream stream;
             if (useSsl)
             {
-                Logger.Debug("Wrap the TCP connection in a SSL stream");
+                _logger.Debug("Wrap the TCP connection in a SSL stream");
                 var sslStream = new SslStream(client.GetStream(), true, ValidateServerCertificate, null);
                 sslStream.AuthenticateAsClient(server);
                 stream = sslStream;
             }
             else
             {
-                Logger.Debug("Use TCP connection stream");
+                _logger.Debug("Use TCP connection stream");
                 stream = client.GetStream();
             }
-            Logger.Debug($"Succesfully connected to {server}:{port}");
+            _logger.Debug($"Succesfully connected to {server}:{port}");
             return stream;
         }
 
@@ -114,10 +115,10 @@ namespace Keyblock
             return true;
         }
 
-        static byte[] Read(Stream stream)
+        byte[] Read(Stream stream)
         {
             // Read the  message sent by the server.
-            Logger.Debug("Start reading bytes from the server");
+            _logger.Debug("Start reading bytes from the server");
             var buffer = new byte[2048];
             var receivedBytes = new List<byte>();
             int bytes;
@@ -129,10 +130,10 @@ namespace Keyblock
             return receivedBytes.ToArray();
         }
 
-        static void Send(Stream stream, byte[] message)
+        void Send(Stream stream, byte[] message)
         {
             //Send the bytes to the server
-            Logger.Debug($"Write {message.Length} bytes to the server");
+            _logger.Debug($"Write {message.Length} bytes to the server");
             stream.Write(message, 0, message.Length);
             stream.Flush();
         }

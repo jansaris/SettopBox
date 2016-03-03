@@ -1,16 +1,15 @@
 ﻿namespace Keyblock
 {
-    public class RC4
+    // ReSharper disable once InconsistentNaming
+    public static class RC4
     {
         public static byte[] Encrypt(byte[] pwd, byte[] data)
         {
-            int a, i, j, k, tmp;
-            int[] key, box;
-            byte[] cipher;
+            int a, i, j, tmp;
 
-            key = new int[256];
-            box = new int[256];
-            cipher = new byte[data.Length];
+            var key = new int[256];
+            var box = new int[256];
+            var cipher = new byte[data.Length];
 
             for (i = 0; i < 256; i++)
             {
@@ -33,7 +32,7 @@
                 tmp = box[a];
                 box[a] = box[j];
                 box[j] = tmp;
-                k = box[((box[a] + box[j]) % 256)];
+                var k = box[((box[a] + box[j]) % 256)];
                 cipher[i] = (byte)(data[i] ^ k);
             }
             return cipher;
@@ -43,6 +42,5 @@
         {
             return Encrypt(pwd, data);
         }
-
     }
 }
