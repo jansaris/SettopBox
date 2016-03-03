@@ -14,10 +14,10 @@ namespace Keyblock
     public class SslTcpClient
     {
         readonly ILog _logger;
-        readonly IniSettings _settings;
+        readonly Settings _settings;
         string Communicationfolder => Path.Combine(_settings.DataFolder, _settings.CommunicationFolder);
 
-        public SslTcpClient(IniSettings settings, ILog logger)
+        public SslTcpClient(Settings settings, ILog logger)
         {
             _settings = settings;
             _logger = logger;

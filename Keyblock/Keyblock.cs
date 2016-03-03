@@ -18,7 +18,7 @@ namespace Keyblock
         string KeyblockFile => Path.Combine(_settings.DataFolder, "Keyblock.dat");
 
         readonly ILog _logger;
-        readonly IniSettings _settings;
+        readonly Settings _settings;
         readonly SslTcpClient _sslClient;
 
         byte[] _sessionKey;
@@ -27,7 +27,7 @@ namespace Keyblock
         byte[] _password;
         X509CertificateRequest _certificateRequest;
 
-        public Keyblock(IniSettings settings, SslTcpClient sslClient, ILog logger)
+        public Keyblock(Settings settings, SslTcpClient sslClient, ILog logger)
         {
             _settings = settings;
             _sslClient = sslClient;
@@ -38,7 +38,7 @@ namespace Keyblock
         {
             _logger.Debug("Generating message");
             var t64 = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
-            _settings.Email = $"{_settings.MachineId}.{t64}@{_settings.EmailHost}";
+            _settings.UpdateEmail($"{_settings.MachineId}.{t64}@{_settings.EmailHost}");
             _logger.Debug($"Using email: {_settings.Email}");
             var csr = GenerateCertificateRequest();
             var msg = $"{_settings.MessageFormat}~{_settings.ClientId}~getCertificate~{_settings.Company}~NA~NA~{csr}~{_settings.Common}~{_settings.Address}~ ~{_settings.City}~{_settings.Province}~{_settings.ZipCode}~{_settings.Country}~{_settings.Telephone}~{_settings.Email}~{_settings.MachineId}~{_settings.ChallengePassword}~";

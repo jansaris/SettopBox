@@ -14,7 +14,7 @@ namespace Keyblock
         public override void RegisterComponents(Container container)
         {
             container.Register<Program>();
-            container.Register<IniSettings>(Lifestyle.Singleton);
+            container.Register<Settings>(Lifestyle.Singleton);
             container.Register<SslTcpClient>();
             container.Register<IKeyblock, Keyblock>();
         }

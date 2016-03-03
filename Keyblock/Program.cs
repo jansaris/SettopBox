@@ -8,10 +8,10 @@ namespace Keyblock
     class Program
     {
         readonly ILog _logger;
-        readonly IniSettings _settings;
+        readonly Settings _settings;
         readonly IKeyblock _keyblock;
 
-        public Program(ILog logger, IniSettings settings, IKeyblock keyblock)
+        public Program(ILog logger, Settings settings, IKeyblock keyblock)
         {
             _logger = logger;
             _settings = settings;
@@ -21,30 +21,23 @@ namespace Keyblock
         static void Main()
         {
             var container = SharedContainer.CreateAndFill<DependencyConfig>("Log4net.config");
-            var logger = container.GetInstance<ILog>();
-            try
-            {
-                logger.Info("Welcome to Keyblock.exe");
-                var prog = container.GetInstance<Program>();
-                prog.Run();
-                logger.Info("Done: Exit");
-            }
-            catch (Exception ex)
-            {
-                logger.Fatal("An unhandled exception occured", ex);
-            }
+            var prog = container.GetInstance<Program>();
+            prog.Run();
         }
 
         void Run()
         {
-            LoadIni();
-            LoadKeyBlock();
-            Close();
-        }
-
-        void LoadIni()
-        {
-            _settings.Load();
+            try
+            {
+                _logger.Info("Welcome to Keyblock");
+                _settings.Load();
+                LoadKeyBlock();
+                _logger.Info("Done");
+            }
+            catch (Exception ex)
+            {
+                _logger.Fatal("An unhandled exception occured", ex);
+            }
         }
 
         void LoadKeyBlock()
@@ -63,11 +56,6 @@ namespace Keyblock
                 Task.Delay(_settings.WaitOnFailingBlockRetrievalInMilliseconds).Wait();
             }
             _logger.Error($"Failed to retrieve the keyblock after {_settings.WaitOnFailingBlockRetrievalInMilliseconds} times, stop trying");
-        }
-
-        void Close()
-        {
-            _settings.Save();
         }
     }
 }

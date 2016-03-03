@@ -30,7 +30,7 @@ namespace SharedComponents.DependencyInjection
 
             Func<TService> rootFactory = () => contextBasedFactory(DependencyContext.Root);
 
-            container.Register(rootFactory, Lifestyle.Singleton);
+            container.Register(rootFactory, Lifestyle.Transient);
 
             // Allow the Func<DependencyContext, TService> to be 
             // injected into parent types.
@@ -48,6 +48,11 @@ namespace SharedComponents.DependencyInjection
 
                 e.Expression = rewriter.Visit(e.Expression);
             };
+        }
+
+        static bool GetTrueOrFalse()
+        {
+            return false;
         }
 
         private sealed class DependencyContextRewriter : ExpressionVisitor
