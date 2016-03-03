@@ -56,7 +56,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyConfig.cs" />
-    <Compile Include="IKeyblock.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Keyblock.cs" />
     <Compile Include="KeyblockException.cs" />

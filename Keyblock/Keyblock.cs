@@ -11,7 +11,7 @@ using Org.BouncyCastle.X509.Extension;
 
 namespace Keyblock
 {
-    public class Keyblock : IKeyblock
+    public class Keyblock
     {
         //Filenames
         string SignedCertificateFile => Path.Combine(_settings.DataFolder, "SignedCert.der");

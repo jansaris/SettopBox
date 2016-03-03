@@ -1,5 +1,4 @@
-﻿using System;
-using log4net;
+﻿using log4net;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
 
@@ -16,7 +15,7 @@ namespace Keyblock
             container.Register<Program>();
             container.Register<Settings>(Lifestyle.Singleton);
             container.Register<SslTcpClient>();
-            container.Register<IKeyblock, Keyblock>();
+            container.Register<Keyblock>();
         }
     }
 }

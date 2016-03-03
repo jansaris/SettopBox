@@ -9,9 +9,9 @@ namespace Keyblock
     {
         readonly ILog _logger;
         readonly Settings _settings;
-        readonly IKeyblock _keyblock;
+        readonly Keyblock _keyblock;
 
-        public Program(ILog logger, Settings settings, IKeyblock keyblock)
+        public Program(ILog logger, Settings settings, Keyblock keyblock)
         {
             _logger = logger;
             _settings = settings;
