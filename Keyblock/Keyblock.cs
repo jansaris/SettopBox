@@ -20,18 +20,19 @@ namespace Keyblock
         readonly ILog _logger;
         readonly Settings _settings;
         readonly SslTcpClient _sslClient;
+        readonly X509CertificateRequest _certificateRequest;
 
         byte[] _sessionKey;
         string _timestamp;
         string _ski;
         byte[] _password;
-        X509CertificateRequest _certificateRequest;
 
-        public Keyblock(Settings settings, SslTcpClient sslClient, ILog logger)
+        public Keyblock(Settings settings, SslTcpClient sslClient, ILog logger, X509CertificateRequest certificateRequest)
         {
             _settings = settings;
             _sslClient = sslClient;
             _logger = logger;
+            _certificateRequest = certificateRequest;
         }
 
         bool GetCertificate()
@@ -40,8 +41,8 @@ namespace Keyblock
             var t64 = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
             _settings.UpdateEmail($"{_settings.MachineId}.{t64}@{_settings.EmailHost}");
             _logger.Debug($"Using email: {_settings.Email}");
-            var csr = GenerateCertificateRequest();
-            var msg = $"{_settings.MessageFormat}~{_settings.ClientId}~getCertificate~{_settings.Company}~NA~NA~{csr}~{_settings.Common}~{_settings.Address}~ ~{_settings.City}~{_settings.Province}~{_settings.ZipCode}~{_settings.Country}~{_settings.Telephone}~{_settings.Email}~{_settings.MachineId}~{_settings.ChallengePassword}~";
+            _certificateRequest.Generate();
+            var msg = $"{_settings.MessageFormat}~{_settings.ClientId}~getCertificate~{_settings.Company}~NA~NA~{_certificateRequest}~{_settings.Common}~{_settings.Address}~ ~{_settings.City}~{_settings.Province}~{_settings.ZipCode}~{_settings.Country}~{_settings.Telephone}~{_settings.Email}~{_settings.MachineId}~{_settings.ChallengePassword}~";
 
             _logger.Debug($"Requesting Certificate: {msg}");
             var response = _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort);
@@ -52,23 +53,6 @@ namespace Keyblock
 
             _logger.Info("Received Certificate");
             return true;
-        }
-
-        X509CertificateRequest GenerateCertificateRequest()
-        {
-            if (_certificateRequest != null) return _certificateRequest;
-
-            _certificateRequest = new X509CertificateRequest();
-            _certificateRequest.AddCountry(_settings.Country);
-            _certificateRequest.AddProvice(_settings.Province);
-            _certificateRequest.AddCity(_settings.City);
-            _certificateRequest.AddCompany(_settings.Company);
-            _certificateRequest.AddOrganization(_settings.Organization);
-            _certificateRequest.AddCommon(_settings.Common);
-            _certificateRequest.AddEmail(_settings.Email);
-            _certificateRequest.ChallangePassword(_settings.ChallengePassword);
-            _certificateRequest.Generate();
-            return _certificateRequest;
         }
 
         bool GetSessionKey()
@@ -174,8 +158,8 @@ namespace Keyblock
             
             // Use the generated key
             var sig = SignerUtilities.GetSigner(PkcsObjectIdentifiers.MD5WithRsaEncryption);
-            var cert = GenerateCertificateRequest();
-            sig.Init(true, cert.KeyPair.Private);
+            _certificateRequest.Generate();
+            sig.Init(true, _certificateRequest.KeyPair.Private);
             sig.BlockUpdate(timestampBytes,0, timestampBytes.Length);
             var signature = sig.GenerateSignature();
             //Return the hash as Hex
@@ -203,14 +187,6 @@ namespace Keyblock
 
             _logger.Debug($"GetAllChannelKeys from server: {unencryptedMsgPart}{encryptedMsgPart}");
 
-            // Validation
-            var expectedUnEncrypted = File.ReadAllText("RC4/keyblock.unencrypted");
-            var expectedEncrypted = File.ReadAllBytes("RC4/keyblock.encrypted");
-            _logger.Debug($"{unencryptedMsgPart}{encryptedMsgPart}");
-            _logger.Debug($"Messages are unencrypted equal: {expectedUnEncrypted == $"{unencryptedMsgPart}{encryptedMsgPart}"}");
-            _logger.Debug($"Messages are encrypted equal: {expectedEncrypted.SequenceEqual(msg)}");
-            // Validation
-
             var response = _sslClient.SendAndReceive(msg.ToArray(), _settings.VksServer, _settings.VksPort + 1, false);
 
             if (response == null || response.Length < 10)
@@ -219,7 +195,7 @@ namespace Keyblock
                 return false;
             }
 
-            var encrypted = response.Skip(4).Take(response.Length - 4).ToArray();
+            var encrypted = response.Skip(4).ToArray();
             var decrypted = RC4.Decrypt(_sessionKey, encrypted);
             
             File.WriteAllBytes(KeyblockFile, decrypted);
@@ -231,7 +207,6 @@ namespace Keyblock
 
         public bool DownloadNew()
         {
-            PreLoad();
             _settings.EnsureDataFolderExists(_settings.DataFolder);
             var retValue = GetSessionKey();
             if (!retValue) return false;
@@ -268,16 +243,15 @@ namespace Keyblock
                 _logger.Warn($"Remove certificate file {certificate.FullName}");
                 certificate.Delete();
             }
+            if (_certificateRequest != null)
+            {
+                _logger.Warn("Remove certificate request file");
+                _certificateRequest.CleanUp();
+            }
             _settings.GenerateClientId();
             _settings.GenerateMachineId();
         }
-
-        void PreLoad()
-        {
-            GenerateCertificateRequest();
-            _certificateRequest.LoadKeyPairFromDisk("RC4/priv_key.pem");
-        }
-
+        
         static string BytesAsHex(byte[] bytes)
         {
             return BitConverter.ToString(bytes).Replace("-", "").ToLower();

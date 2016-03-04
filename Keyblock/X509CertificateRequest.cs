@@ -18,58 +18,39 @@ namespace Keyblock
 {
     public class X509CertificateRequest
     {
-        static readonly ILog Logger = LogManager.GetLogger(typeof(X509CertificateRequest));
+        readonly ILog _logger;
+        readonly string _keyFile;
+        readonly Settings _settings;
 
         Pkcs10CertificationRequest _pkcs10CertificationRequest;
         public AsymmetricCipherKeyPair KeyPair { get; private set; }
-        List<DerObjectIdentifier> Identifiers => _attributes.Select(a => a.Key).ToList();
-        List<object> Values => _attributes.Select(a => a.Value).ToList();
 
-        readonly List<KeyValuePair<DerObjectIdentifier, object>> _attributes = new List<KeyValuePair<DerObjectIdentifier, object>>();
-
-        void Add(DerObjectIdentifier identifier, string value)
+        public X509CertificateRequest(ILog logger, Settings settings)
         {
-            _attributes.Add(new KeyValuePair<DerObjectIdentifier, object>(identifier, value));
+            _logger = logger;
+            _settings = settings;
+            _keyFile = Path.Combine(settings.DataFolder, "privatekey.pem");
         }
 
-        public void ChallangePassword(string value)
+        X509Name LoadSubject()
         {
-            Add(PkcsObjectIdentifiers.Pkcs9AtChallengePassword, value);
+            var attributes = new List<KeyValuePair<DerObjectIdentifier, object>>();
+            Add(attributes, X509Name.C, _settings.Country);
+            Add(attributes, X509Name.ST, _settings.Province);
+            Add(attributes, X509Name.L, _settings.City);
+            Add(attributes, X509Name.O, _settings.Company);
+            Add(attributes, X509Name.OU, _settings.Organization);
+            Add(attributes, X509Name.CN, _settings.Common);
+            Add(attributes, X509Name.EmailAddress, _settings.Email);
+            Add(attributes, PkcsObjectIdentifiers.Pkcs9AtChallengePassword, _settings.ChallengePassword);
+            var identifiers = attributes.Select(a => a.Key).ToList();
+            var values = attributes.Select(a => a.Value).ToList();
+            return new X509Name(identifiers, values);
         }
 
-        public void AddCountry(string country)
+        static void Add(ICollection<KeyValuePair<DerObjectIdentifier, object>> list, DerObjectIdentifier identifier, string value)
         {
-            Add(X509Name.C, country);
-        }
-
-        public void AddProvice(string province)
-        {
-            Add(X509Name.ST, province);
-        }
-
-        public void AddCity(string city)
-        {
-            Add(X509Name.L, city);
-        }
-
-        public void AddCompany(string company)
-        {
-            Add(X509Name.O, company);
-        }
-
-        public void AddOrganization(string organization)
-        {
-            Add(X509Name.OU, organization);
-        }
-
-        public void AddCommon(string common)
-        {
-            Add(X509Name.CN, common);
-        }
-
-        public void AddEmail(string email)
-        {
-            Add(X509Name.EmailAddress, email);
+            list.Add(new KeyValuePair<DerObjectIdentifier, object>(identifier, value));
         }
 
         /// <summary>
@@ -84,22 +65,27 @@ namespace Keyblock
         {
             try
             {
-                Logger.Info($"Create X509 Request Certificate with {Identifiers.Count} subject parts");
-                var rsaKeyPairGenerator = new RsaKeyPairGenerator();
-                // Note: the default public exponent in openssl is '65537'
-                var genParam = new RsaKeyGenerationParameters(BigInteger.ValueOf(65537), new SecureRandom(), 1024, 5);
+                if (LoadKeyPairFromDisk())
+                {
+                    _logger.Info("Loaded keypair from disk");
+                }
+                else
+                {
+                    var rsaKeyPairGenerator = new RsaKeyPairGenerator();
+                    // Note: the default public exponent in openssl is '65537'
+                    var genParam = new RsaKeyGenerationParameters(BigInteger.ValueOf(65537), new SecureRandom(), 1024, 5);
 
-                rsaKeyPairGenerator.Init(genParam);
+                    rsaKeyPairGenerator.Init(genParam);
+                    KeyPair = rsaKeyPairGenerator.GenerateKeyPair();
+                    SaveKeyPairToDisk();
+                }
 
-                KeyPair = rsaKeyPairGenerator.GenerateKeyPair();
-
-                var subject = new X509Name(Identifiers, Values);
-
+                var subject = LoadSubject();
                 _pkcs10CertificationRequest = new Pkcs10CertificationRequest(PkcsObjectIdentifiers.Sha1WithRsaEncryption.Id, subject, KeyPair.Public, null, KeyPair.Private);
             }
             catch (Exception ex)
             {
-                Logger.Error("An error occured during Request Certificate generation", ex);
+                _logger.Error("An error occured during Request Certificate generation", ex);
                 throw new KeyblockException("An error occured during Request Certificate generation", ex);
             }
         }
@@ -112,11 +98,62 @@ namespace Keyblock
             pwriter.WriteObject(_pkcs10CertificationRequest);
             return str.ToString();
         }
-
-        public void LoadKeyPairFromDisk(string file)
+        private bool LoadKeyPairFromDisk()
         {
-            using (var stream = File.OpenText(file))
-                KeyPair = (AsymmetricCipherKeyPair) new PemReader(stream).ReadObject();
+            var file = new FileInfo(_keyFile);
+            if (!file.Exists)
+            {
+                _logger.Warn($"No Keypair available on disk at '{file.FullName}'");
+                return false;
+            }
+            try
+            {
+                using (var stream = file.OpenText())
+                    KeyPair = (AsymmetricCipherKeyPair)new PemReader(stream).ReadObject();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn("Failed to load keypair from disk", ex);
+                return false;
+            }
+        }
+
+        private void SaveKeyPairToDisk()
+        {
+            try
+            {
+                using (var stream = File.CreateText(_keyFile))
+                {
+                    var writer = new PemWriter(stream);
+                    writer.WriteObject(KeyPair.Private);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn("Failed to save the keypair to disk", ex);
+            }
+        }
+
+        public void CleanUp()
+        {
+            try
+            {
+                var file = new FileInfo(_keyFile);
+                if (file.Exists)
+                {
+                    _logger.Warn($"Clean up file '{file.FullName}'");
+                    file.Delete();
+                }
+                else
+                {
+                    _logger.Warn($"Can't clean up file '{file.FullName}' because it doesn't exists");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn("Failed to delete the keypair from disk", ex);
+            }
         }
     }
 }

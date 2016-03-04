@@ -16,6 +16,7 @@ namespace Keyblock
             container.Register<Settings>(Lifestyle.Singleton);
             container.Register<SslTcpClient>();
             container.Register<Keyblock>();
+            container.Register<X509CertificateRequest>();
         }
     }
 }
