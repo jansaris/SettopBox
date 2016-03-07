@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net;
+using System.Net.Sockets;
 using log4net;
 using SharedComponents.DependencyInjection;
 
@@ -8,6 +10,8 @@ namespace NewCamd
     {
         readonly ILog _logger;
         readonly Settings _settings;
+        TcpListener _listener;
+        bool _listening;
 
         public Program(ILog logger, Settings settings)
         {
@@ -19,17 +23,43 @@ namespace NewCamd
         {
             var container = SharedContainer.CreateAndFill<DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
-            prog.Run();
+            prog.Start();
+            Console.WriteLine("Hit 'Enter' to exit");
+            prog.Listen();
+            Console.ReadLine();
+            prog.Stop();
         }
 
-        void Run()
+        void Listen()
+        {
+            while (_listening)
+            {
+                var client = _listener.AcceptSocket();
+                
+            }
+        }
+
+        void Stop()
+        {
+            try
+            {
+                _listening = false;
+                _listener.Stop();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to stop the tcp listener", ex);
+            }
+            _logger.Info("Exit NewCamd");
+        }
+
+        void Start()
         {
             try
             {
                 _logger.Info("Welcome to NewCamd");
                 _settings.Load();
                 StartServer();
-                _settings.Update();
                 _logger.Info("Done");
             }
             catch (Exception ex)
@@ -40,7 +70,8 @@ namespace NewCamd
 
         void StartServer()
         {
-            //throw new NotImplementedException();
+            _listener = new TcpListener(IPAddress.Any, _settings.Port);
+            _listener.Start();
         }
     }
 }

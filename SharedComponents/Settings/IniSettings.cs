@@ -8,9 +8,9 @@ namespace SharedComponents.Settings
 {
     public abstract class IniSettings
     {
-        const BindingFlags PROPERTY_FLAGS = BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Public;
+        const BindingFlags PropertyFlags = BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Public;
         protected readonly ILog Logger;
-        const string FILENAME = "Settings.ini";
+        const string Filename = "Settings.ini";
         abstract protected string Name { get; }
 
         protected IniSettings()
@@ -19,19 +19,19 @@ namespace SharedComponents.Settings
         }
 
         //Decode if ini contains flag
-        const string DECODE_FLAG = "-- Encoded from here --";
+        const string DecodeFlag = "-- Encoded from here --";
         readonly Func<string, string> _noDecode = value => value;
         readonly Func<string, string> _decode = value => string.IsNullOrWhiteSpace(value) ? value : Encoding.UTF8.GetString(Convert.FromBase64String(value));
         Func<string, string> _decoder;
 
         public virtual void Load()
         {
-            Logger.Info($"Read {FILENAME}.ini");
+            Logger.Info($"Read {Filename}");
             _decoder = _noDecode;
             try
             {
-                bool inCorrectBlock = false;
-                using (var reader = new StreamReader(FILENAME))
+                var inCorrectBlock = false;
+                using (var reader = new StreamReader(Filename))
                     while (!reader.EndOfStream)
                     {
                         var line = reader.ReadLine();
@@ -44,7 +44,7 @@ namespace SharedComponents.Settings
                             continue;
                         }
                         if(!inCorrectBlock) continue;
-                        if (line.Equals(DECODE_FLAG))
+                        if (line.Equals(DecodeFlag))
                         {
                             _decoder = _decode;
                             continue;
@@ -62,14 +62,13 @@ namespace SharedComponents.Settings
 
         protected void Save()
         {
-            Logger.Info($"Save {FILENAME}");
+            Logger.Info($"Save {Filename}");
             try
             {
-                using (var writer = new StreamWriter(FILENAME))
+                using (var writer = new StreamWriter(Filename))
                 {
                     writer.WriteLine($"#[{Name}]");
-                    writer.WriteLine(DECODE_FLAG);
-                    var properties = GetType().GetProperties(PROPERTY_FLAGS);
+                    var properties = GetType().GetProperties(PropertyFlags);
                     foreach (var property in properties)
                     {
                         var key = property.Name;
@@ -79,9 +78,8 @@ namespace SharedComponents.Settings
                             Logger.Debug($"Key '{key}' has no value, skip writing to ini file");
                             continue;
                         }
-                        var converted = Convert.ToBase64String(Encoding.UTF8.GetBytes(value.ToString()));
-                        Logger.Debug($"Write '{key}' with value '{value}' to disk as '{converted}'");
-                        writer.WriteLine($"{key}|{converted}");
+                        Logger.Debug($"Write '{key}' with value '{value}' to disk");
+                        writer.WriteLine($"{key}|{value}");
                     }
                 }
             }
@@ -104,7 +102,7 @@ namespace SharedComponents.Settings
 
         void SetValue(string key, string value)
         {
-            var propertyInfo = GetType().GetProperty(key, PROPERTY_FLAGS);
+            var propertyInfo = GetType().GetProperty(key, PropertyFlags);
             if (propertyInfo == null)
             {
                 Logger.WarnFormat("Unknown configuration key: {0}", key);
