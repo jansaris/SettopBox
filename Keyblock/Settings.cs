@@ -13,6 +13,7 @@ namespace Keyblock
     public class Settings : IniSettings
     {
         readonly Random _random;
+        protected override string Name => "Keyblock";
 
         public string MachineId { get; private set; }
         public string ClientId { get; private set; }

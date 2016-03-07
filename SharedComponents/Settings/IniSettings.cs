@@ -10,6 +10,8 @@ namespace SharedComponents.Settings
     {
         const BindingFlags PROPERTY_FLAGS = BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Public;
         protected readonly ILog Logger;
+        const string FILENAME = "Settings.ini";
+        abstract protected string Name { get; }
 
         protected IniSettings()
         {
@@ -24,16 +26,24 @@ namespace SharedComponents.Settings
 
         public virtual void Load()
         {
-            Logger.Info("Read Keyblock.ini");
+            Logger.Info($"Read {FILENAME}.ini");
             _decoder = _noDecode;
             try
             {
-                using (var reader = new StreamReader("Keyblock.ini"))
+                bool inCorrectBlock = false;
+                using (var reader = new StreamReader(FILENAME))
                     while (!reader.EndOfStream)
                     {
                         var line = reader.ReadLine();
                         if (string.IsNullOrWhiteSpace(line)) continue;
                         if (line.StartsWith("#")) continue;
+                        if (line.StartsWith("["))
+                        {
+                            inCorrectBlock = line.Equals($"[{Name}]");
+                            Logger.Debug($"Found block header {line} and this headerblock is correct: {inCorrectBlock}");
+                            continue;
+                        }
+                        if(!inCorrectBlock) continue;
                         if (line.Equals(DECODE_FLAG))
                         {
                             _decoder = _decode;
@@ -52,12 +62,12 @@ namespace SharedComponents.Settings
 
         protected void Save()
         {
-            Logger.Info("Save Keyblock.ini");
+            Logger.Info($"Save {FILENAME}");
             try
             {
-                using (var writer = new StreamWriter("Keyblock.ini"))
+                using (var writer = new StreamWriter(FILENAME))
                 {
-                    writer.WriteLine("#[Keyblock.ini]");
+                    writer.WriteLine($"#[{Name}]");
                     writer.WriteLine(DECODE_FLAG);
                     var properties = GetType().GetProperties(PROPERTY_FLAGS);
                     foreach (var property in properties)

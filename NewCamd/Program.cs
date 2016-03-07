@@ -26,9 +26,10 @@ namespace NewCamd
         {
             try
             {
-                _logger.Info("Welcome to Keyblock");
+                _logger.Info("Welcome to NewCamd");
                 _settings.Load();
                 StartServer();
+                _settings.Update();
                 _logger.Info("Done");
             }
             catch (Exception ex)
@@ -39,7 +40,7 @@ namespace NewCamd
 
         void StartServer()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
     }
 }
