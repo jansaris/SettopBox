@@ -12,19 +12,19 @@ namespace NewCamd
     {
         readonly ILog _logger;
         readonly Settings _settings;
-        readonly Func<NewCamdClientHandler> _clientFactory;
+        readonly Func<NewCamdClient> _clientFactory;
 
         readonly object _syncObject = new object();
-        readonly List<NewCamdClientHandler> _activeClients;
+        readonly List<NewCamdClient> _activeClients;
         TcpListener _listener;
         bool _listening;
 
-        public Program(ILog logger, Settings settings, Func<NewCamdClientHandler> clientFactory)
+        public Program(ILog logger, Settings settings, Func<NewCamdClient> clientFactory)
         {
             _logger = logger;
             _settings = settings;
             _clientFactory = clientFactory;
-            _activeClients = new List<NewCamdClientHandler>();
+            _activeClients = new List<NewCamdClient>();
         }
 
         static void Main()
@@ -56,6 +56,7 @@ namespace NewCamd
         {
             _listener = new TcpListener(IPAddress.Any, _settings.Port);
             _listener.Start();
+            _listening = true;
             _logger.Info($"Start listening at {IPAddress.Any}:{_settings.Port}");
         }
 
@@ -64,11 +65,11 @@ namespace NewCamd
             while (_listening)
             {
                 var client = await _listener.AcceptTcpClientAsync();
-                _logger.Info($"Accept new client: {client.Client.LocalEndPoint}");
+                _logger.Debug("Try to accept new client");
                 var clientHandler = _clientFactory();
-                clientHandler.Handle(client);
                 clientHandler.Closed += ClientClosed;
                 AddClientToWatchList(clientHandler);
+                clientHandler.Handle(client);
             }
         }
 
@@ -89,7 +90,7 @@ namespace NewCamd
 
         void ClientClosed(object sender, EventArgs e)
         {
-            var client = (NewCamdClientHandler)sender;
+            var client = (NewCamdClient)sender;
             _logger.Info($"Stop monitoring client {client.Name}");
             RemoveClientFromWatchList(client);
         }
@@ -99,16 +100,16 @@ namespace NewCamd
             _logger.Info($"Close {_activeClients.Count} clients");
             while (_activeClients.Count > 0)
             {
-                NewCamdClientHandler client;
+                NewCamdClient client;
                 lock (_syncObject)
                 {
-                    client = _activeClients.First();
+                    client = _activeClients.FirstOrDefault();
                 }
-                client?.Close();
+                client?.Dispose();
             }
         }
 
-        void AddClientToWatchList(NewCamdClientHandler client)
+        void AddClientToWatchList(NewCamdClient client)
         {
             lock (_syncObject)
             {
@@ -117,7 +118,7 @@ namespace NewCamd
             _logger.Debug($"Added client {client.Name} to the watchlist");
         }
 
-        void RemoveClientFromWatchList(NewCamdClientHandler client)
+        void RemoveClientFromWatchList(NewCamdClient client)
         {
             lock (_syncObject)
             {
