@@ -18,6 +18,7 @@ namespace NewCamd
         //Handle variables
         TcpClient _client;
         NetworkStream _stream;
+        int _noDataCount;
 
         public EventHandler Closed;
         public string Name { get; private set; }
@@ -47,22 +48,44 @@ namespace NewCamd
             {
                 _logger.Debug($"Wait for new message from {Name}");
                 var bytes = ReceiveMessage();
-                HandleMessage(bytes);
+                if (ValidateMessage(bytes))
+                {
+                    HandleMessage(bytes);
+                }
             }
             _logger.Info($"Stop handling messages, connection with {Name} is closed");
+        }
+
+        bool ValidateMessage(byte[] bytes)
+        {
+            _logger.Debug("Validate message");
+            if (bytes == null)
+            {
+                _logger.Error($"Received no valid message from {Name}, Disconnect client");
+                Dispose();
+                return false;
+            }
+
+            if (bytes.Length == 0)
+            {
+                _logger.Warn($"Received no data from {Name}");
+                _noDataCount++;
+                if (_noDataCount > 3)
+                {
+                    _logger.Error("Received no data 3 times, the client probably disconnected");
+                    Dispose();
+                }
+                return false;
+            }
+
+            _logger.Info("Validated message");
+            _noDataCount = 0;
+            return true;
         }
 
         void HandleMessage(byte[] bytes)
         {
             _logger.Info("Handle message");
-
-            if (bytes == null)
-            {
-                _logger.Warn($"Received no valid message from {Name}, Disconnect client");
-                Dispose();
-                return;
-            }
-
             var val = (NewCamdMessage)bytes[0];
             switch (val)
             {
@@ -74,21 +97,30 @@ namespace NewCamd
 
         byte[] ReceiveMessage()
         {
-            var buffer = new byte[_client.ReceiveBufferSize];
-            //Create read
-            var byteTask = _stream.ReadAsync(buffer, 0, buffer.Length, _cancellationTokenSource.Token);
-            //And wait for response from the server
-            byteTask.Wait(_settings.MaxWaitTimeInMs, _cancellationTokenSource.Token);
-            if (!byteTask.IsCompleted)
+            byte[] result = null;
+            try
             {
-                _logger.Warn($"Failed to receive a valid message from {Name}, state: {byteTask.Status}");
-                _cancellationTokenSource.Cancel();
-                return null;
+                var buffer = new byte[_client.ReceiveBufferSize];
+                //Create read
+                var byteTask = _stream.ReadAsync(buffer, 0, buffer.Length, _cancellationTokenSource.Token);
+                //And wait for response from the server
+                byteTask.Wait(_settings.MaxWaitTimeInMs, _cancellationTokenSource.Token);
+                if (byteTask.IsCompleted)
+                {
+                    //Task succesfully completed, read data
+                    _logger.Debug($"Received {byteTask.Result} from the client");
+                    result = buffer.Take(byteTask.Result).ToArray();
+                }
+                else
+                {
+                    _logger.Warn($"Failed to receive a valid message from {Name}, state: {byteTask.Status}");
+                }
             }
-            _logger.Debug($"Received {byteTask.Result} from the client");
-            var val = (NewCamdMessage)buffer[0];
-            _logger.Debug($"Received message '{val}'");
-            return buffer.Take(byteTask.Result).ToArray();
+            catch (Exception ex)
+            {
+                _logger.Error("An error occured while receiving data from the client", ex);
+            }
+            return result;
         }
 
         void SendMessage(string message, byte[] privateKey)

@@ -62,14 +62,25 @@ namespace NewCamd
 
         async void Listen()
         {
-            while (_listening)
+            try
             {
-                var client = await _listener.AcceptTcpClientAsync();
-                _logger.Debug("Try to accept new client");
-                var clientHandler = _clientFactory();
-                clientHandler.Closed += ClientClosed;
-                AddClientToWatchList(clientHandler);
-                clientHandler.Handle(client);
+                while (_listening)
+                {
+                    var client = await _listener.AcceptTcpClientAsync();
+                    _logger.Debug("Try to accept new client");
+                    var clientHandler = _clientFactory();
+                    clientHandler.Closed += ClientClosed;
+                    AddClientToWatchList(clientHandler);
+                    clientHandler.Handle(client);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                if (_listening)
+                {
+                    throw;
+                }
+                //Ignore because this is expected to happen when we stopped listening    
             }
         }
 
