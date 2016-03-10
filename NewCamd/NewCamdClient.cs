@@ -83,7 +83,6 @@ namespace NewCamd
             {
                 _logger.Warn($"Failed to receive a valid message from {Name}, state: {byteTask.Status}");
                 _cancellationTokenSource.Cancel();
-                byteTask.Dispose();
                 return null;
             }
             _logger.Debug($"Received {byteTask.Result} from the client");
