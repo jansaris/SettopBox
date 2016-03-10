@@ -36,8 +36,8 @@ namespace SharedComponents.Settings
                     {
                         var line = reader.ReadLine();
                         if (string.IsNullOrWhiteSpace(line)) continue;
-                        if (line.StartsWith("#")) continue;
-                        if (line.StartsWith("["))
+                        if (line.StartsWith("#", StringComparison.Ordinal)) continue;
+                        if (line.StartsWith("[", StringComparison.Ordinal))
                         {
                             inCorrectBlock = line.Equals($"[{Name}]");
                             Logger.Debug($"Found block header {line} and this headerblock is correct: {inCorrectBlock}");
