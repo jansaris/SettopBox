@@ -58,6 +58,16 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NewCamd\NewCamd.csproj">
+      <Project>{9b439ea3-b20c-4a50-9657-4d393ad2d72d}</Project>
+      <Name>NewCamd</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
+      <Project>{17e72fdd-c439-4955-8fa6-125f08702a79}</Project>
+      <Name>SharedComponents</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

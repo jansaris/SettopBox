@@ -1,6 +1,6 @@
 namespace NewCamd
 {
-    enum NewCamdMessage
+    public enum NewCamdMessage
     {
         MsgClient2ServerLogin = 224,
         MsgClient2ServerLoginAck,

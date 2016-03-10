@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using log4net;
 
@@ -11,6 +13,7 @@ namespace NewCamd
         //Constructor variables
         readonly ILog _logger;
         readonly Settings _settings;
+        readonly TripleDes _crypto;
         readonly byte[] _privateKey = new byte[14];
         readonly Random _random = new Random();
         readonly CancellationTokenSource _cancellationTokenSource;
@@ -23,10 +26,11 @@ namespace NewCamd
         public EventHandler Closed;
         public string Name { get; private set; }
 
-        public NewCamdClient(ILog logger, Settings settings)
+        public NewCamdClient(ILog logger, Settings settings, TripleDes crypto)
         {
             _logger = logger;
             _settings = settings;
+            _crypto = crypto;
             _random.NextBytes(_privateKey);
             _cancellationTokenSource = new CancellationTokenSource();
         }
@@ -61,7 +65,7 @@ namespace NewCamd
             _logger.Debug("Validate message");
             if (bytes == null)
             {
-                _logger.Error($"Received no valid message from {Name}, Disconnect client");
+                _logger.Error($"Received no valid message from {Name}");
                 Dispose();
                 return false;
             }
@@ -87,11 +91,81 @@ namespace NewCamd
         {
             _logger.Info("Handle message");
             var val = (NewCamdMessage)bytes[0];
+            var data = bytes.Skip(1).ToList();
             switch (val)
             {
+                case NewCamdMessage.MsgClient2ServerLogin:
+                    Login(data);
+                    break;
                 default:
                     _logger.Info($"Handle {val}");
                     break;
+            }
+        }
+
+        void Login(List<byte> bytes)
+        {
+            string username;
+            string encryptedPassword;
+
+            if (!ParseLoginMessage(bytes, out username, out encryptedPassword))
+            {
+                _logger.Warn($"Couldn't read the login credentials from {Name}");
+                Dispose();
+            }
+
+            try
+            {
+                var password = _crypto.Decrypt(encryptedPassword, "$1$abcdefgh$");
+                var response = NewCamdMessage.MsgClient2ServerLoginAck;
+                if (!_settings.Username.Equals(username))
+                {
+                    _logger.Warn($"Login username {username} from {Name} is invalid");
+                    response = NewCamdMessage.MsgClient2ServerLoginNak;
+                }
+                if (!_settings.Password.Equals(password))
+                {
+                    _logger.Warn($"Login password {password} from {Name} is invalid");
+                    response = NewCamdMessage.MsgClient2ServerLoginNak;
+                }
+                SendMessage("Login response", response);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to validate the received username '{username}' and encrypted password '{encryptedPassword}' from {Name}", ex);
+                Dispose();
+            }
+        }
+
+        bool ParseLoginMessage(List<byte> bytes, out string username, out string encryptedPassword)
+        {
+            username = string.Empty;
+            encryptedPassword = string.Empty;
+            try
+            {
+                var usernameEnd = bytes.IndexOf(0);
+                if (usernameEnd <= 0)
+                {
+                    _logger.Error("Failed to find the username field in the login message");
+                    return false;
+                }
+                var passwordStart = usernameEnd + 1;
+                var passwordEnd = bytes.IndexOf(0, passwordStart);
+                if (passwordEnd <= 0)
+                {
+                    _logger.Error("Failed to find the password field in the login message");
+                    return false;
+                }
+
+                username = Encoding.ASCII.GetString(bytes.Take(usernameEnd).ToArray());
+                encryptedPassword = Encoding.ASCII.GetString(bytes.Skip(passwordStart).Take(passwordEnd - passwordStart).ToArray());
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to parse the login details", ex);
+                return false;
             }
         }
 
@@ -113,7 +187,7 @@ namespace NewCamd
                 }
                 else
                 {
-                    _logger.Warn($"Failed to receive a valid message from {Name}, state: {byteTask.Status}");
+                    _logger.Warn($"Failed to receive a valid message from {Name} after {_settings.MaxWaitTimeInMs}ms");
                 }
             }
             catch (Exception ex)
@@ -123,10 +197,15 @@ namespace NewCamd
             return result;
         }
 
-        void SendMessage(string message, byte[] privateKey)
+        void SendMessage(string message, NewCamdMessage data)
         {
-            _logger.Info($"Send '{message}' with {privateKey.Length} bytes");
-            _stream.Write(privateKey, 0, privateKey.Length);
+            SendMessage(message, new[] { (byte)data });
+        }
+
+        void SendMessage(string message, byte[] data)
+        {
+            _logger.Info($"Send '{message}' with {data.Length} bytes");
+            _stream.Write(data, 0, data.Length);
         }
 
         public void Dispose()

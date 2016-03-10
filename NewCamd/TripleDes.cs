@@ -6,21 +6,13 @@ namespace NewCamd
 {
     public class TripleDes
     {
-        readonly Settings _settings;
-
-        public TripleDes(Settings settings)
-        {
-            _settings = settings;
-        }
-
-        public string Encrypt(string toEncrypt, bool useHashing)
+        public string Encrypt(string toEncrypt, string key)
         {
             byte[] keyArray;
             var toEncryptArray = Encoding.UTF8.GetBytes(toEncrypt);
-            var key = _settings.DesKey;
 
             //If hashing use get hashcode regards to your key
-            if (useHashing)
+            if (UseHashing(key))
             {
                 var hashmd5 = new MD5CryptoServiceProvider();
                 keyArray = hashmd5.ComputeHash(Encoding.UTF8.GetBytes(key));
@@ -53,16 +45,13 @@ namespace NewCamd
             return Convert.ToBase64String(resultArray, 0, resultArray.Length);
         }
 
-        public string Decrypt(string cipherString, bool useHashing)
+        public string Decrypt(string cipherString, string key)
         {
             byte[] keyArray;
             //get the byte code of the string
             var toEncryptArray = Convert.FromBase64String(cipherString);
 
-            //Get your key from config file to open the lock!
-            var key = _settings.DesKey;
-
-            if (useHashing)
+            if (UseHashing(key))
             {
                 //if hashing was used get the hash code with regards to your key
                 var hashmd5 = new MD5CryptoServiceProvider();
@@ -94,6 +83,11 @@ namespace NewCamd
             tdes.Clear();
             //return the Clear decrypted TEXT
             return Encoding.UTF8.GetString(resultArray);
+        }
+
+        static bool UseHashing(string key)
+        {
+            return key.Contains("$1$") && key.EndsWith("$", StringComparison.Ordinal);
         }
     }
 }

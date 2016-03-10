@@ -35,7 +35,7 @@ namespace Test.NewCamdClient
             var line = "";
             try
             {
-                while (line != "5")
+                while (line != "6")
                 {
                     line = Console.ReadLine();
                     HandleLine(line);
@@ -65,12 +65,28 @@ namespace Test.NewCamdClient
                     _client.Disconnect();
                     break;
                 case "5":
+                    UpdateCredentials();
+                    break;
+                case "6":
                     Logger.Info("Exit test module");
                     break;
                 default:
                     ShowHelp();
                     break;
             }
+        }
+
+        void UpdateCredentials()
+        {
+            Console.WriteLine($"Change username, hit just enter to ignore (current: {_client.UserName})");
+            var line = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(line)) _client.UserName = line;
+            Console.WriteLine($"Change password, hit just enter to ignore (current: {_client.Password})");
+            line = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(line)) _client.Password = line;
+            Console.WriteLine($"Change DES key, hit just enter to ignore (current: {_client.DesKey})");
+            line = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(line)) _client.DesKey = line;
         }
 
         static void ShowHelp()
@@ -80,7 +96,8 @@ namespace Test.NewCamdClient
             Logger.Info(" 2: Login");
             Logger.Info(" 3: ReceiveKey");
             Logger.Info(" 4: Disconnect");
-            Logger.Info(" 5: Exit");
+            Logger.Info(" 5: Change Settings");
+            Logger.Info(" 6: Exit");
         }
     }
 }
