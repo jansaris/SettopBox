@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using log4net;
-using log4net.Repository.Hierarchy;
+using NewCamd.Encryption;
 
 namespace NewCamd
 {
@@ -14,7 +14,7 @@ namespace NewCamd
         //Constructor variables
         readonly ILog _logger;
         readonly Settings _settings;
-        readonly TripleDes _crypto;
+        readonly EncryptionHelpers _crypto;
         readonly byte[] _privateKey = new byte[14];
         readonly Random _random = new Random();
         readonly CancellationTokenSource _cancellationTokenSource;
@@ -24,10 +24,12 @@ namespace NewCamd
         NetworkStream _stream;
         int _noDataCount;
 
+        const int NewcamdMsgSize = 400;
+
         public EventHandler Closed;
         public string Name { get; private set; }
 
-        public NewCamdClient(ILog logger, Settings settings, TripleDes crypto)
+        public NewCamdClient(ILog logger, Settings settings, EncryptionHelpers crypto)
         {
             _logger = logger;
             _settings = settings;
@@ -125,20 +127,13 @@ namespace NewCamd
                 return NewCamdMessage.MsgClient2ServerLoginNak;
             }
 
-            try
+            var expected = _crypto.UnixEncrypt(_settings.Password, "$1$abcdefgh$");
+            if (!expected.Equals(encryptedPassword))
             {
-                var password = _crypto.Decrypt(encryptedPassword, "$1$abcdefgh$");
-                if (!_settings.Password.Equals(password))
-                {
-                    _logger.Warn($"Login password {password} from {Name} is invalid");
-                    return NewCamdMessage.MsgClient2ServerLoginNak;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"Failed to validate the received username '{username}' and encrypted password '{encryptedPassword}' from {Name}", ex);
+                _logger.Warn($"Login password {encryptedPassword} from {Name} is invalid");
                 return NewCamdMessage.MsgClient2ServerLoginNak;
             }
+            
             return NewCamdMessage.MsgClient2ServerLoginAck;
         }
 
@@ -200,6 +195,51 @@ namespace NewCamd
                 _logger.Error("An error occured while receiving data from the client", ex);
             }
             return result;
+        }
+
+        string ParseMessage(byte[] buffer)
+        {
+            //DES_cblock ivec;
+            //unsigned char buffer[NEWCAMD_MSG_SIZE];
+            //unsigned int len, retlen, i;
+
+            //if (!read(c->client_fd, buffer, 2))
+            //    return -1;
+            if (buffer == null || buffer.Length < 2)
+            {
+                throw new InvalidNewcamdMessage("No valid message or message is to short");
+            }
+
+            var len = ((buffer[0] << 8) | buffer[1]) & 0xFFFF;
+            if (len > NewcamdMsgSize)
+            {
+                throw new InvalidNewcamdMessage($"Message too long ({len})");
+            }
+
+            _logger.Debug($"Read message of {len} bytes");
+
+            //len -= sizeof(ivec);
+            //memcpy(ivec, buffer + len, sizeof(ivec));
+            //DES_ede2_cbc_encrypt(buffer, buffer, len, &c->ks1, &c->ks2, (DES_cblock*)ivec, DES_DECRYPT);
+
+            //if (xor_sum(buffer, len))
+            //{
+            //    LOG(ERROR, "[NEWCAMD] Checksum failed.");
+            //    return -1;
+            //}
+
+            //*msg_id = ((buffer[0] << 8) | buffer[1]) & 0xFFFF;
+            //*service_id = ((buffer[2] << 8) | buffer[3]) & 0xFFFF;
+            //*provider_id = buffer[4] << 16 | buffer[5] << 8 | buffer[6];
+
+            //retlen = (((buffer[3 + NEWCAMD_HDR_LEN] << 8) | buffer[4 + NEWCAMD_HDR_LEN]) & 0x0FFF) + 3;
+            //LOG(DEBUG, "[NEWCAMD] Received message msgid: %d, serviceid: %d, providerid: %d, length: %d", *msg_id, *service_id, *provider_id, retlen);
+            //memcpy(data, buffer + 2 + NEWCAMD_HDR_LEN, retlen);
+
+            //print_hex("received data", buffer, len);
+
+            //return retlen;
+            return string.Empty;
         }
 
         void SendMessage(string message, NewCamdMessage data)

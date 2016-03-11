@@ -2,11 +2,23 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace NewCamd
+namespace NewCamd.Encryption
 {
-    public class TripleDes
+    public class EncryptionHelpers
     {
-        public string Encrypt(string toEncrypt, string key)
+        public string UnixEncrypt(string toEncrypt, string salt)
+        {
+            if (!salt.StartsWith("$1$", StringComparison.Ordinal) || !salt.EndsWith("$", StringComparison.Ordinal))
+            {
+                throw new NotImplementedException("Only MD5 Unix encryption is implemented");
+            }
+            salt = salt.Substring(3, salt.Length - 4);
+            var md5 = new MD5();
+            var encrypted = md5.Encrypt(toEncrypt, salt);
+            return encrypted;
+        }
+
+        public string EncryptTripleDes(string toEncrypt, string key)
         {
             byte[] keyArray;
             var toEncryptArray = Encoding.UTF8.GetBytes(toEncrypt);
@@ -39,17 +51,18 @@ namespace NewCamd
             var cTransform = tdes.CreateEncryptor();
             //transform the specified region of bytes array to resultArray
             var resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
-            //Release resources held by TripleDes Encryptor
+            //Release resources held by EncryptionHelpers Encryptor
             tdes.Clear();
             //Return the encrypted data into unreadable string format
             return Convert.ToBase64String(resultArray, 0, resultArray.Length);
+            //return Encoding.ASCII.GetString(resultArray);
         }
 
-        public string Decrypt(string cipherString, string key)
+        public string DecryptTripleDes(string cipherString, string key)
         {
             byte[] keyArray;
             //get the byte code of the string
-            var toEncryptArray = Convert.FromBase64String(cipherString);
+            var toEncryptArray = Encoding.ASCII.GetBytes(cipherString);
 
             if (UseHashing(key))
             {
@@ -79,7 +92,7 @@ namespace NewCamd
             var cTransform = tdes.CreateDecryptor();
             var resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
 
-            //Release resources held by TripleDes Encryptor                
+            //Release resources held by EncryptionHelpers Encryptor                
             tdes.Clear();
             //return the Clear decrypted TEXT
             return Encoding.UTF8.GetString(resultArray);

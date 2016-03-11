@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using log4net;
 using NewCamd;
+using NewCamd.Encryption;
 
 namespace Test.NewCamdClient
 {
@@ -11,13 +12,13 @@ namespace Test.NewCamdClient
     public class NewCamdClient
     {
         static readonly ILog Logger = LogManager.GetLogger(typeof(NewCamdClient));
-        readonly TripleDes _tripleDes;
+        readonly EncryptionHelpers _encryptionHelpers;
         TcpClient _client;
         NetworkStream _stream;
 
         public NewCamdClient()
         {
-            _tripleDes = new TripleDes();
+            _encryptionHelpers = new EncryptionHelpers();
         }
 
         byte[] _buffer;
@@ -82,13 +83,77 @@ namespace Test.NewCamdClient
                 $1$abcdefgh$. The password in the data field has to be NULL terminated and the
                 packet encrypted with the login key.
             */
-            var msg = new List<byte>();
 
+            /*
+                uint8_t *buffer = c->newcamd.buf;
+	            c->newcamd.caid = 0;
+	            c->newcamd.msg_id = 0;
+
+	            uint8_t rand_data[14];
+	            if (fdread(c->server_fd, (char *)rand_data, sizeof(rand_data)) != 14) {
+		            ts_LOGf("ERR | [%s] Can't read protocol handshake.\n", c->ops.ident);
+		            return 0;
+	            }
+
+	            char *crPasswd = crypt(c->pass, "$1$abcdefgh$");
+	            c->newcamd.crypt_passwd = crPasswd;
+	            if (!crPasswd) {
+		            ts_LOGf("ERR | [%s] Can't crypt password.\n", c->ops.ident);
+		            sleep(1);
+		            return -1;
+	            }
+
+	            const int userLen = strlen(c->user) + 1;
+	            const int passLen = strlen(crPasswd) + 1;
+
+	            // prepare login message
+	            buffer[0] = MSG_CLIENT_2_SERVER_LOGIN;
+	            buffer[1] = 0;
+	            buffer[2] = userLen + passLen;
+	            memcpy(&buffer[3], c->user, userLen);
+	            memcpy(&buffer[3 + userLen], crPasswd, passLen);
+
+	            prepare_login_key(c, rand_data);
+	            des_schedule_key(&c->newcamd.td_key);
+
+	            if (!newcamd_send_msg(c, buffer, buffer[2] + 3, TSDECRYPT_CLIENT_ID, 1) ||
+		            newcamd_recv_cmd(c) != MSG_CLIENT_2_SERVER_LOGIN_ACK)
+	            {
+		            ts_LOGf("ERR | [%s] Login failed. Check user/pass/des-key.\n", c->ops.ident);
+		            sleep(1);
+		            return 0;
+	            }
+
+	            // Prepare session key
+	            uint8_t tmpkey[14];
+	            memcpy(tmpkey, c->newcamd.bin_des_key, sizeof(tmpkey));
+	            int i;
+	            for(i = 0; i < (passLen - 1); ++i)
+		            tmpkey[i % 14] ^= crPasswd[i];
+	            des_key_spread(&c->newcamd.td_key, tmpkey);
+	            des_schedule_key(&c->newcamd.td_key);
+
+	            if (!newcamd_send_cmd(c, MSG_CARD_DATA_REQ) || newcamd_recv_msg(c, buffer, 0) <= 0) {
+		            ts_LOGf("ERR | [%s] MSG_CARD_DATA_REQ error.\n", c->ops.ident);
+		            return 0;
+	            }
+
+	            if (buffer[0] == MSG_CARD_DATA) {
+		            newcamd_init_card_data(c, &c->newcamd, buffer);
+	            } else {
+		            ts_LOGf("ERR | [%s] MSG_CARD_DATA response error.\n", c->ops.ident);
+	            }
+
+	            return 1;
+            */
+            var msg = new List<byte>();
             msg.Add((byte)NewCamdMessage.MsgClient2ServerLogin);
             msg.AddRange(Encoding.ASCII.GetBytes(UserName));
             msg.Add(0);
-            msg.AddRange(Encoding.ASCII.GetBytes(_tripleDes.Encrypt(Password, "$1$abcdefgh$")));
+            msg.AddRange(Encoding.ASCII.GetBytes(_encryptionHelpers.UnixEncrypt(Password, "$1$abcdefgh$")));
             msg.Add(0);
+
+            
             var bytes = msg.ToArray();
             _stream.Write(bytes,0,bytes.Length);
             Read("Login awnser", 1);

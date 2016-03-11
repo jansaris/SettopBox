@@ -52,12 +52,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyConfig.cs" />
+    <Compile Include="Encryption\HashAlgorithm.cs" />
+    <Compile Include="InvalidNewcamdMessage.cs" />
+    <Compile Include="Encryption\MD5.cs" />
     <Compile Include="NewCamdClient.cs" />
     <Compile Include="NewCamdMessage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="TripleDes.cs" />
+    <Compile Include="Encryption\EncryptionHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
