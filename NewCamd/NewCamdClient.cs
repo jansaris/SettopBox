@@ -16,6 +16,8 @@ namespace NewCamd
         readonly Settings _settings;
         readonly EncryptionHelpers _crypto;
         readonly byte[] _privateKey = new byte[14];
+        readonly byte[] _key1 = new byte[8];
+        readonly byte[] _key2 = new byte[8];
         readonly Random _random = new Random();
         readonly CancellationTokenSource _cancellationTokenSource;
 
@@ -34,8 +36,20 @@ namespace NewCamd
             _logger = logger;
             _settings = settings;
             _crypto = crypto;
-            _random.NextBytes(_privateKey);
             _cancellationTokenSource = new CancellationTokenSource();
+        }
+
+        void InitializeKeys()
+        {
+            _random.NextBytes(_privateKey);
+            var spread = _crypto.CreateKeySpread(_privateKey);
+            /*
+                des_key_spread(random, spread);
+
+	            DES_key_sched((DES_cblock *)&spread[0], &c->ks1);
+	            DES_key_sched((DES_cblock *)&spread[8], &c->ks2);
+            */
+
         }
 
         public void Handle(TcpClient client)
@@ -45,6 +59,7 @@ namespace NewCamd
             Name = _client.Client.RemoteEndPoint.ToString();
             _stream = _client.GetStream();
             _logger.Info($"Accepted client {Name}");
+            InitializeKeys();
             SendMessage("Login key", _privateKey);
             HandleMessagesLoop();
         }
@@ -217,9 +232,11 @@ namespace NewCamd
             }
 
             _logger.Debug($"Read message of {len} bytes");
-
+            //sizeof(ivec) = 8 bytes
             //len -= sizeof(ivec);
             //memcpy(ivec, buffer + len, sizeof(ivec));
+            var ivec = buffer.Skip(len - 8).Take(8).ToArray();
+
             //DES_ede2_cbc_encrypt(buffer, buffer, len, &c->ks1, &c->ks2, (DES_cblock*)ivec, DES_DECRYPT);
 
             //if (xor_sum(buffer, len))
