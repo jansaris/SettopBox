@@ -30,6 +30,18 @@ namespace NewCamd.Encryption
             return decrypter.TransformFinalBlock(encryptedMessage, 0, messageLength);
         }
 
+        public byte[] Encrypt(byte[] unEncryptedMessage, byte[] keyblock, byte[] initializationVector)
+        {
+            TripleDES td = new TripleDESCryptoServiceProvider();
+            td.KeySize = 128;
+            td.IV = initializationVector;
+            td.Mode = CipherMode.CBC;
+            td.Padding = PaddingMode.Zeros;
+            td.Key = keyblock;
+            var decrypter = td.CreateEncryptor();
+            return decrypter.TransformFinalBlock(unEncryptedMessage, 0, unEncryptedMessage.Length);
+        }
+
         public string EncryptTripleDes(string toEncrypt, string key)
         {
             byte[] keyArray;
