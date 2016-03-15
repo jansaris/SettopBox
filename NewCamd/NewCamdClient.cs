@@ -197,7 +197,7 @@ namespace NewCamd
             SendMessage(log, data);
         }
 
-        byte[] ConvertToEncryptedMessage(NewCamdMessage message)
+        public byte[] ConvertToEncryptedMessage(NewCamdMessage message)
         {
             _logger.Debug($"Prepare send data of type {message.Type} for encryption for {Name}");
             var buffer = new byte[NewCamdMessage.Size];
@@ -284,7 +284,7 @@ namespace NewCamd
             */
         }
 
-        byte XorSum(byte[] buffer)
+        public byte XorSum(byte[] buffer)
         {
             byte res = 0;
             int i;
