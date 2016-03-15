@@ -147,7 +147,7 @@ namespace Test.NewCamdClient
 	            return 1;
             */
             var msg = new List<byte>();
-            msg.Add((byte)NewCamdMessage.MsgClient2ServerLogin);
+            msg.Add((byte)NewCamdMessageType.MsgClient2ServerLogin);
             msg.AddRange(Encoding.ASCII.GetBytes(UserName));
             msg.Add(0);
             msg.AddRange(Encoding.ASCII.GetBytes(_encryptionHelpers.UnixEncrypt(Password, "$1$abcdefgh$")));
@@ -157,7 +157,7 @@ namespace Test.NewCamdClient
             var bytes = msg.ToArray();
             _stream.Write(bytes,0,bytes.Length);
             Read("Login awnser", 1);
-            var response = (NewCamdMessage) _buffer[0];
+            var response = (NewCamdMessageType) _buffer[0];
             Logger.Info("Received: " + response);
         }
 

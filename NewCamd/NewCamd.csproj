@@ -58,6 +58,7 @@
     <Compile Include="Encryption\MD5.cs" />
     <Compile Include="NewCamdClient.cs" />
     <Compile Include="NewCamdMessage.cs" />
+    <Compile Include="NewCamdMessageType.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />

@@ -25,7 +25,7 @@ namespace Test.NewCamdClient
         {
             try
             {
-                var values = GetValues<NewCamdMessage>();
+                var values = GetValues<NewCamdMessageType>();
                 foreach (var value in values)
                 {
                     Console.WriteLine($"{value}: {(int)value}");
@@ -34,8 +34,8 @@ namespace Test.NewCamdClient
                 var encdata = File.ReadAllBytes(@"C:\temp\src\fromubuntu\src\data\encrypted2.dat");
                 var uncdata = File.ReadAllBytes(@"C:\temp\src\fromubuntu\src\data\unEncrypted4.dat");
 
-                var mes1 = (NewCamdMessage) encdata[0];
-                var mes2 = (NewCamdMessage) uncdata[0];
+                var mes1 = (NewCamdMessageType) encdata[0];
+                var mes2 = (NewCamdMessageType) uncdata[0];
 
                 XmlConfigurator.ConfigureAndWatch(new FileInfo("Log4net.config"));
                 Logger.Info("Welcome to the NewCamd Test Client");

@@ -1,26 +1,12 @@
 namespace NewCamd
 {
-    public enum NewCamdMessage
+    public class NewCamdMessage
     {
-        MsgClient2ServerLogin = 224,
-        MsgClient2ServerLoginAck,
-        MsgClient2ServerLoginNak,
-        MsgCardDataReq,
-        MsgCardData,
-        MsgServer2ClientName,
-        MsgServer2ClientNameAck,
-        MsgServer2ClientNameNak,
-        MsgServer2ClientLogin,
-        MsgServer2ClientLoginAck,
-        MsgServer2ClientLoginNak,
-        MsgAdmin,
-        MsgAdminAck,
-        MsgAdminLogin,
-        MsgAdminLoginAck,
-        MsgAdminLoginNak,
-        MsgAdminCommand,
-        MsgAdminCommandAck,
-        MsgAdminCommandNak,
-        MsgKeepalive = 253,
+        public const int HeaderLength = 8;
+        public NewCamdMessageType Type { get; set; }
+        public int MessageId { get; set; }
+        public int ServiceId { get; set; }
+        public int ProviderId { get; set; }
+        public byte[] Data { get; set; }
     }
 }

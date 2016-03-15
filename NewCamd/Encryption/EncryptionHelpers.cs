@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -19,11 +18,16 @@ namespace NewCamd.Encryption
             return encrypted;
         }
 
-        public static byte[] Decrypt(byte[] encryptedMessage, byte[] key1, byte[] key2)
+        public byte[] Decrypt(byte[] encryptedMessage, int messageLength, byte[] keyblock, byte[] initializationVector)
         {
-            var cryptoProvider = new DESCryptoServiceProvider();
-            var decryptor = cryptoProvider.CreateDecryptor(key1, key2);
-            return decryptor.TransformFinalBlock(encryptedMessage, 0, encryptedMessage.Length);
+            TripleDES td = new TripleDESCryptoServiceProvider();
+            td.KeySize = 128;
+            td.IV = initializationVector;
+            td.Mode = CipherMode.CBC;
+            td.Padding = PaddingMode.Zeros;
+            td.Key = keyblock;
+            var decrypter = td.CreateDecryptor();
+            return decrypter.TransformFinalBlock(encryptedMessage, 0, messageLength);
         }
 
         public string EncryptTripleDes(string toEncrypt, string key)
@@ -130,9 +134,6 @@ namespace NewCamd.Encryption
             spread[13] = (byte)(((key[11] << 3) | (key[12] >> 5)) & 0xfe);
             spread[14] = (byte)(((key[12] << 2) | (key[13] >> 6)) & 0xfe);
             spread[15] = (byte)(key[13] << 1);
-
-            //DES_set_odd_parity((DES_cblock*)&spread[0]);
-            //DES_set_odd_parity((DES_cblock*)&spread[8]);
 
             return spread;
         }
