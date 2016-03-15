@@ -29,6 +29,9 @@ namespace NewCamd
 
         static void Main()
         {
+            var dc = new Decrypt();
+            dc.Run();
+
             var container = SharedContainer.CreateAndFill<DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
             prog.Start();

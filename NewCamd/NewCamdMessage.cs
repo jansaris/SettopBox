@@ -21,6 +21,6 @@ namespace NewCamd
         MsgAdminCommand,
         MsgAdminCommandAck,
         MsgAdminCommandNak,
-        MsgKeepalive = 224 + 0x1d,
+        MsgKeepalive = 253,
     }
 }

@@ -1,12 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using log4net;
 using log4net.Config;
+using NewCamd;
 
 namespace Test.NewCamdClient
 {
     class Program
     {
+        public static IEnumerable<T> GetValues<T>()
+        {
+            return Enum.GetValues(typeof(T)).Cast<T>();
+        }
+
         static readonly ILog Logger = LogManager.GetLogger(typeof (Program));
         readonly NewCamdClient _client = new NewCamdClient();
 
@@ -17,6 +25,18 @@ namespace Test.NewCamdClient
         {
             try
             {
+                var values = GetValues<NewCamdMessage>();
+                foreach (var value in values)
+                {
+                    Console.WriteLine($"{value}: {(int)value}");
+                }
+
+                var encdata = File.ReadAllBytes(@"C:\temp\src\fromubuntu\src\data\encrypted2.dat");
+                var uncdata = File.ReadAllBytes(@"C:\temp\src\fromubuntu\src\data\unEncrypted4.dat");
+
+                var mes1 = (NewCamdMessage) encdata[0];
+                var mes2 = (NewCamdMessage) uncdata[0];
+
                 XmlConfigurator.ConfigureAndWatch(new FileInfo("Log4net.config"));
                 Logger.Info("Welcome to the NewCamd Test Client");
                 var program = new Program();
