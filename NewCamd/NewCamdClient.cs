@@ -84,65 +84,27 @@ namespace NewCamd
         {
             string username;
             string encryptedPassword;
-
-            if (!ParseLoginMessage(message.Data.ToList(), out username, out encryptedPassword))
-            {
-                _logger.Warn($"Couldn't read the login credentials from {Name}");
-                Dispose();
-            }
-            message.Type = ValidateLogin(username, encryptedPassword);
-            message.Data = new byte[3];
-            SendMessage("Login response", message);
-        }
-
-        NewCamdMessageType ValidateLogin(string username, string encryptedPassword)
-        {
-            if (!_settings.Username.Equals(username))
-            {
-                _logger.Warn($"Login username {username} from {Name} is invalid");
-                return NewCamdMessageType.MsgClient2ServerLoginNak;
-            }
-
-            var expected = _crypto.UnixEncrypt(_settings.Password, "$1$abcdefgh$");
-            if (!expected.Equals(encryptedPassword))
-            {
-                _logger.Warn($"Login password {encryptedPassword} from {Name} is invalid");
-                return NewCamdMessageType.MsgClient2ServerLoginNak;
-            }
-            
-            return NewCamdMessageType.MsgClient2ServerLoginAck;
-        }
-
-        bool ParseLoginMessage(List<byte> bytes, out string username, out string encryptedPassword)
-        {
-            username = string.Empty;
-            encryptedPassword = string.Empty;
             try
             {
-                var usernameEnd = bytes.IndexOf(0);
-                if (usernameEnd <= 0)
-                {
-                    _logger.Error("Failed to find the username field in the login message");
-                    return false;
-                }
-                var passwordStart = usernameEnd + 1;
-                var passwordEnd = bytes.IndexOf(0, passwordStart);
-                if (passwordEnd <= 0)
-                {
-                    _logger.Error("Failed to find the password field in the login message");
-                    return false;
-                }
-
-                username = Encoding.ASCII.GetString(bytes.Take(usernameEnd).ToArray());
-                encryptedPassword = Encoding.ASCII.GetString(bytes.Skip(passwordStart).Take(passwordEnd - passwordStart).ToArray());
-
-                return true;
+                const int header = 3;
+                var splitter = Array.IndexOf(message.Data, (byte)0, header);
+                username = Encoding.ASCII.GetString(message.Data.Skip(header).Take(splitter - header).ToArray());
+                splitter++;
+                encryptedPassword = Encoding.ASCII.GetString(message.Data.Skip(splitter).Take(message.Data.Length - splitter - 1).ToArray());
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to parse the login details", ex);
-                return false;
+                _logger.Warn($"Couldn't read the login credentials from {Name}", ex);
+                Dispose();
+                return;
             }
+
+            var expectedPassword = _crypto.UnixEncrypt(_settings.Password, "$1$abcdefgh$");
+            var loginValid = _settings.Username.Equals(username) && expectedPassword.Equals(encryptedPassword);
+            message.Type = loginValid ? NewCamdMessageType.MsgClient2ServerLoginAck : NewCamdMessageType.MsgClient2ServerLoginNak;
+            _logger.Info($"Login from {Name} is {message.Type}");
+            message.Data = new byte[] {(byte) message.Type, 0, 0};
+            SendMessage("Login response", message);
         }
 
         NewCamdMessage ReceiveMessage()
@@ -200,88 +162,53 @@ namespace NewCamd
         public byte[] ConvertToEncryptedMessage(NewCamdMessage message)
         {
             _logger.Debug($"Prepare send data of type {message.Type} for encryption for {Name}");
-            var buffer = new byte[NewCamdMessage.Size];
+            _logger.Debug($"Prepare message headers for {Name}");
+            var prepareData = new List<byte>();
+            prepareData.Add((byte)(message.MessageId >> 8));
+            prepareData.Add((byte)(message.MessageId & 0xFF));
+            prepareData.Add((byte)(message.ServiceId >> 8));
+            prepareData.Add((byte)(message.ServiceId & 0xFF));
+            prepareData.Add((byte)(message.ProviderId >> 16));
+            prepareData.Add((byte)((message.ProviderId >> 8) & 0xFF));
+            prepareData.Add((byte)(message.ProviderId & 0xFF));
+            prepareData.Add(0);
+            prepareData.Add(0);
+            prepareData.Add(0);
+
             _logger.Debug($"Copy {message.Data.Length} bytes into the buffer for {Name}");
-            Buffer.BlockCopy(message.Data,0,buffer, NewCamdMessage.HeaderLength + 4, message.Data.Length);
-            _logger.Debug($"Prepare header information for {Name}");
-
-            buffer[NewCamdMessage.HeaderLength + 4 + 1] = (byte)((message.Data[1] & 0xF0) | (((message.Data.Length - 3) >> 8) & 0x0F));
-            buffer[NewCamdMessage.HeaderLength + 4 + 2] = (byte)((message.Data.Length - 3) & 0xFF);
-
-            buffer[2] = (byte)(message.MessageId >> 8);
-            buffer[3] = (byte)(message.MessageId & 0xFF);
-            buffer[4] = (byte)(message.ServiceId >> 8);
-            buffer[5] = (byte)(message.ServiceId & 0xFF);
-            buffer[6] = (byte)(message.ProviderId >> 16);
-            buffer[7] = (byte)((message.ProviderId >> 8) & 0xFF);
-            buffer[8] = (byte)(message.ProviderId & 0xFF);
+            prepareData.AddRange(message.Data);
+            while (prepareData.Count < 15) prepareData.Add(0);
+            _logger.Debug($"Correct message headers for {Name}");
+            prepareData[NewCamdMessage.HeaderLength + 5] = (byte)((message.Data[1] & 240) | (((message.Data.Length - 3) >> 8) & 255));
+            prepareData[NewCamdMessage.HeaderLength + 6] = (byte)((message.Data.Length - 3) & 255);
 
             _logger.Debug($"Encrypt data before sending to {Name}");
 
-            /*
-            memset(buffer + 2, 0, NEWCAMD_HDR_LEN + 2);
-	memcpy(buffer + NEWCAMD_HDR_LEN + 4, data, data_len);
-
-	buffer[NEWCAMD_HDR_LEN + 4 + 1] = (data[1] & 0xF0) | (((data_len - 3) >> 8) & 0x0F);
-	buffer[NEWCAMD_HDR_LEN + 4 + 2] = (data_len - 3) & 0xFF;
-
-	buffer[2] = msg_id >> 8;
-	buffer[3] = msg_id & 0xFF;
-	buffer[4] = service_id >> 8;
-	buffer[5] = service_id & 0xFF;
-	buffer[6] = provider_id >> 16;
-	buffer[7] = (provider_id >> 8) & 0xFF;
-	buffer[8] = provider_id & 0xFF;
-	
-	LOG(DEBUG, "[NEWCAMD] Send message msgid: %d, serviceid: %d, providerid: %d, length: %d", msg_id, service_id, provider_id, data_len + 2 + NEWCAMD_HDR_LEN);
-    */
             var padding = new byte[8];
             _random.NextBytes(padding);
 
-            var bufferLen = message.Data.Length + 4 + NewCamdMessage.HeaderLength;
-            var paddingLen = (8 - ((bufferLen - 1)%8))%8;
-            Buffer.BlockCopy(padding, 0, buffer, bufferLen, paddingLen);
-            bufferLen += paddingLen;
-            buffer[bufferLen] = XorSum(buffer.Skip(2).ToArray());
-            bufferLen++;
+            //fill up bytes with padding data at the end
+            var bufferLen = prepareData.Count;
+            var paddingLen = (8 - ((bufferLen - 1) % 8)) % 8;
+            var prepareDataArray = prepareData.ToArray();
+            Buffer.BlockCopy(padding, 0, prepareDataArray, bufferLen - paddingLen, paddingLen);
+            prepareData = prepareDataArray.ToList();
+            //Add checksum at byte 16
+            prepareData.Add(XorSum(prepareData.ToArray()));
 
             var ivec = new byte[8];
             _random.NextBytes(ivec);
 
-            Buffer.BlockCopy(ivec, 0, buffer, bufferLen, ivec.Length);
-            bufferLen += 8;
-
-            var dataToEncrypt = buffer.Skip(2).Take(bufferLen).ToArray();
-            var encrypted = _crypto.Encrypt(dataToEncrypt, _keyblock, ivec);
+            var dataToEncrypt = prepareData.ToArray();
+            var encrypted = _crypto.Encrypt(dataToEncrypt, _keyblock, ivec).ToList();
 
             var dataToSend = new List<byte>();
-            dataToSend.Add((byte)((bufferLen - 2) >> 8));
-            dataToSend.Add((byte)((bufferLen - 2) & 0xFF));
+            dataToSend.Add((byte)((encrypted.Count + ivec.Length) >> 8));
+            dataToSend.Add((byte)((encrypted.Count + ivec.Length) & 0xFF));
             dataToSend.AddRange(encrypted);
+            dataToSend.AddRange(ivec);
 
             return dataToSend.ToArray();
-            /*
-
-	DES_cblock padding;
-	buf_len = data_len + NEWCAMD_HDR_LEN + 4;
-	padding_len = (8 - ((buf_len - 1) % 8)) % 8;
-
-	DES_random_key(&padding);
-	memcpy(buffer + buf_len, padding, padding_len);
-	buf_len += padding_len;
-	buffer[buf_len] = xor_sum(buffer + 2, buf_len - 2);
-	buf_len++;
-
-	DES_cblock ivec;
-	DES_random_key(&ivec);
-	memcpy(buffer + buf_len, ivec, sizeof(ivec));
-	print_hex("sended data", buffer + 2, data_len + NEWCAMD_HDR_LEN + 4);
-	DES_ede2_cbc_encrypt(buffer + 2, buffer + 2, buf_len - 2, &c->ks1, &c->ks2, (DES_cblock *)ivec, DES_ENCRYPT);
-
-	buf_len += sizeof(DES_cblock);
-	buffer[0] = (buf_len - 2) >> 8;
-	buffer[1] = (buf_len - 2) & 0xFF;
-            */
         }
 
         public byte XorSum(byte[] buffer)

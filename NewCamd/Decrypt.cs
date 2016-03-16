@@ -72,79 +72,65 @@ namespace NewCamd
         public byte[] ConvertToEncryptedMessage(NewCamdMessage message)
         {
             _logger.Debug($"Prepare send data of type {message.Type} for encryption for {Name}");
-            var buffer = new byte[NewCamdMessage.Size];
+            var prepareData  = new List<byte>();
+            _logger.Debug($"Prepare message headers for {Name}");
+            prepareData.Add((byte)(message.MessageId >> 8));
+            prepareData.Add((byte)(message.MessageId & 0xFF));
+            prepareData.Add((byte)(message.ServiceId >> 8));
+            prepareData.Add((byte)(message.ServiceId & 0xFF));
+            prepareData.Add((byte)(message.ProviderId >> 16));
+            prepareData.Add((byte)((message.ProviderId >> 8) & 0xFF));
+            prepareData.Add((byte)(message.ProviderId & 0xFF));
+            prepareData.Add(0);
+            prepareData.Add(0);
+            prepareData.Add(0);
+
             _logger.Debug($"Copy {message.Data.Length} bytes into the buffer for {Name}");
-            Buffer.BlockCopy(message.Data, 0, buffer, NewCamdMessage.HeaderLength + 4, message.Data.Length);
-            _logger.Debug($"Prepare header information for {Name}");
-
-            buffer[NewCamdMessage.HeaderLength + 4 + 1] = (byte)((message.Data[1] & 0xF0) | (((message.Data.Length - 3) >> 8) & 0x0F));
-            buffer[NewCamdMessage.HeaderLength + 4 + 2] = (byte)((message.Data.Length - 3) & 0xFF);
-
-            buffer[2] = (byte)(message.MessageId >> 8);
-            buffer[3] = (byte)(message.MessageId & 0xFF);
-            buffer[4] = (byte)(message.ServiceId >> 8);
-            buffer[5] = (byte)(message.ServiceId & 0xFF);
-            buffer[6] = (byte)(message.ProviderId >> 16);
-            buffer[7] = (byte)((message.ProviderId >> 8) & 0xFF);
-            buffer[8] = (byte)(message.ProviderId & 0xFF);
+            prepareData.AddRange(message.Data);
+            while (prepareData.Count < 15) prepareData.Add(0);
+            _logger.Debug($"Correct message headers for {Name}");
+            prepareData[NewCamdMessage.HeaderLength + 5] = (byte)((message.Data[1] & 240) | (((message.Data.Length - 3) >> 8) & 255));
+            prepareData[NewCamdMessage.HeaderLength + 6] = (byte)((message.Data.Length - 3) & 255);
 
             var compare = File.ReadAllBytes(GetPath("ToSendWithBuffer12.dat"));
-            //Ignore byte 1 en 2
-            buffer[1] = compare[1];
-            CompareArrays(buffer,compare);
+            CompareArrays(prepareData.ToArray(),compare);
 
             _logger.Debug($"Encrypt data before sending to {Name}");
 
-            /*
-            memset(buffer + 2, 0, NEWCAMD_HDR_LEN + 2);
-	memcpy(buffer + NEWCAMD_HDR_LEN + 4, data, data_len);
-
-	buffer[NEWCAMD_HDR_LEN + 4 + 1] = (data[1] & 0xF0) | (((data_len - 3) >> 8) & 0x0F);
-	buffer[NEWCAMD_HDR_LEN + 4 + 2] = (data_len - 3) & 0xFF;
-
-	buffer[2] = msg_id >> 8;
-	buffer[3] = msg_id & 0xFF;
-	buffer[4] = service_id >> 8;
-	buffer[5] = service_id & 0xFF;
-	buffer[6] = provider_id >> 16;
-	buffer[7] = (provider_id >> 8) & 0xFF;
-	buffer[8] = provider_id & 0xFF;
-	
-	LOG(DEBUG, "[NEWCAMD] Send message msgid: %d, serviceid: %d, providerid: %d, length: %d", msg_id, service_id, provider_id, data_len + 2 + NEWCAMD_HDR_LEN);
-    */
             var padding = new byte[8];
             _random.NextBytes(padding);
             padding = File.ReadAllBytes(GetPath("padding13.dat"));
 
-            var bufferLen = message.Data.Length + 4 + NewCamdMessage.HeaderLength;
+            //fill up bytes with padding data at the end
+            var bufferLen = prepareData.Count;
             var paddingLen = (8 - ((bufferLen - 1) % 8)) % 8;
-            Buffer.BlockCopy(padding, 0, buffer, bufferLen, paddingLen);
-            bufferLen += paddingLen;
-            buffer[bufferLen] = _client.XorSum(buffer.Skip(2).ToArray());
-            bufferLen++;
+            var prepareDataArray = prepareData.ToArray();
+            Buffer.BlockCopy(padding, 0, prepareDataArray, bufferLen-paddingLen, paddingLen);
+            prepareData = prepareDataArray.ToList();
+            //Add checksum at byte 16
+            prepareData.Add(_client.XorSum(prepareData.ToArray()));
+
+            //And validate again
+            var withPadding = File.ReadAllBytes(GetPath("withpaddingAndxor14.dat"));
+            CompareArrays(prepareData.ToArray(), withPadding);
 
             var ivec = new byte[8];
             _random.NextBytes(ivec);
             ivec = File.ReadAllBytes(GetPath("ivecToSend15.dat"));
 
-            Buffer.BlockCopy(ivec, 0, buffer, bufferLen, ivec.Length);
-            bufferLen += 8;
-
             var before = File.ReadAllBytes(GetPath("beforeEncrypt16.dat"));
-            CompareArrays(buffer, before);
+            CompareArrays(prepareData.ToArray(), before);
 
-            var dataToEncrypt = buffer.Skip(2).Take(bufferLen).ToArray();
-            var encrypted = _crypto.Encrypt(dataToEncrypt, _keyblock, ivec);
-
-            var after = File.ReadAllBytes(GetPath("encryptedForSend17.dat"));
-            CompareArrays(encrypted, after);
+            var dataToEncrypt = prepareData.ToArray();
+            var encrypted = _crypto.Encrypt(dataToEncrypt, _keyblock, ivec).ToList();
 
             var dataToSend = new List<byte>();
-            dataToSend.Add((byte)((bufferLen - 2) >> 8));
-            dataToSend.Add((byte)((bufferLen - 2) & 0xFF));
+            dataToSend.Add((byte)((encrypted.Count + ivec.Length) >> 8));
+            dataToSend.Add((byte)((encrypted.Count + ivec.Length) & 0xFF));
             dataToSend.AddRange(encrypted);
+            dataToSend.AddRange(ivec);
 
-            var sending = File.ReadAllBytes(GetPath("encrypted18.dat"));
+            var sending = File.ReadAllBytes(GetPath("encryptedForSend17.dat"));
             CompareArrays(dataToSend.ToArray(), sending);
 
             return dataToSend.ToArray();
