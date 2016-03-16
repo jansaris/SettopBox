@@ -62,8 +62,9 @@ namespace NewCamd
 
             mes.Type = NewCamdMessageType.MsgClient2ServerLoginAck;
             mes.Data = File.ReadAllBytes(GetPath("toSend11.dat"));
-            
-            var encrypted = _client.ConvertToEncryptedMessage(mes);
+            _keyblock = _crypto.CreateKeySpread(File.ReadAllBytes(GetPath("random3.dat")));
+
+            var encrypted = ConvertToEncryptedMessage(mes);
             
             Console.WriteLine(mes.Type);
         }
@@ -87,6 +88,11 @@ namespace NewCamd
             buffer[7] = (byte)((message.ProviderId >> 8) & 0xFF);
             buffer[8] = (byte)(message.ProviderId & 0xFF);
 
+            var compare = File.ReadAllBytes(GetPath("ToSendWithBuffer12.dat"));
+            //Ignore byte 1 en 2
+            buffer[1] = compare[1];
+            CompareArrays(buffer,compare);
+
             _logger.Debug($"Encrypt data before sending to {Name}");
 
             /*
@@ -108,6 +114,7 @@ namespace NewCamd
     */
             var padding = new byte[8];
             _random.NextBytes(padding);
+            padding = File.ReadAllBytes(GetPath("padding13.dat"));
 
             var bufferLen = message.Data.Length + 4 + NewCamdMessage.HeaderLength;
             var paddingLen = (8 - ((bufferLen - 1) % 8)) % 8;
@@ -118,17 +125,27 @@ namespace NewCamd
 
             var ivec = new byte[8];
             _random.NextBytes(ivec);
+            ivec = File.ReadAllBytes(GetPath("ivecToSend15.dat"));
 
             Buffer.BlockCopy(ivec, 0, buffer, bufferLen, ivec.Length);
             bufferLen += 8;
 
+            var before = File.ReadAllBytes(GetPath("beforeEncrypt16.dat"));
+            CompareArrays(buffer, before);
+
             var dataToEncrypt = buffer.Skip(2).Take(bufferLen).ToArray();
             var encrypted = _crypto.Encrypt(dataToEncrypt, _keyblock, ivec);
+
+            var after = File.ReadAllBytes(GetPath("encryptedForSend17.dat"));
+            CompareArrays(encrypted, after);
 
             var dataToSend = new List<byte>();
             dataToSend.Add((byte)((bufferLen - 2) >> 8));
             dataToSend.Add((byte)((bufferLen - 2) & 0xFF));
             dataToSend.AddRange(encrypted);
+
+            var sending = File.ReadAllBytes(GetPath("encrypted18.dat"));
+            CompareArrays(dataToSend.ToArray(), sending);
 
             return dataToSend.ToArray();
             /*
@@ -153,6 +170,24 @@ namespace NewCamd
 	buffer[0] = (buf_len - 2) >> 8;
 	buffer[1] = (buf_len - 2) & 0xFF;
             */
+        }
+
+        void CompareArrays(byte[] array1, byte[] array2)
+        {
+            for (var i = 0; i < array1.Length; i++)
+            {
+                if (array2.Length <= i)
+                {
+                    _logger.Warn($"Array2 is shorter than array1, compare stops at {i}");
+                    return;
+                }
+                if (array1[i] != array2[i])
+                {
+                    _logger.Warn($"First mismatch at byte {i}");
+                    return;
+                }
+            }
+            _logger.Info("Arrays are equal");
         }
 
         void Validate(byte[] toTest)
