@@ -113,13 +113,13 @@ namespace NewCamd
             prepareData.Add(0);
             prepareData.Add(0);
 
-            _logger.Debug($"Copy {message.Data.Length} bytes into the buffer for {Name}");
+            _logger.Debug($"Correct message headers for {Name}");
             message.Data[1] = (byte)((message.Data[1] & 240) | (((message.Data.Length - 3) >> 8) & 255));
             message.Data[2] = (byte)((message.Data.Length - 3) & 255);
-
+            _logger.Debug($"Copy {message.Data.Length} bytes into the buffer for {Name}");
             prepareData.AddRange(message.Data);
-            while (prepareData.Count < 15) prepareData.Add(0);
-            _logger.Debug($"Correct message headers for {Name}");
+            //Fill up
+            while (prepareData.Count % 8 != 7) prepareData.Add(0);
             
 
             var compare = File.ReadAllBytes(GetPath("sToSendWithBuffer23.dat"));
@@ -133,7 +133,7 @@ namespace NewCamd
 
             //fill up bytes with padding data at the end
             var bufferLen = prepareData.Count;
-            var paddingLen = (8 - ((bufferLen - 1) % 8)) % 8;
+            var paddingLen = (8 - ((bufferLen - 2) % 8)) % 8;
             var prepareDataArray = prepareData.ToArray();
             Buffer.BlockCopy(padding, 0, prepareDataArray, bufferLen-paddingLen, paddingLen);
             prepareData = prepareDataArray.ToList();
