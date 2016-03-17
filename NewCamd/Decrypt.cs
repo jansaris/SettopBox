@@ -30,7 +30,8 @@ namespace NewCamd
             _client = new NewCamdClient(LogManager.GetLogger(typeof(Decrypt)), getInstance, _crypto);
 
             //ReadData();
-            var mes = TestFiles("random3.dat", "encrypted8.dat");
+
+            var mes = TestFiles("random3.dat", "rencrypted19.dat", "rivec20.dat");
             TestEncrypt(mes);
             //_keyblock = _crypto.CreateKeySpread(_random);
             //var client = new NewCamdClient(LogManager.GetLogger(typeof(Decrypt)),null,_crypto);
@@ -42,29 +43,56 @@ namespace NewCamd
             Console.ReadKey();
         }
 
-        NewCamdMessage TestFiles(string key, string encrypted)
+        NewCamdMessage TestFiles(string key, string encrypted, string ivec)
         {
             var random = File.ReadAllBytes(GetPath(key));
+            var encOld = File.ReadAllBytes(GetPath("rencrypted18.dat"));
+            var len = ((encOld[0] << 8) | encOld[1]) & 0xFFFF;
             var enc = File.ReadAllBytes(GetPath(encrypted));
+            var iv = File.ReadAllBytes(GetPath(ivec));
+
             
             var generated = _client.InitializeKeys();
             //_client._keyblock = _crypto.CreateKeySpread(random);
+            var expectedPassword = _crypto.UnixEncrypt("pass", "$1$abcdefgh$");
+            _client.InitializeKeys();
+            _client.UpdateKeyBlock(expectedPassword);
             var mes = _client.ParseMessage(enc);
             Console.WriteLine(mes.Type);
             return mes;
         }
 
-        void TestEncrypt(NewCamdMessage mes)
+        public void UpdateKeyBlock(string encryptedPassword)
         {
             var random = File.ReadAllBytes(GetPath("random3.dat"));
-            var padding = File.ReadAllBytes(GetPath("padding13.dat"));
-            var ivec = File.ReadAllBytes(GetPath("ivecToSend15.dat"));
+            for (var i = 0; i < encryptedPassword.Length; i++)
+            {
+                random[i % 14] ^= (byte)encryptedPassword[i];
+            }
+            _keyblock = _crypto.CreateKeySpread(random);
+        }
 
-            mes.Type = NewCamdMessageType.MsgClient2ServerLoginAck;
-            mes.Data = File.ReadAllBytes(GetPath("toSend11.dat"));
-            _keyblock = _crypto.CreateKeySpread(File.ReadAllBytes(GetPath("random3.dat")));
+        void TestEncrypt(NewCamdMessage mes)
+        {
+            var expect = File.ReadAllBytes(GetPath("sToSend22.dat"));
+            mes.Type = NewCamdMessageType.MsgCardData;
+            mes.Data = new byte[26];
+            mes.Data[0] = (byte)NewCamdMessageType.MsgCardData;
+
+            //Provide CAID
+            mes.Data[4] = 0x56;
+            mes.Data[5] = 0x01;
+
+            mes.Data[14] = 1; //Set number of cards
+            mes.Data[17] = 1; //Set provider ID of card 1
+
+            CompareArrays(expect, mes.Data);
+
+            UpdateKeyBlock(_crypto.UnixEncrypt("pass", "$1$abcdefgh$"));
+            //_keyblock = _crypto.CreateKeySpread(File.ReadAllBytes(GetPath("random3.dat")));
 
             var encrypted = ConvertToEncryptedMessage(mes);
+            var toCompare = File.ReadAllBytes(GetPath("sencryptedForSend28.dat"));
             
             Console.WriteLine(mes.Type);
         }
@@ -86,20 +114,22 @@ namespace NewCamd
             prepareData.Add(0);
 
             _logger.Debug($"Copy {message.Data.Length} bytes into the buffer for {Name}");
+            message.Data[1] = (byte)((message.Data[1] & 240) | (((message.Data.Length - 3) >> 8) & 255));
+            message.Data[2] = (byte)((message.Data.Length - 3) & 255);
+
             prepareData.AddRange(message.Data);
             while (prepareData.Count < 15) prepareData.Add(0);
             _logger.Debug($"Correct message headers for {Name}");
-            prepareData[NewCamdMessage.HeaderLength + 5] = (byte)((message.Data[1] & 240) | (((message.Data.Length - 3) >> 8) & 255));
-            prepareData[NewCamdMessage.HeaderLength + 6] = (byte)((message.Data.Length - 3) & 255);
+            
 
-            var compare = File.ReadAllBytes(GetPath("ToSendWithBuffer12.dat"));
+            var compare = File.ReadAllBytes(GetPath("sToSendWithBuffer23.dat"));
             CompareArrays(prepareData.ToArray(),compare);
 
             _logger.Debug($"Encrypt data before sending to {Name}");
 
             var padding = new byte[8];
             _random.NextBytes(padding);
-            padding = File.ReadAllBytes(GetPath("padding13.dat"));
+            padding = File.ReadAllBytes(GetPath("spadding24.dat"));
 
             //fill up bytes with padding data at the end
             var bufferLen = prepareData.Count;
@@ -111,14 +141,14 @@ namespace NewCamd
             prepareData.Add(_client.XorSum(prepareData.ToArray()));
 
             //And validate again
-            var withPadding = File.ReadAllBytes(GetPath("withpaddingAndxor14.dat"));
+            var withPadding = File.ReadAllBytes(GetPath("swithpaddingAndxor25.dat"));
             CompareArrays(prepareData.ToArray(), withPadding);
 
             var ivec = new byte[8];
             _random.NextBytes(ivec);
-            ivec = File.ReadAllBytes(GetPath("ivecToSend15.dat"));
+            ivec = File.ReadAllBytes(GetPath("sivecToSend26.dat"));
 
-            var before = File.ReadAllBytes(GetPath("beforeEncrypt16.dat"));
+            var before = File.ReadAllBytes(GetPath("sbeforeEncrypt27.dat"));
             CompareArrays(prepareData.ToArray(), before);
 
             var dataToEncrypt = prepareData.ToArray();
@@ -130,7 +160,7 @@ namespace NewCamd
             dataToSend.AddRange(encrypted);
             dataToSend.AddRange(ivec);
 
-            var sending = File.ReadAllBytes(GetPath("encryptedForSend17.dat"));
+            var sending = File.ReadAllBytes(GetPath("sencryptedForSend28.dat"));
             CompareArrays(dataToSend.ToArray(), sending);
 
             return dataToSend.ToArray();
@@ -231,7 +261,7 @@ namespace NewCamd
 
         static string GetPath(string file)
         {
-            return Path.Combine(@".\encrypttest", file);
+            return Path.Combine(@".\testfiles", file);
         }
     }
 }

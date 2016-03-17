@@ -22,7 +22,7 @@ namespace NewCamd
         //Handle variables
         TcpClient _client;
         NetworkStream _stream;
-        public byte[] _keyblock;
+        byte[] _keyblock;
 
         public EventHandler Closed;
         public string Name { get; private set; }
@@ -73,11 +73,31 @@ namespace NewCamd
                 case NewCamdMessageType.MsgClient2ServerLogin:
                     Login(message);
                     break;
+                case NewCamdMessageType.MsgCardDataReq:
+                    MessageCardData(message);
+                    break;
                 default:
                     _logger.Info($"Handle {message.Type}");
                     return false;
             }
             return true;
+        }
+
+        void MessageCardData(NewCamdMessage message)
+        {
+            _logger.Info($"Request card info from {Name}");
+            message.Type = NewCamdMessageType.MsgCardData;
+            message.Data = new byte[26];
+            message.Data[0] = (byte)NewCamdMessageType.MsgCardData;
+
+            //Provide CAID
+            message.Data[4] = 0x56;
+            message.Data[5] = 0x01;
+
+            message.Data[14] = 1; //Set number of cards
+            message.Data[17] = 1; //Set provider ID of card 1
+            
+            SendMessage("Card info", message);
         }
 
         void Login(NewCamdMessage message)
@@ -105,6 +125,18 @@ namespace NewCamd
             _logger.Info($"Login from {Name} is {message.Type}");
             message.Data = new byte[] {(byte) message.Type, 0, 0};
             SendMessage("Login response", message);
+            if (!loginValid) return;
+            UpdateKeyBlock(encryptedPassword);
+        }
+
+        public void UpdateKeyBlock(string encryptedPassword)
+        {
+            var random = _settings.GetDesArray();
+            for (var i = 0; i < encryptedPassword.Length; i++)
+            {
+                random[i % 14] ^= (byte)encryptedPassword[i];
+            }
+            _keyblock = _crypto.CreateKeySpread(random);
         }
 
         NewCamdMessage ReceiveMessage()
