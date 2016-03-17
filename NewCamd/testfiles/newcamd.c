@@ -246,7 +246,7 @@ int newcamd_recv(struct newcamd *c, unsigned char* data, uint16_t* service_id, u
 	len = ((buffer[0] << 8) | buffer[1]) & 0xFFFF;
 	
 	LOG(DEBUG, "[NEWCAMD] Read message of %d bytes", len);
-	writeToFile(buffer, len, "data/encrypted");
+	writeToFile(buffer, len, "data/rencrypted");
 
 	if (len > NEWCAMD_MSG_SIZE) {
 		LOG(ERROR, "[NEWCAMD] Message too long");
@@ -257,14 +257,14 @@ int newcamd_recv(struct newcamd *c, unsigned char* data, uint16_t* service_id, u
 		LOG(ERROR, "[NEWCAMD] Received message too short");
 	}
 
-	writeToFile(buffer, len, "data/encrypted");
+	writeToFile(buffer, len, "data/rencrypted");
 
 	len -= sizeof(ivec);
 	memcpy(ivec, buffer+len, sizeof(ivec));
 	unsigned char ivecbuffer[sizeof(ivec)];
 	memcpy(ivecbuffer, buffer+len, sizeof(ivec));
 	LOG(DEBUG, "Ivec at %d with size of %d", len, sizeof(ivec));
-	writeToFile(ivecbuffer, sizeof(ivec), "data/ivec");
+	writeToFile(ivecbuffer, sizeof(ivec), "data/rivec");
 
 	DES_ede2_cbc_encrypt(buffer, buffer, len, &c->ks1, &c->ks2, (DES_cblock *)ivec, DES_DECRYPT);
 
@@ -273,7 +273,7 @@ int newcamd_recv(struct newcamd *c, unsigned char* data, uint16_t* service_id, u
 		return -1;
 	}
 
-	writeToFile(buffer, len, "data/unEncrypted");
+	writeToFile(buffer, len, "data/runEncrypted");
 
 	*msg_id = ((buffer[0] << 8) | buffer[1]) & 0xFFFF;
 	*service_id = ((buffer[2] << 8) | buffer[3]) & 0xFFFF;
@@ -293,13 +293,17 @@ int newcamd_send(struct newcamd *c, unsigned char* data, int data_len, uint16_t 
 	char buffer[NEWCAMD_MSG_SIZE];
 	unsigned int padding_len, buf_len, i;
 
-	writeToFile(data, data_len, "data/ToSend");
+	writeToFile(data, data_len, "data/sToSend");
 
-	memset(buffer + 2, 0, NEWCAMD_HDR_LEN + 2);
+	memset(buffer, 0, 50);
 	memcpy(buffer + NEWCAMD_HDR_LEN + 4, data, data_len);
-
+	printf("%u\n", data[1]);
+	printf("%d\n", data_len);
+	printf("%d\n", NEWCAMD_HDR_LEN + 4 + 1);
 	buffer[NEWCAMD_HDR_LEN + 4 + 1] = (data[1] & 0xF0) | (((data_len - 3) >> 8) & 0x0F);
 	buffer[NEWCAMD_HDR_LEN + 4 + 2] = (data_len - 3) & 0xFF;
+	printf("%u\n", buffer[NEWCAMD_HDR_LEN + 4 + 1]);
+	printf("%u\n", buffer[NEWCAMD_HDR_LEN + 4 + 2]);
 
 	buffer[2] = msg_id >> 8;
 	buffer[3] = msg_id & 0xFF;
@@ -309,7 +313,7 @@ int newcamd_send(struct newcamd *c, unsigned char* data, int data_len, uint16_t 
 	buffer[7] = (provider_id >> 8) & 0xFF;
 	buffer[8] = provider_id & 0xFF;
 	
-	writeToFile(buffer + 2, data_len + 2 + NEWCAMD_HDR_LEN, "data/ToSendWithBuffer");
+	writeToFile(buffer + 2, data_len + 4 + NEWCAMD_HDR_LEN, "data/sToSendWithBuffer");
 	LOG(DEBUG, "[NEWCAMD] Send message msgid: %d, serviceid: %d, providerid: %d, length: %d", msg_id, service_id, provider_id, data_len + 2 + NEWCAMD_HDR_LEN);
 
 	DES_cblock padding;
@@ -317,23 +321,23 @@ int newcamd_send(struct newcamd *c, unsigned char* data, int data_len, uint16_t 
 	padding_len = (8 - ((buf_len - 1) % 8)) % 8;
 
 	DES_random_key(&padding);
-	writeToFile(padding, sizeof(padding), "data/padding");
+	writeToFile(padding, sizeof(padding), "data/spadding");
 	memcpy(buffer + buf_len, padding, padding_len);
 	buf_len += padding_len;
 	buffer[buf_len] = xor_sum(buffer + 2, buf_len - 2);
 	buf_len++;
-	writeToFile(buffer + 2, buf_len - 2, "data/withpaddingAndxor");
+	writeToFile(buffer + 2, buf_len - 2, "data/swithpaddingAndxor");
 	DES_cblock ivec;
 	DES_random_key(&ivec);
-	writeToFile(ivec, sizeof(ivec), "data/ivecToSend");
+	writeToFile(ivec, sizeof(ivec), "data/sivecToSend");
 	memcpy(buffer + buf_len, ivec, sizeof(ivec));
 	print_hex("sended data", buffer + 2, data_len + NEWCAMD_HDR_LEN + 4);
-	writeToFile(buffer + 2, buf_len - 2, "data/beforeEncrypt");
+	writeToFile(buffer + 2, buf_len - 2, "data/sbeforeEncrypt");
 	DES_ede2_cbc_encrypt(buffer + 2, buffer + 2, buf_len - 2, &c->ks1, &c->ks2, (DES_cblock *)ivec, DES_ENCRYPT);
 
 	buf_len += sizeof(DES_cblock);
 	buffer[0] = (buf_len - 2) >> 8;
 	buffer[1] = (buf_len - 2) & 0xFF;
-	writeToFile(buffer, buf_len, "data/encryptedForSend");
+	writeToFile(buffer, buf_len, "data/sencryptedForSend");
 	return write(c->client_fd, buffer, buf_len);
 }
