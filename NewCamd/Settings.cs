@@ -23,7 +23,7 @@ namespace NewCamd
             return retValue.ToArray();
         } 
 
-        public int MaxWaitTimeInMs { get; private set; } = 6000; //1 minute
+        public int MaxWaitTimeInMs { get; private set; } = 60000; //1 minute
 
         public void Update()
         {

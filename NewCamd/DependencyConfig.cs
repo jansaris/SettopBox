@@ -14,8 +14,9 @@ namespace NewCamd
         public override void RegisterComponents(Container container)
         {
             container.Register<Program>();
-            container.Register<NewCamdClient>();
-            container.RegisterSingleton<Func<NewCamdClient>>(() => container.GetInstance<NewCamdClient>());
+            container.Register<NewCamdApi>();
+            container.Register<NewCamdCommunication>();
+            container.RegisterSingleton<Func<NewCamdApi>>(() => container.GetInstance<NewCamdApi>());
         }
     }
 }

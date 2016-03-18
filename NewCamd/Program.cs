@@ -12,27 +12,27 @@ namespace NewCamd
     {
         readonly ILog _logger;
         readonly Settings _settings;
-        readonly Func<NewCamdClient> _clientFactory;
+        readonly Func<NewCamdApi> _clientFactory;
 
         readonly object _syncObject = new object();
-        readonly List<NewCamdClient> _activeClients;
+        readonly List<NewCamdApi> _activeClients;
         TcpListener _listener;
         bool _listening;
 
-        public Program(ILog logger, Settings settings, Func<NewCamdClient> clientFactory)
+        public Program(ILog logger, Settings settings, Func<NewCamdApi> clientFactory)
         {
             _logger = logger;
             _settings = settings;
             _clientFactory = clientFactory;
-            _activeClients = new List<NewCamdClient>();
+            _activeClients = new List<NewCamdApi>();
         }
 
         static void Main()
         {
             var container = SharedContainer.CreateAndFill<DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
-            var test = new Decrypt();
-            test.Run(container.GetInstance<Settings>());
+            //var test = new Decrypt();
+            //test.Run(container.GetInstance<Settings>());
 
             prog.Start();
             Console.WriteLine("Hit 'Enter' to exit");
@@ -70,11 +70,11 @@ namespace NewCamd
                 while (_listening)
                 {
                     var client = await _listener.AcceptTcpClientAsync();
-                    _logger.Debug("Try to accept new client");
+                    _logger.Debug("Try to accept new api");
                     var clientHandler = _clientFactory();
                     clientHandler.Closed += ClientClosed;
                     AddClientToWatchList(clientHandler);
-                    clientHandler.Handle(client);
+                    clientHandler.HandleClient(client);
                 }
             }
             catch (ObjectDisposedException)
@@ -104,7 +104,7 @@ namespace NewCamd
 
         void ClientClosed(object sender, EventArgs e)
         {
-            var client = (NewCamdClient)sender;
+            var client = (NewCamdApi)sender;
             _logger.Info($"Stop monitoring client {client.Name}");
             RemoveClientFromWatchList(client);
         }
@@ -114,31 +114,31 @@ namespace NewCamd
             _logger.Info($"Close {_activeClients.Count} clients");
             while (_activeClients.Count > 0)
             {
-                NewCamdClient client;
+                NewCamdApi api;
                 lock (_syncObject)
                 {
-                    client = _activeClients.FirstOrDefault();
+                    api = _activeClients.FirstOrDefault();
                 }
-                client?.Dispose();
+                api?.Dispose();
             }
         }
 
-        void AddClientToWatchList(NewCamdClient client)
+        void AddClientToWatchList(NewCamdApi api)
         {
             lock (_syncObject)
             {
-                _activeClients.Add(client);
+                _activeClients.Add(api);
             }
-            _logger.Debug($"Added client {client.Name} to the watchlist");
+            _logger.Debug($"Added client {api.Name} to the watchlist");
         }
 
-        void RemoveClientFromWatchList(NewCamdClient client)
+        void RemoveClientFromWatchList(NewCamdApi api)
         {
             lock (_syncObject)
             {
-                _activeClients.Remove(client);
+                _activeClients.Remove(api);
             }
-            _logger.Debug($"Removed client {client.Name} from the watchlist");
+            _logger.Debug($"Removed client {api.Name} from the watchlist");
         }
     }
 }

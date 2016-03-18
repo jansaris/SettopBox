@@ -13,7 +13,7 @@ namespace NewCamd.Encryption
 	///    http://theory.lcs.mit.edu/~rivest/md5.c
 	///    lib/libcrypt/crypt-md5.c
 	/// </summary>
-	public class MD5 : HashAlgorithm
+	public class MD5
 	{
 		private const int S11 = 7;
 		private const int S12 = 12;
@@ -223,7 +223,7 @@ namespace NewCamd.Encryption
 		/// <summary>This method encrypt the given string, using MD5 Algorithm</summary>
 		/// <param name="s">The string to be encrypted.</param>
 		/// <returns>The encrypted password.</returns>
-		public override string Encrypt(string s)
+		public string Encrypt(string s)
 		{
 			MDcontext MDp = new MDcontext();
 			MD5Init(ref MDp);
@@ -236,7 +236,7 @@ namespace NewCamd.Encryption
 		/// <param name="pwd">The password to be encrypted.</param>
 		/// <param name="salt"> The salt.</param>
 		/// <returns>The encrypted password.</returns>
-		public override string Encrypt(string pwd, string salt)
+		public string Encrypt(string pwd, string salt)
 		{
 			string e_pass = "";
 			MDcontext MDp1 = new MDcontext();

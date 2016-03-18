@@ -1,16 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using log4net;
 using NewCamd.Encryption;
 
 namespace NewCamd
 {
-    class NewCamdClient : IDisposable
+    public class NewCamdCommunication : IDisposable
     {
         //Constructor variables
         readonly ILog _logger;
@@ -23,11 +21,12 @@ namespace NewCamd
         TcpClient _client;
         NetworkStream _stream;
         byte[] _keyblock;
-
-        public EventHandler Closed;
         public string Name { get; private set; }
 
-        public NewCamdClient(ILog logger, Settings settings, EncryptionHelpers crypto)
+        public EventHandler Closed;
+        public EventHandler<NewCamdMessage> MessageReceived;
+
+        public NewCamdCommunication(ILog logger, Settings settings, EncryptionHelpers crypto)
         {
             _logger = logger;
             _settings = settings;
@@ -35,14 +34,7 @@ namespace NewCamd
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
-        public byte[] InitializeKeys()
-        {
-            _keyblock = _crypto.CreateKeySpread(_settings.GetDesArray());
-            //Send an empty array of 14 zero's to the client
-            return new byte[14];
-        }
-
-        public void Handle(TcpClient client)
+        public void Start(TcpClient client)
         {
             _logger.Debug("Start handling new client");
             _client = client;
@@ -54,79 +46,40 @@ namespace NewCamd
             HandleMessagesLoop();
         }
 
+        public void SendMessage(string logMessage, NewCamdMessage message)
+        {
+            var log = $"{logMessage}: {message.Type}";
+            var data = ConvertToEncryptedMessage(message);
+            SendMessage(log, data);
+        }
+
         void HandleMessagesLoop()
         {
             while (_client.Connected)
             {
                 _logger.Debug($"Wait for new message from {Name}");
                 var message = ReceiveMessage();
-                if (message == null || !HandleMessage(message)) Dispose();
+                if (message == null) Dispose();
+                MessageReceived?.Invoke(this, message);
             }
             _logger.Info($"Stop handling messages, connection with {Name} is closed");
         }
 
-        bool HandleMessage(NewCamdMessage message)
+        byte[] InitializeKeys()
         {
-            _logger.Info($"Handle message: {message.Type} from {Name}");
-            switch (message.Type)
-            {
-                case NewCamdMessageType.MsgClient2ServerLogin:
-                    Login(message);
-                    break;
-                case NewCamdMessageType.MsgCardDataReq:
-                    MessageCardData(message);
-                    break;
-                default:
-                    _logger.Info($"Handle {message.Type}");
-                    return false;
-            }
-            return true;
+            _keyblock = _crypto.CreateKeySpread(_settings.GetDesArray());
+            //Send an empty array of 14 zero's to the client
+            return new byte[14];
         }
 
-        void MessageCardData(NewCamdMessage message)
+        static byte XorSum(IReadOnlyList<byte> buffer)
         {
-            _logger.Info($"Request card info from {Name}");
-            message.Type = NewCamdMessageType.MsgCardData;
-            message.Data = new byte[26];
-            message.Data[0] = (byte)NewCamdMessageType.MsgCardData;
-
-            //Provide CAID
-            message.Data[4] = 0x56;
-            message.Data[5] = 0x01;
-
-            message.Data[14] = 1; //Set number of cards
-            message.Data[17] = 1; //Set provider ID of card 1
-            
-            SendMessage("Card info", message);
-        }
-
-        void Login(NewCamdMessage message)
-        {
-            string username;
-            string encryptedPassword;
-            try
+            byte res = 0;
+            foreach (var b in buffer)
             {
-                const int header = 3;
-                var splitter = Array.IndexOf(message.Data, (byte)0, header);
-                username = Encoding.ASCII.GetString(message.Data.Skip(header).Take(splitter - header).ToArray());
-                splitter++;
-                encryptedPassword = Encoding.ASCII.GetString(message.Data.Skip(splitter).Take(message.Data.Length - splitter - 1).ToArray());
+                res ^= b;
             }
-            catch (Exception ex)
-            {
-                _logger.Warn($"Couldn't read the login credentials from {Name}", ex);
-                Dispose();
-                return;
-            }
-
-            var expectedPassword = _crypto.UnixEncrypt(_settings.Password, "$1$abcdefgh$");
-            var loginValid = _settings.Username.Equals(username) && expectedPassword.Equals(encryptedPassword);
-            message.Type = loginValid ? NewCamdMessageType.MsgClient2ServerLoginAck : NewCamdMessageType.MsgClient2ServerLoginNak;
-            _logger.Info($"Login from {Name} is {message.Type}");
-            message.Data = new byte[] {(byte) message.Type, 0, 0};
-            SendMessage("Login response", message);
-            if (!loginValid) return;
-            UpdateKeyBlock(encryptedPassword);
+            return res;
         }
 
         public void UpdateKeyBlock(string encryptedPassword)
@@ -146,24 +99,23 @@ namespace NewCamd
                 var buffer = new byte[_client.ReceiveBufferSize];
                 //Read first two bytes to get the message length
                 var len = _stream.Read(buffer, 0, 2);
-                if(len != 2) throw new InvalidNewcamdMessage($"Expected to receive 2 bytes from {Name}, but got {len} bytes instaed");
+                if (len != 2) throw new InvalidNewcamdMessage($"Expected to receive 2 bytes from {Name}, but got {len} bytes instaed");
                 var messageLength = ((buffer[0] << 8) | buffer[1]) & 0xFFFF;
                 _logger.Debug($"Received {len} bytes from {Name} with a new message length {messageLength}");
                 if (messageLength > NewCamdMessage.Size) throw new InvalidNewcamdMessage($"Message from {Name} too long ({len} vs {NewCamdMessage.Size})");
                 len = _stream.Read(buffer, 0, messageLength);
-                File.WriteAllBytes("decrypttest/loginMessage.dat", buffer);
-                if(len < messageLength) throw new InvalidNewcamdMessage($"Message from {Name} too short ({len} vs {messageLength})");
+                if (len < messageLength) throw new InvalidNewcamdMessage($"Message from {Name} too short ({len} vs {messageLength})");
                 _logger.Debug($"Received {len} bytes from {Name} with encrypted data");
                 return ParseMessage(buffer.Take(len).ToArray());
             }
             catch (Exception ex)
             {
-                _logger.Error("An error occured while receiving data from the client", ex);
+                _logger.Error($"Client disconnected or didn't respond withing {_settings.MaxWaitTimeInMs}ms", ex);
                 return null;
             }
         }
 
-        public NewCamdMessage ParseMessage(byte[] buffer)
+        NewCamdMessage ParseMessage(byte[] buffer)
         {
             _logger.Debug("Read TripleDES Initialization Vector from encrypted message");
             var ivec = buffer.Skip(buffer.Length - 8).Take(8).ToArray();
@@ -171,7 +123,7 @@ namespace NewCamd
             var decryptedData = _crypto.Decrypt(buffer, buffer.Length - 8, _keyblock, ivec);
             _logger.Debug("Parse decrypted message");
             var len = (((decryptedData[3 + NewCamdMessage.HeaderLength] << 8) | decryptedData[4 + NewCamdMessage.HeaderLength]) & 0x0FFF) + 3;
-            if(len > decryptedData.Length) throw new InvalidNewcamdMessage($"Decryption of the message from {Name} failed");
+            if (len > decryptedData.Length) throw new InvalidNewcamdMessage($"Decryption of the message from {Name} failed");
             var retValue = new NewCamdMessage
             {
                 MessageId = ((decryptedData[0] << 8) | decryptedData[1]) & 0xFFFF,
@@ -184,16 +136,8 @@ namespace NewCamd
             return retValue;
         }
 
-        void SendMessage(string logMessage, NewCamdMessage message)
+        byte[] ConvertToEncryptedMessage(NewCamdMessage message)
         {
-            var log = $"{logMessage}: {message.Type}";
-            var data = ConvertToEncryptedMessage(message);
-            SendMessage(log, data);
-        }
-
-        public byte[] ConvertToEncryptedMessage(NewCamdMessage message)
-        {
-            _logger.Debug($"Prepare send data of type {message.Type} for encryption for {Name}");
             _logger.Debug($"Prepare message headers for {Name}");
             var prepareData = new List<byte>();
             prepareData.Add((byte)(message.MessageId >> 8));
@@ -207,12 +151,13 @@ namespace NewCamd
             prepareData.Add(0);
             prepareData.Add(0);
 
+            _logger.Debug($"Correct message headers for {Name}");
+            message.Data[1] = (byte)((message.Data[1] & 240) | (((message.Data.Length - 3) >> 8) & 255));
+            message.Data[2] = (byte)((message.Data.Length - 3) & 255);
             _logger.Debug($"Copy {message.Data.Length} bytes into the buffer for {Name}");
             prepareData.AddRange(message.Data);
-            while (prepareData.Count < 15) prepareData.Add(0);
-            _logger.Debug($"Correct message headers for {Name}");
-            prepareData[NewCamdMessage.HeaderLength + 5] = (byte)((message.Data[1] & 240) | (((message.Data.Length - 3) >> 8) & 255));
-            prepareData[NewCamdMessage.HeaderLength + 6] = (byte)((message.Data.Length - 3) & 255);
+            //Fill up
+            while (prepareData.Count % 8 != 7) prepareData.Add(0);
 
             _logger.Debug($"Encrypt data before sending to {Name}");
 
@@ -221,11 +166,11 @@ namespace NewCamd
 
             //fill up bytes with padding data at the end
             var bufferLen = prepareData.Count;
-            var paddingLen = (8 - ((bufferLen - 1) % 8)) % 8;
+            var paddingLen = (8 - ((bufferLen - 2) % 8)) % 8;
             var prepareDataArray = prepareData.ToArray();
             Buffer.BlockCopy(padding, 0, prepareDataArray, bufferLen - paddingLen, paddingLen);
             prepareData = prepareDataArray.ToList();
-            //Add checksum at byte 16
+            //Add checksum
             prepareData.Add(XorSum(prepareData.ToArray()));
 
             var ivec = new byte[8];
@@ -241,17 +186,6 @@ namespace NewCamd
             dataToSend.AddRange(ivec);
 
             return dataToSend.ToArray();
-        }
-
-        public byte XorSum(byte[] buffer)
-        {
-            byte res = 0;
-            int i;
-
-            for (i = 0; i < buffer.Length; i++)
-                res ^= buffer[i];
-
-            return res;
         }
 
         void SendMessage(string message, byte[] data)
