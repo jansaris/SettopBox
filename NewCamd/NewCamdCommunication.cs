@@ -41,7 +41,7 @@ namespace NewCamd
             Name = _client.Client.RemoteEndPoint.ToString();
             _stream = _client.GetStream();
             _stream.ReadTimeout = _settings.MaxWaitTimeInMs;
-            _logger.Info($"Accepted client {Name}");
+            _logger.Info($"{Name} - Accepted client");
             SendMessage("Login key", InitializeKeys());
             HandleMessagesLoop();
         }
@@ -72,7 +72,7 @@ namespace NewCamd
             return new byte[14];
         }
 
-        static byte XorSum(IReadOnlyList<byte> buffer)
+        static byte XorSum(IEnumerable<byte> buffer)
         {
             byte res = 0;
             foreach (var b in buffer)
@@ -110,7 +110,8 @@ namespace NewCamd
             }
             catch (Exception ex)
             {
-                _logger.Error($"Client disconnected or didn't respond withing {_settings.MaxWaitTimeInMs}ms", ex);
+                _logger.Error($"Client disconnected or didn't respond withing {_settings.MaxWaitTimeInMs}ms");
+                _logger.Debug("Exception at reading message", ex);
                 return null;
             }
         }
@@ -152,6 +153,7 @@ namespace NewCamd
             prepareData.Add(0);
 
             _logger.Debug($"Correct message headers for {Name}");
+            message.Data[0] = (byte) message.Type;
             message.Data[1] = (byte)((message.Data[1] & 240) | (((message.Data.Length - 3) >> 8) & 255));
             message.Data[2] = (byte)((message.Data.Length - 3) & 255);
             _logger.Debug($"Copy {message.Data.Length} bytes into the buffer for {Name}");
@@ -190,7 +192,7 @@ namespace NewCamd
 
         void SendMessage(string message, byte[] data)
         {
-            _logger.Info($"Send '{message}' with {data.Length} bytes to {Name}");
+            _logger.Debug($"Send '{message}' with {data.Length} bytes to {Name}");
             _stream.Write(data, 0, data.Length);
         }
 
