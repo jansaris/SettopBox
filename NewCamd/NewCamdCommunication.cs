@@ -133,7 +133,7 @@ namespace NewCamd
                 Data = decryptedData.Skip(2 + NewCamdMessage.HeaderLength).Take(len).ToArray(),
                 Type = (NewCamdMessageType)decryptedData[2 + NewCamdMessage.HeaderLength]
             };
-            _logger.Debug($"[NEWCAMD] Received decrypted message msgid: {retValue.MessageId}, serviceid: {retValue.ServiceId}, providerid: {retValue.ProviderId}, length: {len}, type {retValue.Type} from {Name}");
+            _logger.Debug($"Received decrypted message msgid: {retValue.MessageId}, serviceid: {retValue.ServiceId}, providerid: {retValue.ProviderId}, length: {len}, type {retValue.Type} from {Name}");
             return retValue;
         }
 
