@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -13,17 +14,19 @@ namespace NewCamd
         readonly ILog _logger;
         readonly Settings _settings;
         readonly NewCamdCommunication _communication;
+        readonly Keyblock _keyblock;
         readonly EncryptionHelpers _crypto;
 
         public EventHandler Closed;
         public string Name => _communication?.Name;
 
-        public NewCamdApi(ILog logger, Settings settings, EncryptionHelpers crypto, NewCamdCommunication communication)
+        public NewCamdApi(ILog logger, Settings settings, EncryptionHelpers crypto, NewCamdCommunication communication, Keyblock keyblock)
         {
             _logger = logger;
             _settings = settings;
             _crypto = crypto;
             _communication = communication;
+            _keyblock = keyblock;
             _communication.MessageReceived += (sender, message) => ReceiveMessage(message);
             _communication.Closed += (sender, message) => Closed?.Invoke(this, null);
         }
@@ -31,6 +34,7 @@ namespace NewCamd
         public void HandleClient(TcpClient client)
         {
             _logger.Debug("Start handling new client");
+            _keyblock.Prepare();
             _communication.Start(client);
         }
 
@@ -44,19 +48,32 @@ namespace NewCamd
                     Login(message);
                     break;
                 case NewCamdMessageType.MsgCardDataReq:
-                    MessageCardData(message);
+                    CardData(message);
                     break;
                 case NewCamdMessageType.MsgKeepalive:
                     _logger.Debug($"{Name} - Keep connection alive");
                     _communication.SendMessage("Keep alive", message);
                     break;
+                case NewCamdMessageType.MsgKeyblockReq:
+                    KeyBlock(message);
+                    break;
                 default:
-                    _logger.Info($"Handle {message.Type}");
+                    _logger.Error($"Unable to handle {message.Type}");
+                    Dispose();
                     break;
             }
         }
 
-        void MessageCardData(NewCamdMessage message)
+        void KeyBlock(NewCamdMessage message)
+        {
+            _logger.Info($"{Name} - Give keyblock info");
+            var header = new byte[] {128, 1, 1};
+            var keyInfo = _keyblock.DecryptBlock(message.Data);
+            message.Data = header.Concat(keyInfo).ToArray();
+            _communication.SendMessage("Key info", message);
+        }
+
+        void CardData(NewCamdMessage message)
         {
             _logger.Info($"{Name} - Request card info");
             message.Type = NewCamdMessageType.MsgCardData;

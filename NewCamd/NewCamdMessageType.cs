@@ -2,6 +2,7 @@ namespace NewCamd
 {
     public enum NewCamdMessageType
     {
+        MsgKeyblockReq = 128,
         MsgClient2ServerLogin = 224,
         MsgClient2ServerLoginAck,
         MsgClient2ServerLoginNak,

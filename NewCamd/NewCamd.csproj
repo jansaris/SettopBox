@@ -51,9 +51,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChannelBlock.cs" />
     <Compile Include="DependencyConfig.cs" />
     <Compile Include="InvalidNewcamdMessage.cs" />
     <Compile Include="Encryption\MD5.cs" />
+    <Compile Include="Keyblock.cs" />
     <Compile Include="NewCamdApi.cs" />
     <Compile Include="NewCamdCommunication.cs" />
     <Compile Include="NewCamdMessage.cs" />

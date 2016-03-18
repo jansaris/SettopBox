@@ -17,6 +17,20 @@ namespace NewCamd.Encryption
             return encrypted;
         }
 
+        public byte[] AesDecrypt(byte[] data, byte[] key)
+        {
+            var aesAlg = new RijndaelManaged
+            {
+                Key = key,
+                Mode = CipherMode.ECB,
+                Padding = PaddingMode.Zeros,
+                KeySize = 128,
+                IV = new byte[16]
+            };
+            var encryptor = aesAlg.CreateEncryptor();
+            return encryptor.TransformFinalBlock(data, 0, data.Length);
+        }
+
         public byte[] Decrypt(byte[] encryptedMessage, int messageLength, byte[] keyblock, byte[] initializationVector)
         {
             TripleDES td = new TripleDESCryptoServiceProvider();
