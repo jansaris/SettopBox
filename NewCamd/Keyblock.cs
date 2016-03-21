@@ -14,8 +14,6 @@ namespace NewCamd
         readonly EncryptionHelpers _crypto;
         readonly Settings _settings;
 
-        byte[] _data;
-        int _current;
         const int Blocksize = 108;
 
         List<ChannelBlock> _blocks = new List<ChannelBlock>(); 
@@ -30,39 +28,42 @@ namespace NewCamd
         public void Prepare()
         {
             _logger.Debug("Start splitting keyblocks");
-            ReadKeyBlock();
-            SplitKeyBlock();
+            var data = ReadKeyBlock();
+            _blocks = SplitKeyBlock(data);
             _logger.Debug($"Parsed {_blocks.Count} channel blocks");
         }
 
-        void ReadKeyBlock()
+        byte[] ReadKeyBlock()
         {
-            _data = File.ReadAllBytes(Path.Combine(_settings.DataFolder, "keyblock.dat"));
+            return File.ReadAllBytes(Path.Combine(_settings.DataFolder, "keyblock.dat"));
         }
 
-        void SplitKeyBlock()
+        List<ChannelBlock> SplitKeyBlock(byte[] keyblock)
         {
-            _current = 4;
+            var index = 4;
             var blocks = new List<ChannelBlock>();
-            var block = NextBlock();
+
+            var block = NextBlock(keyblock, index);
             while (block != null)
             {
+                index += Blocksize;
+
                 var channel = (block[1] << 8) + block[0];
                 blocks.Add(ChannelBlock.Parse(channel, block.Skip(4).Take(52).ToArray()));
                 blocks.Add(ChannelBlock.Parse(channel, block.Skip(56).Take(52).ToArray()));
-                block = NextBlock();
+
+                block = NextBlock(keyblock, index);
             }
-            _blocks = blocks;
+            return blocks;
         }
 
-        byte[] NextBlock()
+        byte[] NextBlock(byte[] keyblock, int index)
         {
-            if (_data.Length < (_current + Blocksize))
+            if (keyblock.Length < (index + Blocksize))
             {
                 return null;
             }
-            var block = _data.Skip(_current).Take(Blocksize).ToArray();
-            _current += Blocksize;
+            var block = keyblock.Skip(index).Take(Blocksize).ToArray();
             return block;
         }
 

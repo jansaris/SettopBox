@@ -22,14 +22,14 @@ namespace NewCamd
             return cb;
         }
 
-        private static DateTime GetTimeStamp(byte[] data)
+        static DateTime GetTimeStamp(byte[] data)
         {
-            var year = (data[1] << 8) + data[0];
-            var month = data[2];
-            var day = data[4];
-            var hour = data[6];
-            var min = data[8];
-            var sec = data[10];
+            var year = BitConverter.ToInt16(data, 0);
+            var month = BitConverter.ToInt16(data, 2);
+            var day = BitConverter.ToInt16(data, 4);
+            var hour = BitConverter.ToInt16(data, 6);
+            var min = BitConverter.ToInt16(data, 8);
+            var sec = BitConverter.ToInt16(data, 10);
             return new DateTime(year,month,day,hour,min,sec);
         }
     }
