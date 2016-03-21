@@ -19,16 +19,16 @@ namespace NewCamd.Encryption
 
         public byte[] AesDecrypt(byte[] data, byte[] key)
         {
-            var aesAlg = new RijndaelManaged
+            using (var rijAlg = Rijndael.Create())
             {
-                Key = key,
-                Mode = CipherMode.ECB,
-                Padding = PaddingMode.Zeros,
-                KeySize = 128,
-                IV = new byte[16]
-            };
-            var encryptor = aesAlg.CreateEncryptor();
-            return encryptor.TransformFinalBlock(data, 0, data.Length);
+                rijAlg.Mode = CipherMode.ECB;
+                rijAlg.Padding = PaddingMode.Zeros;
+                rijAlg.Key = key;
+                rijAlg.IV = new byte[16];
+
+                var decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
+                return decryptor.TransformFinalBlock(data, 0, data.Length);
+            }
         }
 
         public byte[] Decrypt(byte[] encryptedMessage, int messageLength, byte[] keyblock, byte[] initializationVector)
