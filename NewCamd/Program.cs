@@ -31,9 +31,6 @@ namespace NewCamd
         {
             var container = SharedContainer.CreateAndFill<DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
-            var keynlock = container.GetInstance<Keyblock>();
-            keynlock.Prepare();
-            keynlock.DecryptTest();
 
             prog.Start();
             Console.WriteLine("Hit 'Enter' to exit");

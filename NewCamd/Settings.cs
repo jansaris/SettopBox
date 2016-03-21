@@ -10,6 +10,7 @@ namespace NewCamd
         public string Password { get; private set; } = "pass";
         public int Port { get; private set; } = 15050;
         public string DesKey { get; private set; } = "0102030405060708091011121314";
+        public string DataFolder { get; private set; } = "Data";
 
         public byte[] GetDesArray()
         {

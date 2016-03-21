@@ -12,16 +12,19 @@ namespace NewCamd
     {
         readonly ILog _logger;
         readonly EncryptionHelpers _crypto;
+        readonly Settings _settings;
+
         byte[] _data;
         int _current;
-        int _blocksize = 108;
+        const int Blocksize = 108;
 
         List<ChannelBlock> _blocks = new List<ChannelBlock>(); 
 
-        public Keyblock(ILog logger, EncryptionHelpers crypto)
+        public Keyblock(ILog logger, EncryptionHelpers crypto, Settings settings)
         {
             _logger = logger;
             _crypto = crypto;
+            _settings = settings;
         }
 
         public void Prepare()
@@ -34,8 +37,7 @@ namespace NewCamd
 
         void ReadKeyBlock()
         {
-            _data = File.ReadAllBytes("token.dat");
-            _data = new byte[4].Concat(_data).ToArray();
+            _data = File.ReadAllBytes(Path.Combine(_settings.DataFolder, "keyblock.dat"));
         }
 
         void SplitKeyBlock()
@@ -55,16 +57,16 @@ namespace NewCamd
 
         byte[] NextBlock()
         {
-            if (_data.Length < (_current + _blocksize))
+            if (_data.Length < (_current + Blocksize))
             {
                 return null;
             }
-            var block = _data.Skip(_current).Take(_blocksize).ToArray();
-            _current += _blocksize;
+            var block = _data.Skip(_current).Take(Blocksize).ToArray();
+            _current += Blocksize;
             return block;
         }
 
-        public byte[] Decrypt(byte[] data)
+        public byte[] DecryptBlock(byte[] data)
         {
             var channel = (data[18] << 8) + data[19];
             var channelBlock = _blocks.FirstOrDefault(b => b.Channel == channel && b.From < DateTime.Now && b.To > DateTime.Now);
@@ -84,21 +86,6 @@ namespace NewCamd
 
             _logger.Debug($"Decryption of channel {channel} succeeded");
             return block1.Concat(block2).Concat(block3).ToArray();
-        }
-
-        public byte[] DecryptBlock(byte[] data)
-        {
-            File.WriteAllBytes("ChannelBlockRequest.dat", data);
-            return Decrypt(data);
-        }
-
-        public void DecryptTest()
-        {
-            var bytes = File.ReadAllBytes("block.dat");
-            bytes = new byte[24].Concat(bytes).ToArray();
-            bytes[18] = 661 >> 8;
-            bytes[19] = (byte)(661 & 0xff);
-            var data = Decrypt(bytes);
         }
     }
 }
