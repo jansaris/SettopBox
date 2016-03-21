@@ -67,7 +67,7 @@ namespace NewCamd
             return block;
         }
 
-        public byte[] DecryptBlock(byte[] data)
+        public byte[] DecryptBlock(NewCamdMessageType type, byte[] data)
         {
             var channel = (data[18] << 8) + data[19];
             var channelBlock = _blocks.FirstOrDefault(b => b.Channel == channel && b.From < DateTime.Now && b.To > DateTime.Now);
@@ -76,17 +76,25 @@ namespace NewCamd
                 _logger.Warn($"No valid block found for channel {channel}");
                 return null;
             }
+
             var block1 = _crypto.AesDecrypt(data.Skip(24).Take(16).ToArray(), channelBlock.Key);
             var block2 = _crypto.AesDecrypt(data.Skip(40).Take(16).ToArray(), channelBlock.Key);
             var block3 = _crypto.AesDecrypt(data.Skip(56).Take(16).ToArray(), channelBlock.Key);
+
             if (!Encoding.ASCII.GetString(block1).StartsWith("CEB", StringComparison.Ordinal))
             {
                 _logger.Warn($"Failed to decrypt block for channel {channel}");
                 return null;
             }
 
-            _logger.Debug($"Decryption of channel {channel} succeeded");
-            return block1.Concat(block2).Concat(block3).ToArray();
+            _logger.Info($"Decryption of channel {channel} succeeded");
+
+            var key1 = block1.Skip(9).Take(7).Concat(block2.Take(9));
+            var key2 = block2.Skip(9).Take(7).Concat(block3.Take(9));
+
+            return type == NewCamdMessageType.MsgKeyblockReq1 ? 
+                key1.Concat(key2).ToArray() : 
+                key2.Concat(key1).ToArray();
         }
     }
 }

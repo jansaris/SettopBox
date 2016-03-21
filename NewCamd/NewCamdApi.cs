@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -54,7 +53,8 @@ namespace NewCamd
                     _logger.Debug($"{Name} - Keep connection alive");
                     _communication.SendMessage("Keep alive", message);
                     break;
-                case NewCamdMessageType.MsgKeyblockReq:
+                case NewCamdMessageType.MsgKeyblockReq1:
+                case NewCamdMessageType.MsgKeyblockReq2:
                     KeyBlock(message);
                     break;
                 default:
@@ -67,8 +67,8 @@ namespace NewCamd
         void KeyBlock(NewCamdMessage message)
         {
             _logger.Info($"{Name} - Give keyblock info");
-            var header = new byte[] {128, 1, 1};
-            var keyInfo = _keyblock.DecryptBlock(message.Data);
+            var header = new byte[] {(byte) message.Type, 1, 1};
+            var keyInfo = _keyblock.DecryptBlock(message.Type, message.Data);
             message.Data = header.Concat(keyInfo).ToArray();
             _communication.SendMessage("Key info", message);
         }
