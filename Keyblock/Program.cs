@@ -5,7 +5,7 @@ using SharedComponents.DependencyInjection;
 
 namespace Keyblock
 {
-    class Program
+    public class Program
     {
         readonly ILog _logger;
         readonly Settings _settings;
@@ -25,7 +25,7 @@ namespace Keyblock
             prog.Run();
         }
 
-        void Run()
+        public void Run()
         {
             try
             {

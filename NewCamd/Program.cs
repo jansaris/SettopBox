@@ -8,7 +8,7 @@ using SharedComponents.DependencyInjection;
 
 namespace NewCamd
 {
-    class Program
+    public class Program
     {
         readonly ILog _logger;
         readonly Settings _settings;
@@ -39,7 +39,7 @@ namespace NewCamd
             prog.Stop();
         }
 
-        void Start()
+        public void Start()
         {
             try
             {
@@ -55,13 +55,28 @@ namespace NewCamd
 
         void StartServer()
         {
-            _listener = new TcpListener(IPAddress.Any, _settings.Port);
+            var ip = GetIpAdress();
+            _listener = new TcpListener(ip, _settings.Port);
             _listener.Start();
             _listening = true;
-            _logger.Info($"Start listening at {IPAddress.Any}:{_settings.Port}");
+            _logger.Info($"Start listening at {ip}:{_settings.Port}");
         }
 
-        async void Listen()
+        IPAddress GetIpAdress()
+        {
+            if(string.IsNullOrWhiteSpace(_settings.IpAdress)) return IPAddress.Any;
+            try
+            {
+                return IPAddress.Parse(_settings.IpAdress);
+            }
+            catch (Exception)
+            {
+                _logger.Warn($"Failed to parse IpAdress to listen on: {_settings.IpAdress}, use Any");
+                return IPAddress.Any;
+            }
+        }
+
+        public async void Listen()
         {
             try
             {
@@ -85,7 +100,7 @@ namespace NewCamd
             }
         }
 
-        void Stop()
+        public void Stop()
         {
             try
             {

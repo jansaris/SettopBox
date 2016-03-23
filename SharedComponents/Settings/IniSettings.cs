@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using log4net;
@@ -28,66 +30,102 @@ namespace SharedComponents.Settings
         {
             Logger.Info($"Read {Filename}");
             _decoder = _noDecode;
+            var atLeastOneLineOfTheBlockFound = false;
             try
             {
-                var inCorrectBlock = false;
+                var correctBlock = false;
                 using (var reader = new StreamReader(Filename))
                     while (!reader.EndOfStream)
                     {
                         var line = reader.ReadLine();
                         if (string.IsNullOrWhiteSpace(line)) continue;
+                        line = line.Trim();
                         if (line.StartsWith("#", StringComparison.Ordinal)) continue;
                         if (line.StartsWith("[", StringComparison.Ordinal))
                         {
-                            inCorrectBlock = line.Equals($"[{Name}]");
-                            Logger.Debug($"Found block header {line} and this headerblock is correct: {inCorrectBlock}");
+                            correctBlock = line.Equals($"[{Name}]");
+                            Logger.Debug($"Found block header {line} and this headerblock is correct: {correctBlock}");
                             continue;
                         }
-                        if(!inCorrectBlock) continue;
+                        if(!correctBlock) continue;
                         if (line.Equals(DecodeFlag))
                         {
                             _decoder = _decode;
                             continue;
                         }
                         Logger.DebugFormat("Process line {0}", line);
+                        atLeastOneLineOfTheBlockFound = true;
                         ReadConfigItem(line);
                     }
+                
             }
             catch (Exception ex)
             {
                 throw new Exception("Failed to load the configuration", ex);
             }
+            if (!atLeastOneLineOfTheBlockFound)
+            {
+                Save();
+            }
         }
-
 
         protected void Save()
         {
             Logger.Info($"Save {Filename}");
             try
             {
-                using (var writer = new StreamWriter(Filename))
+                //Read current ini file
+                var iniLines = File.ReadAllLines(Filename).ToList();
+                //Generate lines for this block of the ini file
+                var configLines = ConfigurationLines();
+                //Find the index of this block
+                var index = iniLines.IndexOf(configLines.First());
+                if (index == -1)
                 {
-                    writer.WriteLine($"#[{Name}]");
-                    var properties = GetType().GetProperties(PropertyFlags);
-                    foreach (var property in properties)
-                    {
-                        var key = property.Name;
-                        var value = property.GetValue(this);
-                        if (value == null)
-                        {
-                            Logger.Debug($"Key '{key}' has no value, skip writing to ini file");
-                            continue;
-                        }
-                        Logger.Debug($"Write '{key}' with value '{value}' to disk");
-                        writer.WriteLine($"{key}|{value}");
-                    }
+                    //Just add the lines to the end of the ini file
+                    iniLines.AddRange(configLines);
                 }
+                else
+                {
+                    //Determine next block
+                    var nextBlock = iniLines.FindIndex(index + 1, line => line.StartsWith("["));
+                    //If no next block found, then just hit the full count, so nothing will end up in after
+                    if (nextBlock == -1) nextBlock = iniLines.Count;
+
+                    //Generate new ini file lines
+                    var before = iniLines.Take(index);
+                    var after = iniLines.Skip(nextBlock);
+                    iniLines = before.Concat(configLines).Concat(after).ToList();
+                }
+                //Write everything to disk
+                File.WriteAllLines(Filename,iniLines);
             }
             catch (Exception ex)
             {
                 throw new Exception("Failed to save the configuration", ex);
             }
         }
+
+        private List<string> ConfigurationLines()
+        {
+            var list = new List<string> {$"[{Name}]"};
+
+            var properties = GetType().GetProperties(PropertyFlags);
+            foreach (var property in properties)
+            {
+                var key = property.Name;
+                var value = property.GetValue(this);
+                if (value == null)
+                {
+                    Logger.Debug($"Key '{key}' has no value, skip saving it to ini file");
+                    continue;
+                }
+                Logger.Debug($"Save '{key}' with value '{value}' in ini file");
+                list.Add($"{key}|{value}");
+            }
+
+            return list;
+        } 
 
         void ReadConfigItem(string line)
         {

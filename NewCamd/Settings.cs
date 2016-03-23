@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SharedComponents.Settings;
 
 namespace NewCamd
@@ -8,6 +9,7 @@ namespace NewCamd
         protected override string Name => "NewCamd";
         public string Username { get; private set; } = "user";
         public string Password { get; private set; } = "pass";
+        public string IpAdress { get; set; } = String.Empty;
         public int Port { get; private set; } = 15050;
         public string DesKey { get; private set; } = "0102030405060708091011121314";
         public string DataFolder { get; private set; } = "Data";
@@ -24,11 +26,6 @@ namespace NewCamd
             return retValue.ToArray();
         } 
 
-        public int MaxWaitTimeInMs { get; private set; } = 60000; //1 minute
-
-        public void Update()
-        {
-            Save();
-        }
+        public int MaxWaitTimeInMs { get; private set; } = 60000;
     }
 }

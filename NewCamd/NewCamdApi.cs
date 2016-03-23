@@ -7,7 +7,7 @@ using NewCamd.Encryption;
 
 namespace NewCamd
 {
-    class NewCamdApi : IDisposable
+    public class NewCamdApi : IDisposable
     {
         //Constructor variables
         readonly ILog _logger;
