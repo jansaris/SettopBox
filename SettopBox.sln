@@ -15,6 +15,60 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.NewCamdClient", "Test.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettopBox", "SettopBox\SettopBox.csproj", "{2BC70BDC-4906-4682-A061-9743BD3DB822}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Synology", "Synology", "{48142585-0429-4B24-9A61-12FAAEC4261D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "package.tgz", "package.tgz", "{D4710B83-9607-42A0-8FD8-FFE355028225}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spk", "spk", "{EB9921AF-ABD9-4C17-9EF7-D573A1DCCB01}"
+	ProjectSection(SolutionItems) = preProject
+		Synology\spk\INFO = Synology\spk\INFO
+		Synology\spk\PACKAGE_ICON.PNG = Synology\spk\PACKAGE_ICON.PNG
+		Synology\spk\PACKAGE_ICON_120.PNG = Synology\spk\PACKAGE_ICON_120.PNG
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app", "app", "{B81348BC-0138-46B2-A157-AEE0600E406D}"
+	ProjectSection(SolutionItems) = preProject
+		Synology\package.tgz\app\config = Synology\package.tgz\app\config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bin", "bin", "{510023F1-DC1B-41C0-ABEC-705F677591AB}"
+	ProjectSection(SolutionItems) = preProject
+		Synology\package.tgz\bin\busybox = Synology\package.tgz\bin\busybox
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{022C816A-9F20-4BEC-A952-B27E6D9DB78D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "share", "share", "{7D41F63D-09F9-48EA-9475-583ACAD17F45}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "var", "var", "{61B1C3E3-F0CE-458C-9D95-C8EC7D1691EA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SettopBox", "SettopBox", "{B91DE7A2-BC3F-485E-85EA-4809AB0AD355}"
+	ProjectSection(SolutionItems) = preProject
+		Synology\package.tgz\share\SettopBox\README.txt = Synology\package.tgz\share\SettopBox\README.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{DC5DA914-448F-4385-A840-8F9FECFC3877}"
+	ProjectSection(SolutionItems) = preProject
+		Synology\package.tgz\app\images\settopbox-16.png = Synology\package.tgz\app\images\settopbox-16.png
+		Synology\package.tgz\app\images\settopbox-24.png = Synology\package.tgz\app\images\settopbox-24.png
+		Synology\package.tgz\app\images\settopbox-32.png = Synology\package.tgz\app\images\settopbox-32.png
+		Synology\package.tgz\app\images\settopbox-48.png = Synology\package.tgz\app\images\settopbox-48.png
+		Synology\package.tgz\app\images\settopbox-72.png = Synology\package.tgz\app\images\settopbox-72.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{57A5F425-837C-499F-BE80-61CD24DA1C06}"
+	ProjectSection(SolutionItems) = preProject
+		Synology\spk\scripts\installer = Synology\spk\scripts\installer
+		Synology\spk\scripts\postinst = Synology\spk\scripts\postinst
+		Synology\spk\scripts\postuninst = Synology\spk\scripts\postuninst
+		Synology\spk\scripts\postupgrade = Synology\spk\scripts\postupgrade
+		Synology\spk\scripts\preinst = Synology\spk\scripts\preinst
+		Synology\spk\scripts\preuninst = Synology\spk\scripts\preuninst
+		Synology\spk\scripts\preupgrade = Synology\spk\scripts\preupgrade
+		Synology\spk\scripts\settopbox.sc = Synology\spk\scripts\settopbox.sc
+		Synology\spk\scripts\start-stop-status = Synology\spk\scripts\start-stop-status
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,5 +101,15 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7F248A75-E6BC-4A70-8998-31618167A610} = {67CDA5C0-0219-4037-8D15-56B4A00F013F}
+		{D4710B83-9607-42A0-8FD8-FFE355028225} = {48142585-0429-4B24-9A61-12FAAEC4261D}
+		{EB9921AF-ABD9-4C17-9EF7-D573A1DCCB01} = {48142585-0429-4B24-9A61-12FAAEC4261D}
+		{B81348BC-0138-46B2-A157-AEE0600E406D} = {D4710B83-9607-42A0-8FD8-FFE355028225}
+		{510023F1-DC1B-41C0-ABEC-705F677591AB} = {D4710B83-9607-42A0-8FD8-FFE355028225}
+		{022C816A-9F20-4BEC-A952-B27E6D9DB78D} = {D4710B83-9607-42A0-8FD8-FFE355028225}
+		{7D41F63D-09F9-48EA-9475-583ACAD17F45} = {D4710B83-9607-42A0-8FD8-FFE355028225}
+		{61B1C3E3-F0CE-458C-9D95-C8EC7D1691EA} = {D4710B83-9607-42A0-8FD8-FFE355028225}
+		{B91DE7A2-BC3F-485E-85EA-4809AB0AD355} = {7D41F63D-09F9-48EA-9475-583ACAD17F45}
+		{DC5DA914-448F-4385-A840-8F9FECFC3877} = {B81348BC-0138-46B2-A157-AEE0600E406D}
+		{57A5F425-837C-499F-BE80-61CD24DA1C06} = {EB9921AF-ABD9-4C17-9EF7-D573A1DCCB01}
 	EndGlobalSection
 EndGlobal
