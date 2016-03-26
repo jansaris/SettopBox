@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using log4net;
+using log4net.Repository.Hierarchy;
 using SharedComponents.DependencyInjection;
 
 namespace NewCamd
@@ -125,14 +126,22 @@ namespace NewCamd
         void CloseClients()
         {
             _logger.Info($"Close {_activeClients.Count} clients");
-            while (_activeClients.Count > 0)
+            try
             {
-                NewCamdApi api;
+                NewCamdApi[] clients;
                 lock (_syncObject)
                 {
-                    api = _activeClients.FirstOrDefault();
+                    clients = _activeClients.ToArray();
                 }
-                api?.Dispose();
+                foreach (var client in clients)
+                {
+                    client.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to close one of the clients");
+                _logger.Debug("CloseClients", ex);
             }
         }
 

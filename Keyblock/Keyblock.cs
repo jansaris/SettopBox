@@ -15,7 +15,7 @@ namespace Keyblock
     {
         //Filenames
         string SignedCertificateFile => Path.Combine(_settings.DataFolder, "SignedCert.der");
-        string KeyblockFile => Path.Combine(_settings.DataFolder, "Keyblock.dat");
+        string KeyblockFile => Path.Combine(_settings.DataFolder, _settings.KeyblockFile);
 
         readonly ILog _logger;
         readonly Settings _settings;

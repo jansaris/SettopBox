@@ -43,6 +43,7 @@ namespace Keyblock
 
         // Communication data
         public string DataFolder { get; private set; } = "Data";
+        public string KeyblockFile { get; private set; } = "Keyblock.dat";
         public bool WriteAllCommunicationToDisk { get; private set; } = false;
         public string CommunicationFolder { get; private set; } = "Communication";
         public bool DontUseRealServerButMessagesFromDisk { get; private set; } = false;

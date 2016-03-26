@@ -35,7 +35,7 @@ namespace NewCamd
 
         byte[] ReadKeyBlock()
         {
-            return File.ReadAllBytes(Path.Combine(_settings.DataFolder, "keyblock.dat"));
+            return File.ReadAllBytes(Path.Combine(_settings.DataFolder, _settings.KeyblockFile));
         }
 
         List<ChannelBlock> SplitKeyBlock(byte[] keyblock)
@@ -88,8 +88,16 @@ namespace NewCamd
             }
 
             _logger.Info($"Decryption of channel {channel} succeeded");
-
-            var key1 = block1.Skip(9).Take(7).Concat(block2.Take(9));
+            /*
+            #define OFFSET_CWKEYS 33
+            AES_ecb_encrypt(&ECM[24 + t], &ECM[24 + t], &aesmkey, AES_DECRYPT);
+            if (table == 0x80) {
+				memcpy(dcw, ECM + OFFSET_CWKEYS, 32);
+			} else {
+				memcpy(dcw, ECM + OFFSET_CWKEYS + 16, 16);
+				memcpy(dcw + 16, ECM + OFFSET_CWKEYS, 16);
+			}*/
+            var key1 = block1.Skip(9).Take(7).Concat(block2).Concat(block3.Take(9));
             var key2 = block2.Skip(9).Take(7).Concat(block3.Take(9));
 
             return type == NewCamdMessageType.MsgKeyblockReq1 ? 
