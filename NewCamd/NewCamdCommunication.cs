@@ -55,7 +55,7 @@ namespace NewCamd
 
         void HandleMessagesLoop()
         {
-            while (_client.Connected)
+            while (_client.Connected && !_disposing)
             {
                 _logger.Debug($"Wait for new message from {Name}");
                 var message = ReceiveMessage();
@@ -198,6 +198,16 @@ namespace NewCamd
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        bool _disposing;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposing || _disposing) return;
+            _disposing = true;
             _cancellationTokenSource.Cancel();
 
             if (_client == null)

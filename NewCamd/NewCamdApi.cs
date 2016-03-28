@@ -120,6 +120,16 @@ namespace NewCamd
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        bool _disposing;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposing || _disposing) return;
+            _disposing = true;
             _communication.Dispose();
         }
     }
