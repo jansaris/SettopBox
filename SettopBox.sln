@@ -34,6 +34,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bin", "bin", "{510023F1-DC1B-41C0-ABEC-705F677591AB}"
 	ProjectSection(SolutionItems) = preProject
 		Synology\package.tgz\bin\busybox = Synology\package.tgz\bin\busybox
+		Synology\package.tgz\bin\udpxy = Synology\package.tgz\bin\udpxy
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{022C816A-9F20-4BEC-A952-B27E6D9DB78D}"
