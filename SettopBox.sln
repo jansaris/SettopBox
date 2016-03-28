@@ -70,6 +70,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{57A5
 		Synology\spk\scripts\start-stop-status = Synology\spk\scripts\start-stop-status
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebUi", "WebUi\WebUi.csproj", "{61ACA837-0874-4BCC-8815-B3E64207480D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +98,10 @@ Global
 		{2BC70BDC-4906-4682-A061-9743BD3DB822}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BC70BDC-4906-4682-A061-9743BD3DB822}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BC70BDC-4906-4682-A061-9743BD3DB822}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61ACA837-0874-4BCC-8815-B3E64207480D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61ACA837-0874-4BCC-8815-B3E64207480D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61ACA837-0874-4BCC-8815-B3E64207480D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61ACA837-0874-4BCC-8815-B3E64207480D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
