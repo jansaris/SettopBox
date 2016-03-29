@@ -1,6 +1,8 @@
 ﻿using log4net;
+using Owin;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
+using SimpleInjector.Extensions.ExecutionContextScoping;
 
 namespace WebUi
 {
@@ -13,6 +15,22 @@ namespace WebUi
         public override void RegisterComponents(Container container)
         {
             container.Register<Program>();
+        }
+    }
+
+    public static class DependencyConfigExtension
+    {
+        public static void UseOwinContextInjector(this IAppBuilder app, Container container)
+        {
+            
+            // Create an OWIN middleware to create an execution context scope
+            app.Use(async (context, next) =>
+            {
+                using (var scope = container.BeginExecutionContextScope())
+                {
+                    await next.Invoke();
+                }
+            });
         }
     }
 }

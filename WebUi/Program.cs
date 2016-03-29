@@ -1,19 +1,23 @@
 ﻿using System;
 using log4net;
-using Nancy.Hosting.Self;
 using SharedComponents.DependencyInjection;
+using Microsoft.Owin.Hosting;
+using Owin;
+using SimpleInjector;
 
 namespace WebUi
 {
     class Program : IDisposable
     {
         readonly Settings _settings;
+        readonly Container _container;
         readonly ILog _logger;
-        NancyHost _host;
+        IDisposable _host;
 
-        public Program(ILog logger, Settings settings)
+        public Program(ILog logger, Settings settings, Container container)
         {
             _settings = settings;
+            _container = container;
             _logger = logger;
 
         }
@@ -35,14 +39,19 @@ namespace WebUi
             {
                 var uri = $"http://localhost:{_settings.Port}";
                 _logger.Info($"Start WebUi at {uri}");
-                _host = new NancyHost(new Uri(uri));
-                _host.Start();
+                _host = WebApp.Start(uri, StartWeb);
             }
             catch (Exception ex)
             {
                 _logger.Error("Failed to start the Web interface");
                 _logger.Debug("Exception", ex);
             }
+        }
+
+        void StartWeb(IAppBuilder app)
+        {
+            app.UseOwinContextInjector(_container);
+            app.UseNancy();
         }
 
         void Stop()

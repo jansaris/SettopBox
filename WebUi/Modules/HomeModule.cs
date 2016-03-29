@@ -1,4 +1,4 @@
-﻿namespace WebUi
+﻿namespace WebUi.Modules
 {
     public class HomeModule : Nancy.NancyModule
     {
