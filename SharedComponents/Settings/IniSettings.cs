@@ -88,7 +88,7 @@ namespace SharedComponents.Settings
                 else
                 {
                     //Determine next block
-                    var nextBlock = iniLines.FindIndex(index + 1, line => line.StartsWith("["));
+                    var nextBlock = iniLines.FindIndex(index + 1, line => line.StartsWith("[", StringComparison.Ordinal));
                     //If no next block found, then just hit the full count, so nothing will end up in after
                     if (nextBlock == -1) nextBlock = iniLines.Count;
 
