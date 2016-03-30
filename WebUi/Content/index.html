@@ -1,15 +1,21 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>Aurelia</title>
+    <title>SettopBox</title>
+    <link rel="stylesheet" type="text/css" href="jspm_packages/github/twbs/bootstrap@3.3.6/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="jspm_packages/npm/font-awesome@4.5.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="styles/styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body aurelia-app>
-    <script src="jspm_packages/system.js"></script>
-    <script src="config.js"></script>
-    <script>
-      SystemJS.import('aurelia-bootstrapper');
-    </script>
+<div class="splash">
+    <div class="message">Loading SettopBox</div>
+    <i class="fa fa-spinner fa-spin"></i>
+</div>
+<script src="jspm_packages/system.js"></script>
+<script src="config.js"></script>
+<script>
+    SystemJS.import('aurelia-bootstrapper');
+</script>
 </body>
 </html>
