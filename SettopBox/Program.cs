@@ -20,7 +20,10 @@ namespace SettopBox
         }
         static void Main()
         {
-            var container = SharedContainer.CreateAndFill<DependencyConfig, NewCamd.DependencyConfig, Keyblock.DependencyConfig>("Log4net.config");
+            var container = SharedContainer.CreateAndFill<DependencyConfig, 
+                                                          NewCamd.DependencyConfig, 
+                                                          Keyblock.DependencyConfig,
+                                                          WebUi.DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
             prog.Start();
             Console.WriteLine("Hit 'Enter' to exit");

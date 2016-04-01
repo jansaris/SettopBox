@@ -14,10 +14,11 @@ namespace NewCamd
 
         public override void RegisterComponents(Container container)
         {
-            container.Register<IModule, Program>();
             container.Register<NewCamdApi>();
             container.Register<NewCamdCommunication>();
             container.RegisterSingleton<Func<NewCamdApi>>(() => container.GetInstance<NewCamdApi>());
         }
+
+        public override Type Module => typeof(Program);
     }
 }

@@ -23,7 +23,7 @@ namespace WebUi
 
         }
 
-        static void Main(string[] args)
+        static void Main()
         {
             var container = SharedContainer.CreateAndFill<DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();

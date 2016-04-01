@@ -1,6 +1,5 @@
 ﻿using System;
 using log4net;
-using SettopBox;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
 
@@ -16,5 +15,7 @@ namespace SettopBox
         {
             container.Register<Program>();
         }
+
+        public override Type Module => null;
     }
 }

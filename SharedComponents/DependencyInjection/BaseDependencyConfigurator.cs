@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using System;
+using log4net;
 using SimpleInjector;
 
 namespace SharedComponents.DependencyInjection
@@ -12,5 +13,7 @@ namespace SharedComponents.DependencyInjection
             Logger = logger;
         }
         public abstract void RegisterComponents(Container container);
+
+        public abstract Type Module { get; }
     }
 }

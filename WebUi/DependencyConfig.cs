@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using System;
+using log4net;
 using Owin;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
@@ -14,8 +15,10 @@ namespace WebUi
 
         public override void RegisterComponents(Container container)
         {
-            container.Register<Program>();
+            
         }
+
+        public override Type Module => typeof(Program);
     }
 
     public static class DependencyConfigExtension

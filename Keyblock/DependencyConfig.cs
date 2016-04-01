@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using System;
+using log4net;
 using SharedComponents;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
@@ -13,11 +14,12 @@ namespace Keyblock
 
         public override void RegisterComponents(Container container)
         {
-            container.Register<IModule, Program>();
             container.Register<Settings>(Lifestyle.Singleton);
             container.Register<SslTcpClient>();
             container.Register<Keyblock>();
             container.Register<X509CertificateRequest>();
         }
+
+        public override Type Module => typeof (Program);
     }
 }
