@@ -1,4 +1,5 @@
 ﻿using log4net;
+using SharedComponents;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
 
@@ -12,7 +13,7 @@ namespace Keyblock
 
         public override void RegisterComponents(Container container)
         {
-            container.Register<Program>();
+            container.Register<IModule, Program>();
             container.Register<Settings>(Lifestyle.Singleton);
             container.Register<SslTcpClient>();
             container.Register<Keyblock>();

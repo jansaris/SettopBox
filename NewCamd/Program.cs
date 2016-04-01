@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using log4net;
-using log4net.Repository.Hierarchy;
+using SharedComponents;
 using SharedComponents.DependencyInjection;
 
 namespace NewCamd
 {
-    public class Program
+    public class Program :BaseModule
     {
         readonly ILog _logger;
         readonly Settings _settings;
@@ -19,6 +19,7 @@ namespace NewCamd
         readonly List<NewCamdApi> _activeClients;
         TcpListener _listener;
         bool _listening;
+        Task _listeningTask;
 
         public Program(ILog logger, Settings settings, Func<NewCamdApi> clientFactory)
         {
@@ -35,22 +36,42 @@ namespace NewCamd
 
             prog.Start();
             Console.WriteLine("Hit 'Enter' to exit");
-            prog.Listen();
             Console.ReadLine();
             prog.Stop();
         }
 
-        public void Start()
+        protected override void StartModule()
         {
             try
             {
                 _logger.Info("Welcome to NewCamd");
                 _settings.Load();
                 StartServer();
+                _listeningTask = Listen();
             }
             catch (Exception ex)
             {
                 _logger.Fatal("An unhandled exception occured", ex);
+                Error();
+            }
+        }
+
+        protected override void StopModule()
+        {
+            try
+            {
+                _listening = false;
+                _listener.Stop();
+                _logger.Info("Stopped listening");
+                CloseClients();
+                if (_listeningTask == null || _listeningTask.Status != AsyncTaskIsRunning) return;
+
+                _logger.Warn("Wait max 10 sec for the Listener to stop");
+                _listeningTask.Wait(10000);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to stop the tcp listener", ex);
             }
         }
 
@@ -77,7 +98,7 @@ namespace NewCamd
             }
         }
 
-        public async void Listen()
+        async Task Listen()
         {
             try
             {
@@ -98,21 +119,6 @@ namespace NewCamd
                     throw;
                 }
                 //Ignore because this is expected to happen when we stopped listening    
-            }
-        }
-
-        public void Stop()
-        {
-            try
-            {
-                _listening = false;
-                _listener.Stop();
-                _logger.Info("Stopped listening");
-                CloseClients();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed to stop the tcp listener", ex);
             }
         }
 

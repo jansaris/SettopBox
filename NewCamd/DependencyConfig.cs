@@ -1,5 +1,6 @@
 ﻿using System;
 using log4net;
+using SharedComponents;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
 
@@ -13,7 +14,7 @@ namespace NewCamd
 
         public override void RegisterComponents(Container container)
         {
-            container.Register<Program>();
+            container.Register<IModule, Program>();
             container.Register<NewCamdApi>();
             container.Register<NewCamdCommunication>();
             container.RegisterSingleton<Func<NewCamdApi>>(() => container.GetInstance<NewCamdApi>());

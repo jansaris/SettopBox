@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using log4net;
+using SharedComponents;
 using SharedComponents.DependencyInjection;
-using SimpleInjector;
 
 namespace SettopBox
 {
@@ -9,15 +10,13 @@ namespace SettopBox
     {
         readonly ILog _logger;
         readonly Settings _settings;
-        readonly NewCamd.Program _newCamd;
-        readonly Keyblock.Program _keyblock;
+        readonly IEnumerable<IModule> _modules;
 
-        public Program(ILog logger, Settings settings, NewCamd.Program newCamd, Keyblock.Program keyblock)
+        public Program(ILog logger, Settings settings, IEnumerable<IModule> modules)
         {
             _logger = logger;
             _settings = settings;
-            _newCamd = newCamd;
-            _keyblock = keyblock;
+            _modules = modules;
         }
         static void Main()
         {
@@ -31,9 +30,9 @@ namespace SettopBox
 
         void Stop()
         {
-            if (_settings.NewCamdEnabled)
+            foreach (var module in _modules)
             {
-                _newCamd.Stop();
+                module.Stop();
             }
         }
 
@@ -41,27 +40,24 @@ namespace SettopBox
         {
             _logger.Info("Welcome to Settopbox");
             _settings.Load();
-            if (_settings.KeyblockEnabled)
+            foreach (var module in _modules)
             {
-                StartKeyBlock();
+                if (_settings.GetModule(module.Name)) Start(module);
+                else Disable(module);
             }
-            if (_settings.NewCamdEnabled)
-            {
-                StartNewCamd();
-            }
+
         }
 
-        void StartNewCamd()
+        void Disable(IModule module)
         {
-            _logger.Info("Start NewCamd");
-            _newCamd.Start();
-            _newCamd.Listen();
+            _logger.Info($"{module.Name} disabled");
+            module.Disable();
         }
 
-        void StartKeyBlock()
+        void Start(IModule module)
         {
-            _logger.Info("Start Keyblock");
-            _keyblock.Run();
+            _logger.Info($"Start {module.Name}");
+            module.Start();
         }
     }
 }
