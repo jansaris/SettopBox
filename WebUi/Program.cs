@@ -3,11 +3,12 @@ using log4net;
 using SharedComponents.DependencyInjection;
 using Microsoft.Owin.Hosting;
 using Owin;
+using SharedComponents;
 using SimpleInjector;
 
 namespace WebUi
 {
-    class Program : IDisposable
+    class Program : BaseModule
     {
         readonly Settings _settings;
         readonly Container _container;
@@ -33,7 +34,7 @@ namespace WebUi
             prog.Stop();
         }
 
-        void Start()
+        protected override void StartModule()
         {
             try
             {
@@ -54,33 +55,18 @@ namespace WebUi
             app.UseNancy();
         }
 
-        void Stop()
+        protected override void StopModule()
         {
             try
             {
                 _logger.Info("Exit WebUi");
-                Dispose();
+                _host.Dispose();
             }
             catch (Exception ex)
             {
                 _logger.Error("Failed to stop the Web interface");
                 _logger.Debug("Exception", ex);
             }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        bool _disposing;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposing || _disposing) return;
-            _disposing = true;
-            _host.Dispose();
         }
     }
 }

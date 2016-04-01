@@ -7,6 +7,7 @@ namespace SharedComponents
     {
         public enum Status
         {
+            Initial,
             Disabled,
             Starting,
             Running,
