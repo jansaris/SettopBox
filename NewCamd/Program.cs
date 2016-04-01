@@ -9,7 +9,7 @@ using SharedComponents.DependencyInjection;
 
 namespace NewCamd
 {
-    public class Program :BaseModule
+    public class Program : BaseModule
     {
         readonly ILog _logger;
         readonly Settings _settings;

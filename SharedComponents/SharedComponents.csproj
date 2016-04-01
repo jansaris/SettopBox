@@ -54,6 +54,7 @@
     <Compile Include="DependencyInjection\DependecyContext.cs" />
     <Compile Include="IModule.cs" />
     <Compile Include="Module.cs" />
+    <Compile Include="ModuleInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\IniSettings.cs" />
   </ItemGroup>

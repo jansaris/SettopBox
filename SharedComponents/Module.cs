@@ -5,46 +5,35 @@ namespace SharedComponents
 {
     public abstract class BaseModule : IModule
     {
-        public enum Status
-        {
-            Initial,
-            Disabled,
-            Starting,
-            Running,
-            Stopping,
-            Stopped,
-            Error
-        };
-
         public string Name => GetType().Namespace;
 
-        public Status State { get; private set; }
+        public ModuleState State { get; private set; }
 
-        public EventHandler<Status> StatusChanged;
-
-        bool _disposing;
+        public event EventHandler<ModuleState> StatusChanged;
 
         protected const TaskStatus AsyncTaskIsRunning = TaskStatus.WaitingForActivation;
 
+        bool _disposing;
+
         public void Start()
         {
-            if (State == Status.Disabled) return;
-            ChangeState(Status.Starting);
+            if (State == ModuleState.Disabled) return;
+            ChangeState(ModuleState.Starting);
             StartModule();
-            ChangeState(Status.Running);
+            ChangeState(ModuleState.Running);
         }
 
         public void Disable()
         {
-            ChangeState(Status.Disabled);
+            ChangeState(ModuleState.Disabled);
         }
 
         public void Stop()
         {
-            if (State == Status.Disabled) return;
-            ChangeState(Status.Stopping);
+            if (State == ModuleState.Disabled) return;
+            ChangeState(ModuleState.Stopping);
             StopModule();
-            ChangeState(Status.Stopped);
+            ChangeState(ModuleState.Stopped);
         }
 
         public void Dispose()
@@ -63,10 +52,10 @@ namespace SharedComponents
 
         protected void Error()
         {
-            ChangeState(Status.Error);
+            ChangeState(ModuleState.Error);
         }
 
-        void ChangeState(Status newState)
+        void ChangeState(ModuleState newState)
         {
             State = newState;
             StatusChanged?.Invoke(this, newState);

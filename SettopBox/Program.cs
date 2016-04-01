@@ -11,12 +11,14 @@ namespace SettopBox
         readonly ILog _logger;
         readonly Settings _settings;
         readonly IEnumerable<IModule> _modules;
+        readonly ModuleInformation _moduleInformation;
 
-        public Program(ILog logger, Settings settings, IEnumerable<IModule> modules)
+        public Program(ILog logger, Settings settings, IEnumerable<IModule> modules, ModuleInformation moduleInformation)
         {
             _logger = logger;
             _settings = settings;
             _modules = modules;
+            _moduleInformation = moduleInformation;
         }
         static void Main()
         {
@@ -35,6 +37,7 @@ namespace SettopBox
         {
             foreach (var module in _modules)
             {
+                _moduleInformation.UnRegister(module);
                 module.Stop();
             }
         }
@@ -47,6 +50,7 @@ namespace SettopBox
             {
                 if (_settings.GetModule(module.Name)) Start(module);
                 else Disable(module);
+                _moduleInformation.Register(module);
             }
 
         }

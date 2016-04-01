@@ -12,15 +12,16 @@ namespace WebUi
     {
         readonly Settings _settings;
         readonly Container _container;
+        readonly ModuleInformation _info;
         readonly ILog _logger;
         IDisposable _host;
 
-        public Program(ILog logger, Settings settings, Container container)
+        public Program(ILog logger, Settings settings, Container container, ModuleInformation info)
         {
+            _logger = logger;
             _settings = settings;
             _container = container;
-            _logger = logger;
-
+            _info = info;
         }
 
         static void Main()

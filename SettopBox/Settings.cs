@@ -18,8 +18,14 @@ namespace SettopBox
         }
 
         public bool Keyblock {
-            get { return GetModule(nameof(NewCamd)); }
-            set { UpdateModule(nameof(NewCamd), value); }
+            get { return GetModule(nameof(Keyblock)); }
+            set { UpdateModule(nameof(Keyblock), value); }
+        }
+
+        public bool WebUi
+        {
+            get { return GetModule(nameof(WebUi)); }
+            set { UpdateModule(nameof(WebUi), value); }
         }
 
         public IReadOnlyList<Tuple<string, bool>> GetModules()
