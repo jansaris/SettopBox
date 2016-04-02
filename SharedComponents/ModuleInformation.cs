@@ -9,17 +9,7 @@ namespace SharedComponents
         readonly ILog _logger = LogManager.GetLogger(typeof (ModuleInformation));
         readonly List<IModule> _modules = new List<IModule>();
 
-        public List<string> Modules => _modules
-            .Select(m => m.Name)
-            .ToList();
-
-        public List<string> EnabledModules => _modules
-            .Where(m => m.State != ModuleState.Disabled)
-            .Select(m => m.Name)
-            .ToList();
-
-        public List<string> DisabledModules => _modules
-            .Where(m => m.State == ModuleState.Disabled)
+        public IEnumerable<string> Modules => _modules
             .Select(m => m.Name)
             .ToList();
 
@@ -32,6 +22,24 @@ namespace SharedComponents
         public void UnRegister(IModule module)
         {
             _modules.Remove(module);
+        }
+
+        public bool Enabled(string name)
+        {
+            var mod = Get(name);
+            if (mod == null) return false;
+            return !mod.State.HasFlag(ModuleState.Disabled);
+        }
+
+        public string Status(string name)
+        {
+            var mod = Get(name);
+            return mod?.State.ToString() ?? "Unknown Module";
+        }
+
+        IModule Get(string name)
+        {
+            return _modules.FirstOrDefault(m => m.Name == name);
         }
     }
 }

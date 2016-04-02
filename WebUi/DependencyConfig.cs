@@ -5,6 +5,7 @@ using SharedComponents.DependencyInjection;
 using SimpleInjector;
 using SimpleInjector.Extensions.ExecutionContextScoping;
 using WebUi.api;
+using WebUi.api.Controllers;
 
 namespace WebUi
 {
