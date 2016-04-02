@@ -4,6 +4,7 @@ export class App {
     static inject() { return [HttpClient]; }
     http: HttpClient;
     message: string;
+    modules: any;
 
     constructor(http: HttpClient) {
         http.configure(config => { config.withBaseUrl("/api/"); });
@@ -11,10 +12,16 @@ export class App {
     }
 
     activate() {
-        return this.http.fetch("home")
+        var home = this.http.fetch("home")
             .then(response => response.json()
             .then(mes => {
                 this.message = mes;
-        }));
+                }));
+        var list = this.http.fetch("module")
+            .then(response => response.json()
+                .then(modules => {
+                    this.modules = modules;
+                }));
+        return [home, list];
     }
 }
