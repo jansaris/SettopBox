@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Web.Http;
 using log4net;
+using Microsoft.Owin.FileSystems;
 using SharedComponents.DependencyInjection;
 using Microsoft.Owin.Hosting;
+using Microsoft.Owin.StaticFiles;
 using Owin;
 using SharedComponents;
 using SimpleInjector;
+using SimpleInjector.Integration.WebApi;
 
 namespace WebUi
 {
@@ -53,7 +57,38 @@ namespace WebUi
         void StartWeb(IAppBuilder app)
         {
             app.UseOwinContextInjector(_container);
-            app.UseNancy();
+            app.UseWebApi(GenerateHttpConfiguration());
+            app.UseFileServer(GenerateFileServerConfig());
+        }
+
+        FileServerOptions GenerateFileServerConfig()
+        {
+            var physicalFileSystem = new PhysicalFileSystem(@"./www");
+            var options = new FileServerOptions
+            {
+                EnableDefaultFiles = true,
+                FileSystem = physicalFileSystem
+            };
+            options.StaticFileOptions.FileSystem = physicalFileSystem;
+            options.StaticFileOptions.ServeUnknownFileTypes = true;
+            options.DefaultFilesOptions.DefaultFileNames = new[]
+            {
+                "index.html"
+            };
+
+            return options;
+        }
+
+        HttpConfiguration GenerateHttpConfiguration()
+        {
+            var config = new HttpConfiguration();
+            config.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(_container);
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi",
+                routeTemplate: "api/{controller}/{id}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+            return config;
         }
 
         protected override void StopModule()
