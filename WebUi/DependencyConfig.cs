@@ -4,6 +4,7 @@ using Owin;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
 using SimpleInjector.Extensions.ExecutionContextScoping;
+using WebUi.api;
 
 namespace WebUi
 {
@@ -15,7 +16,7 @@ namespace WebUi
 
         public override void RegisterComponents(Container container)
         {
-            
+            container.Register<HomeController>();
         }
 
         public override Type Module => typeof(Program);

@@ -6,13 +6,13 @@ export class App {
     message: string;
 
     constructor(http: HttpClient) {
-        http.configure(config => { config.withBaseUrl("/"); });
+        http.configure(config => { config.withBaseUrl("/api/"); });
         this.http = http;
     }
 
     activate() {
-        return this.http.fetch("welcome")
-            .then(response => response.text()
+        return this.http.fetch("home")
+            .then(response => response.json()
             .then(mes => {
                 this.message = mes;
         }));

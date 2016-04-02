@@ -1,0 +1,26 @@
+{
+  "name": "ASP.NET",
+  "private": true,
+  "main": "src/main.js",
+  "devDependencies": {
+    "traceur": "^0.0.104",
+    "traceur-runtime": "^0.0.104",
+    "bootstrap": "^3.3.6",
+    "jquery": "^2.2.2",
+    "aurelia-animator-css": "^1.0.0-beta.1.2.0",
+    "aurelia-bootstrapper": "^1.0.0-beta.1.2.0",
+    "aurelia-fetch-client": "^1.0.0-beta.1.2.0",
+    "aurelia-framework": "^1.0.0-beta.1.2.1",
+    "aurelia-history-browser": "^1.0.0-beta.1.2.0",
+    "aurelia-loader-default": "^1.0.0-beta.1.2.0",
+    "aurelia-logging-console": "^1.0.0-beta.1.2.0",
+    "aurelia-router": "^1.0.0-beta.1.2.0",
+    "aurelia-templating-binding": "^1.0.0-beta.1.2.1",
+    "aurelia-templating-resources": "^1.0.0-beta.1.2.1",
+    "aurelia-templating-router": "^1.0.0-beta.1.2.0",
+    "fetch": "^0.11.0",
+    "font-awesome": "^4.5.0",
+    "text": "^2.0.14",
+    "systemjs": ""
+  }
+}
