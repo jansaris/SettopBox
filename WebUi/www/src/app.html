@@ -1,10 +1,7 @@
 <template>
-    <h1>${message}</h1>
-    <div>
-        <ul class="list-group">
-            <li repeat.for="module of modules" class="list-group-item">
-                ${module.Name}: ${module.Status}
-            </li>
-        </ul>
+    <import from='./nav-bar'></import>
+    <nav-bar router.bind="router"></nav-bar>
+    <div class="page-host">
+        <router-view></router-view>
     </div>
 </template>

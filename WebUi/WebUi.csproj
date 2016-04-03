@@ -2520,9 +2520,13 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="www\jspm_packages\system.src.js" />
+    <Content Include="www\src\home.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www\src\app.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="www\src\nav-bar.html" />
     <Content Include="www\styles\styles.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -2576,6 +2580,12 @@
     <TypeScriptCompile Include="www\jspm_packages\npm\typescript%401.8.0\lib\typescript.d.ts" />
     <TypeScriptCompile Include="www\jspm_packages\npm\typescript%401.8.0\lib\typescriptServices.d.ts" />
     <None Include="www\src\app.ts">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\src\nav-bar.ts">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\src\home.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

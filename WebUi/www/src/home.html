@@ -1,0 +1,10 @@
+<template>
+    <h1>${message}</h1>
+    <div>
+        <ul class="list-group">
+            <li repeat.for="module of modules" class="list-group-item">
+                ${module.Name}: ${module.Status}
+            </li>
+        </ul>
+    </div>
+</template>

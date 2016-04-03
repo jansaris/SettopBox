@@ -1,27 +1,16 @@
-import {HttpClient} from "aurelia-fetch-client";
+import {Router} from "aurelia-router"
+import Aureliarouter = require("aurelia-router");
 
 export class App {
-    static inject() { return [HttpClient]; }
-    http: HttpClient;
-    message: string;
-    modules: any;
-
-    constructor(http: HttpClient) {
-        http.configure(config => { config.withBaseUrl("/api/"); });
-        this.http = http;
-    }
-
-    activate() {
-        var home = this.http.fetch("home")
-            .then(response => response.json()
-            .then(mes => {
-                this.message = mes;
-                }));
-        var list = this.http.fetch("module")
-            .then(response => response.json()
-                .then(modules => {
-                    this.modules = modules;
-                }));
-        return [home, list];
+    static inject() { return [Router]; }
+    router: Router;
+    constructor(router: Router) {
+        this.router = router;
+        var config = new Aureliarouter.RouterConfiguration();
+        config.title = "SettopBox";
+        config.map([
+            { route: ['', 'home'], moduleId: 'home', nav: true, title: 'Welcome' }
+        ]);
+        this.router.configure(config);
     }
 }

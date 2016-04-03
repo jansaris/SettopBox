@@ -52,7 +52,6 @@ namespace SettopBox
                 else Disable(module);
                 _moduleInformation.Register(module);
             }
-
         }
 
         void Disable(IModule module)
