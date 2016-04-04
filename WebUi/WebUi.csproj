@@ -2526,7 +2526,9 @@
     <Content Include="www\src\app.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="www\src\nav-bar.html" />
+    <Content Include="www\src\nav-bar.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www\styles\styles.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
