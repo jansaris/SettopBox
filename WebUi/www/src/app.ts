@@ -12,28 +12,25 @@ export class App {
         this.router.configure(this.generateRouterConfiguration(null));
     }
 
-    private generateRouterConfiguration(modules: IModule) : RouterConfiguration {
+    private generateRouterConfiguration(modules: IModule[]) : RouterConfiguration {
         var config = new RouterConfiguration();
         config.title = "SettopBox";
-        var routes = [{ route: ['', 'home'], moduleId: 'home', nav: true, title: 'Welcome' }];
+        var routes = [];
         if (modules) {
-            //for (var module in modules) {
-            //    var name = module.Name;
-            //    routes.push({
-            //            route: [module.Name],
-            //            moduleId: module.Name,
-            //            nav: true,
-            //            title: module.Name
-            //        }
-            //    );
-            //}
+            for (var index in modules) {
+                var module = modules[index];
+                routes.push({
+                        route: 'module/' + [module.name],
+                        moduleId: 'module',
+                        nav: true,
+                        title: module.name
+                    }
+                );
+            }
+        } else {
+            routes.push({ route: ['', 'home'], moduleId: 'home', nav: true, title: 'Welcome' });
         }
-        /**
-         [
 
-            //{ route: ['NewCamd', 'newcamd'], moduleId: 'newcamd', nav: true, title: 'NewCamd' }
-        ]
-         */
         config.map(routes);
         return config;
     }
@@ -42,7 +39,7 @@ export class App {
         return this.http.fetch("module")
             .then(response => response.json()
             .then(modules => {
-                this.router.configure(this.generateRouterConfiguration(<IModule>[]modules));
+                this.router.configure(this.generateRouterConfiguration(<IModule[]>modules));
             }));
     }
 }
