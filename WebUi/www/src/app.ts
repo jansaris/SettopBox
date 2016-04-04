@@ -20,10 +20,10 @@ export class App {
             for (var index in modules) {
                 var module = modules[index];
                 routes.push({
-                        route: 'module/' + [module.name],
+                        route: 'module/' + [module.Name],
                         moduleId: 'module',
                         nav: true,
-                        title: module.name
+                        title: module.Name
                     }
                 );
             }
