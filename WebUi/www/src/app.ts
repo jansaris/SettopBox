@@ -20,12 +20,12 @@ export class App {
             for (var index in modules) {
                 var module = modules[index];
                 routes.push({
-                        route: 'module/' + [module.Name],
-                        moduleId: 'module',
-                        nav: true,
-                        title: module.Name
-                    }
-                );
+                    route: 'module/:id',
+                    href: '#/module/' + module.Name,
+                    moduleId: 'module',
+                    nav: true,
+                    title: module.Name
+                });
             }
         } else {
             routes.push({ route: ['', 'home'], moduleId: 'home', nav: true, title: 'Welcome' });
@@ -42,10 +42,4 @@ export class App {
                 this.router.configure(this.generateRouterConfiguration(<IModule[]>modules));
             }));
     }
-}
-
-interface IModule {
-    Name: string;
-    Enabled: boolean;
-    Status: string;
 }
