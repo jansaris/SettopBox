@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using log4net;
 using log4net.Config;
+using SharedComponents.Module;
 using SimpleInjector;
 
 namespace SharedComponents.DependencyInjection

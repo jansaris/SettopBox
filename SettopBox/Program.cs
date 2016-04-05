@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using log4net;
 using SharedComponents;
 using SharedComponents.DependencyInjection;
+using SharedComponents.Module;
 
 namespace SettopBox
 {

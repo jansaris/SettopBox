@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Web.Http;
 using SharedComponents;
+using SharedComponents.Module;
 using WebUi.api.Models;
 
 namespace WebUi.api.Controllers
@@ -30,7 +31,8 @@ namespace WebUi.api.Controllers
             {
                 Name = name,
                 Enabled = _info.Enabled(name),
-                Status = _info.Status(name)
+                Status = _info.Status(name),
+                Info = _info.Info(name)
             };
         }
     }

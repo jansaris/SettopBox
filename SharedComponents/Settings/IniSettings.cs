@@ -15,6 +15,8 @@ namespace SharedComponents.Settings
         const string Filename = "Settings.ini";
         abstract protected string Name { get; }
 
+        static object _syncRoot = new object();
+
         protected IniSettings()
         {
             Logger = LogManager.GetLogger(GetType());
@@ -31,37 +33,40 @@ namespace SharedComponents.Settings
             Logger.Info($"Read {Filename}");
             _decoder = _noDecode;
             var atLeastOneLineOfTheBlockFound = false;
-            try
+            lock (_syncRoot)
             {
-                var correctBlock = false;
-                using (var reader = new StreamReader(Filename))
-                    while (!reader.EndOfStream)
-                    {
-                        var line = reader.ReadLine();
-                        if (string.IsNullOrWhiteSpace(line)) continue;
-                        line = line.Trim();
-                        if (line.StartsWith("#", StringComparison.Ordinal)) continue;
-                        if (line.StartsWith("[", StringComparison.Ordinal))
+                try
+                {
+                    var correctBlock = false;
+                    using (var reader = new StreamReader(Filename))
+                        while (!reader.EndOfStream)
                         {
-                            correctBlock = line.Equals($"[{Name}]");
-                            Logger.Debug($"Found block header {line} and this headerblock is correct: {correctBlock}");
-                            continue;
+                            var line = reader.ReadLine();
+                            if (string.IsNullOrWhiteSpace(line)) continue;
+                            line = line.Trim();
+                            if (line.StartsWith("#", StringComparison.Ordinal)) continue;
+                            if (line.StartsWith("[", StringComparison.Ordinal))
+                            {
+                                correctBlock = line.Equals($"[{Name}]");
+                                Logger.Debug($"Found block header {line} and this headerblock is correct: {correctBlock}");
+                                continue;
+                            }
+                            if (!correctBlock) continue;
+                            if (line.Equals(DecodeFlag))
+                            {
+                                _decoder = _decode;
+                                continue;
+                            }
+                            Logger.DebugFormat("Process line {0}", line);
+                            atLeastOneLineOfTheBlockFound = true;
+                            ReadConfigItem(line);
                         }
-                        if(!correctBlock) continue;
-                        if (line.Equals(DecodeFlag))
-                        {
-                            _decoder = _decode;
-                            continue;
-                        }
-                        Logger.DebugFormat("Process line {0}", line);
-                        atLeastOneLineOfTheBlockFound = true;
-                        ReadConfigItem(line);
-                    }
-                
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Failed to load the configuration", ex);
+
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Failed to load the configuration", ex);
+                }
             }
             if (!atLeastOneLineOfTheBlockFound)
             {
@@ -74,31 +79,35 @@ namespace SharedComponents.Settings
             Logger.Info($"Save {Filename}");
             try
             {
-                //Read current ini file
-                var iniLines = File.ReadAllLines(Filename).ToList();
-                //Generate lines for this block of the ini file
-                var configLines = ConfigurationLines();
-                //Find the index of this block
-                var index = iniLines.IndexOf(configLines.First());
-                if (index == -1)
+                
+                lock (_syncRoot)
                 {
-                    //Just add the lines to the end of the ini file
-                    iniLines.AddRange(configLines);
-                }
-                else
-                {
-                    //Determine next block
-                    var nextBlock = iniLines.FindIndex(index + 1, line => line.StartsWith("[", StringComparison.Ordinal));
-                    //If no next block found, then just hit the full count, so nothing will end up in after
-                    if (nextBlock == -1) nextBlock = iniLines.Count;
+                    //Read current ini file
+                    var iniLines = File.ReadAllLines(Filename).ToList();
+                    //Generate lines for this block of the ini file
+                    var configLines = ConfigurationLines();
+                    //Find the index of this block
+                    var index = iniLines.IndexOf(configLines.First());
+                    if (index == -1)
+                    {
+                        //Just add the lines to the end of the ini file
+                        iniLines.AddRange(configLines);
+                    }
+                    else
+                    {
+                        //Determine next block
+                        var nextBlock = iniLines.FindIndex(index + 1, line => line.StartsWith("[", StringComparison.Ordinal));
+                        //If no next block found, then just hit the full count, so nothing will end up in after
+                        if (nextBlock == -1) nextBlock = iniLines.Count;
 
-                    //Generate new ini file lines
-                    var before = iniLines.Take(index);
-                    var after = iniLines.Skip(nextBlock);
-                    iniLines = before.Concat(configLines).Concat(after).ToList();
+                        //Generate new ini file lines
+                        var before = iniLines.Take(index);
+                        var after = iniLines.Skip(nextBlock);
+                        iniLines = before.Concat(configLines).Concat(after).ToList();
+                    }
+                    //Write everything to disk
+                    File.WriteAllLines(Filename, iniLines);
                 }
-                //Write everything to disk
-                File.WriteAllLines(Filename,iniLines);
             }
             catch (Exception ex)
             {

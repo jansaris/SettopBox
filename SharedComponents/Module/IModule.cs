@@ -1,18 +1,7 @@
-﻿using System;
+using System;
 
-namespace SharedComponents
+namespace SharedComponents.Module
 {
-    public enum ModuleState
-    {
-        Initial,
-        Disabled,
-        Starting,
-        Running,
-        Stopping,
-        Stopped,
-        Error
-    };
-
     public interface IModule : IDisposable
     {
         string Name { get; }
@@ -20,6 +9,8 @@ namespace SharedComponents
         void Start();
         void Stop();
         void Disable();
+
+        IModuleInfo GetModuleInfo();
 
         event EventHandler<ModuleState> StatusChanged;
     }

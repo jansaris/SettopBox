@@ -25,16 +25,28 @@ namespace NewCamd
             _settings = settings;
         }
 
+        public int NrOfChannels => _blocks.Count;
+        public DateTime ValidFrom => _blocks.Count > 0 ? _blocks.Min(c => c.From) : DateTime.MinValue;
+        public DateTime ValidTo => _blocks.Count > 0 ? _blocks.Min(c => c.To) : DateTime.MinValue;
+
         public void Prepare()
         {
             _logger.Debug("Start splitting keyblocks");
             var data = ReadKeyBlock();
+            if (data == null) return;
             _blocks = SplitKeyBlock(data);
             _logger.Debug($"Parsed {_blocks.Count} channel blocks");
         }
 
         byte[] ReadKeyBlock()
         {
+            var file = Path.Combine(_settings.DataFolder, _settings.KeyblockFile);
+            if (!File.Exists(file))
+            {
+                _logger.Warn($"Keyblock file '{file}' doesn't exists");
+                return null;
+            }
+            _logger.Debug($"Read {file} from disk");
             return File.ReadAllBytes(Path.Combine(_settings.DataFolder, _settings.KeyblockFile));
         }
 

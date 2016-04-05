@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using log4net;
 
-namespace SharedComponents
+namespace SharedComponents.Module
 {
     public class ModuleInformation
     {
@@ -35,6 +35,12 @@ namespace SharedComponents
         {
             var mod = Get(name);
             return mod?.State.ToString() ?? "Unknown Module";
+        }
+
+        public IModuleInfo Info(string name)
+        {
+            var mod = Get(name);
+            return mod?.GetModuleInfo() ?? null;
         }
 
         IModule Get(string name)

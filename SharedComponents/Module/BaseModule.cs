@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 
-namespace SharedComponents
+namespace SharedComponents.Module
 {
     public abstract class BaseModule : IModule
     {
@@ -9,6 +9,7 @@ namespace SharedComponents
 
         public ModuleState State { get; private set; }
 
+        public abstract IModuleInfo GetModuleInfo();
         public event EventHandler<ModuleState> StatusChanged;
 
         protected const TaskStatus AsyncTaskIsRunning = TaskStatus.WaitingForActivation;

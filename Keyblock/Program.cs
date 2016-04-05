@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
-using SharedComponents;
 using SharedComponents.DependencyInjection;
+using SharedComponents.Module;
 
 namespace Keyblock
 {
@@ -82,6 +82,10 @@ namespace Keyblock
 
             _logger.Warn("Wait max 10 sec for Keyblock to stop");
             _runningKeyblockTask.Wait(10000);
+        }
+        public override IModuleInfo GetModuleInfo()
+        {
+            return null;
         }
     }
 }

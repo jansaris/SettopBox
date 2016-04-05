@@ -20,9 +20,8 @@ export class App {
             for (var index in modules) {
                 var module = modules[index];
                 routes.push({
-                    route: 'module/:id',
-                    href: '#/module/' + module.Name,
-                    moduleId: 'module',
+                    route: module.Name,
+                    moduleId: module.Name,
                     nav: true,
                     title: module.Name,
                     disabled: module.Status === 'Disabled'

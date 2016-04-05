@@ -6,7 +6,7 @@ using SharedComponents.DependencyInjection;
 using Microsoft.Owin.Hosting;
 using Microsoft.Owin.StaticFiles;
 using Owin;
-using SharedComponents;
+using SharedComponents.Module;
 using SimpleInjector;
 using SimpleInjector.Integration.WebApi;
 
@@ -39,11 +39,17 @@ namespace WebUi
             prog.Stop();
         }
 
+        public override IModuleInfo GetModuleInfo()
+        {
+            return null;
+        }
+
         protected override void StartModule()
         {
             try
             {
-                var uri = $"http://localhost:{_settings.Port}";
+                _settings.Load();
+                var uri = $"http://{_settings.Host}:{_settings.Port}";
                 _logger.Info($"Start WebUi at {uri}");
                 _host = WebApp.Start(uri, StartWeb);
             }
@@ -63,8 +69,8 @@ namespace WebUi
 
         FileServerOptions GenerateFileServerConfig()
         {
-            //var physicalFileSystem = new PhysicalFileSystem(@"./www");
-            var physicalFileSystem = new PhysicalFileSystem(@"F:\GitHub\SettopBox\WebUi\www");
+            var physicalFileSystem = new PhysicalFileSystem(@"./www");
+            //var physicalFileSystem = new PhysicalFileSystem(@"F:\GitHub\SettopBox\WebUi\www");
             var options = new FileServerOptions
             {
                 EnableDefaultFiles = true,

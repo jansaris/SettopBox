@@ -4,8 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using log4net;
-using SharedComponents;
 using SharedComponents.DependencyInjection;
+using SharedComponents.Module;
 
 namespace NewCamd
 {
@@ -14,18 +14,21 @@ namespace NewCamd
         readonly ILog _logger;
         readonly Settings _settings;
         readonly Func<NewCamdApi> _clientFactory;
+        readonly Keyblock _keyblock;
 
         readonly object _syncObject = new object();
         readonly List<NewCamdApi> _activeClients;
         TcpListener _listener;
         bool _listening;
         Task _listeningTask;
+        string _listeningAdress;
 
-        public Program(ILog logger, Settings settings, Func<NewCamdApi> clientFactory)
+        public Program(ILog logger, Settings settings, Func<NewCamdApi> clientFactory, Keyblock keyblock)
         {
             _logger = logger;
             _settings = settings;
             _clientFactory = clientFactory;
+            _keyblock = keyblock;
             _activeClients = new List<NewCamdApi>();
         }
 
@@ -40,12 +43,28 @@ namespace NewCamd
             prog.Stop();
         }
 
+        public override IModuleInfo GetModuleInfo()
+        {
+            return new NewCamdInfo
+            {
+                NrOfClients = _activeClients.Count,
+                NrOfChannels = _keyblock.NrOfChannels,
+                ValidFrom = _keyblock.ValidFrom,
+                ValidTo = _keyblock.ValidTo,
+                DesKey = _settings.DesKey,
+                Username = _settings.Username,
+                Password = _settings.Password,
+                ListeningAt = _listeningAdress
+            };
+        }
+
         protected override void StartModule()
         {
             try
             {
                 _logger.Info("Welcome to NewCamd");
                 _settings.Load();
+                _keyblock.Prepare();
                 StartServer();
                 _listeningTask = Listen();
             }
@@ -61,8 +80,11 @@ namespace NewCamd
             try
             {
                 _listening = false;
-                _listener.Stop();
-                _logger.Info("Stopped listening");
+                if (_listener != null)
+                {
+                    _listener.Stop();
+                    _logger.Info("Stopped listening");
+                }               
                 CloseClients();
                 if (_listeningTask == null || _listeningTask.Status != AsyncTaskIsRunning) return;
 
@@ -81,7 +103,8 @@ namespace NewCamd
             _listener = new TcpListener(ip, _settings.Port);
             _listener.Start();
             _listening = true;
-            _logger.Info($"Start listening at {ip}:{_settings.Port}");
+            _listeningAdress = $"{ip}:{_settings.Port}";
+            _logger.Info($"Start listening at ${_listeningAdress}");
         }
 
         IPAddress GetIpAdress()
