@@ -15,7 +15,7 @@
             </div>
             <div class="collapse navbar-collapse in" id="navbar" aria-expanded="true">
                 <ul class="nav navbar-nav">
-                    <li repeat.for="row of router.navigation" class="${row.isActiver ? 'active' : ''}">
+                    <li repeat.for="row of router.navigation" class="${row.isActive ? 'active' : ''} ${row.disabled ? 'disabled' : ''}">
                         <a href.bind="row.href">${row.title}</a>
                     </li>
                 </ul>

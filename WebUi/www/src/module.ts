@@ -2,7 +2,6 @@ import {HttpClient} from "aurelia-fetch-client";
 
 export class Module {
     static inject() { return [HttpClient]; }
-    message: string;
     module: IModule;
 
     constructor(private http: HttpClient) {

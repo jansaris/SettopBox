@@ -24,7 +24,8 @@ export class App {
                     href: '#/module/' + module.Name,
                     moduleId: 'module',
                     nav: true,
-                    title: module.Name
+                    title: module.Name,
+                    disabled: module.Status === 'Disabled'
                 });
             }
         } else {
