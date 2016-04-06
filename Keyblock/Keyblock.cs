@@ -14,6 +14,10 @@ namespace Keyblock
 {
     public class Keyblock
     {
+        public bool IsValid { get; private set; }
+        public DateTime? BlockValidFrom => IsValid ? _block.ValidFrom : (DateTime?)null;
+        public DateTime? BlockValidTo => IsValid ? _block.ValidTo : (DateTime?)null;
+
         //Filenames
         string SignedCertificateFile => Path.Combine(_settings.DataFolder, "SignedCert.der");
         string KeyblockFile => Path.Combine(_settings.DataFolder, _settings.KeyblockFile);
@@ -209,6 +213,12 @@ namespace Keyblock
         }
 
         public bool ValidateKeyBlock()
+        {
+            IsValid = LoadAndValidate();
+            return IsValid;
+        }
+
+        private bool LoadAndValidate()
         {
             _logger.Debug("Start validating the keyblock data");
             if (!File.Exists(KeyblockFile))

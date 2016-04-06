@@ -18,3 +18,11 @@ interface INewcamdInfo extends IModuleInfo {
     Password: string;
     DesKey: string;
 }
+
+interface IKeyblockInfo extends IModuleInfo {
+    HasValidKeyblock: boolean;
+    NextRetrieval: Date;
+    LastRetrieval: Date;
+    ValidFrom: Date;
+    ValidTo: Date;
+}

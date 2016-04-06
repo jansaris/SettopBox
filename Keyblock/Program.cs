@@ -14,6 +14,8 @@ namespace Keyblock
         readonly Keyblock _keyblock;
         readonly CancellationTokenSource _cancelSource = new CancellationTokenSource();
         Task _runningKeyblockTask;
+        DateTime? _lastRetrieval;
+        DateTime? _nextRetrieval;
 
         public Program(ILog logger, Settings settings, Keyblock keyblock)
         {
@@ -27,23 +29,57 @@ namespace Keyblock
             var container = SharedContainer.CreateAndFill<DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
             prog.Start();
-            prog._runningKeyblockTask.Wait();
+            Console.WriteLine("Press enter to exit");
+            Console.ReadLine();
+            prog._cancelSource.Cancel();
         }
 
-        void Run()
+        void LoadKeyBlockLoop()
         {
+            while (!_cancelSource.IsCancellationRequested)
+            {
+                var nextRunAt = _nextRetrieval ?? DateTime.Now;
+                WaitAndRun(nextRunAt).Wait(_cancelSource.Token);
+            }
+        }
+
+        async Task WaitAndRun(DateTime executionTime)
+        {
+            var waitTime = executionTime - DateTime.Now;
+            if (waitTime.TotalMilliseconds > 0)
+            {
+                _logger.Info($"Next keyblock will be fetched at {executionTime:yyyy-MM-dd HH:mm:ss}");
+                await Task.Delay(executionTime - DateTime.Now, _cancelSource.Token);
+            }
+            if (_cancelSource.IsCancellationRequested) return;
             try
             {
-                _logger.Info("Welcome to Keyblock");
-                _settings.Load();
                 LoadKeyBlock();
-                _logger.Info("Done");
+                _nextRetrieval = DetermineNextRetrieval();
             }
             catch (Exception ex)
             {
                 _logger.Fatal("An unhandled exception occured", ex);
                 Error();
             }
+        }
+
+        DateTime DetermineNextRetrieval()
+        {
+            //Set default at next block validation hour
+            var nextRetrieval = DateTime.Now.AddHours(_settings.KeyblockValidationInHours);
+            if (!_keyblock.IsValid)
+            {
+                _logger.Warn("Can't calculate next retrieval because the keyblock is not valid");
+                return nextRetrieval;
+            }
+            if (!_keyblock.BlockValidTo.HasValue || _keyblock.BlockValidTo.Value == DateTime.MinValue)
+            {
+                _logger.Warn("Can't calculate next retrieval because the loaded keyblock has no valid data");
+                return nextRetrieval;
+            }
+            _logger.Debug($"Keyblock needs to be valid for at least {_settings.KeyblockValidationInHours} hours");
+            return _keyblock.BlockValidTo.Value.AddHours(-1*_settings.KeyblockValidationInHours);
         }
 
         void LoadKeyBlock()
@@ -59,6 +95,7 @@ namespace Keyblock
                 if (_keyblock.DownloadNew())
                 {
                     _logger.Info($"Succesfully loaded a new keyblock at run {i}/{_settings.MaxRetries}");
+                    _lastRetrieval = DateTime.Now;
                     return;
                 }
                 _logger.Error($"Failed to download a new keyblock at run {i}/{_settings.MaxRetries}");
@@ -74,7 +111,9 @@ namespace Keyblock
 
         protected override void StartModule()
         {
-            _runningKeyblockTask = Task.Run(() => Run(), _cancelSource.Token);
+            _logger.Info("Welcome to Keyblock");
+            _settings.Load();
+            _runningKeyblockTask = Task.Run(() => LoadKeyBlockLoop(), _cancelSource.Token);
         }
 
         protected override void StopModule()
@@ -87,7 +126,14 @@ namespace Keyblock
         }
         public override IModuleInfo GetModuleInfo()
         {
-            return null;
+            return new KeyblockInfo
+            {
+                HasValidKeyblock = _keyblock.IsValid,
+                ValidFrom = _keyblock.BlockValidFrom,
+                ValidTo = _keyblock.BlockValidTo,
+                LastRetrieval = _lastRetrieval,
+                NextRetrieval = _nextRetrieval
+            };
         }
     }
 }

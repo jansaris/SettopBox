@@ -16,16 +16,14 @@ namespace WebUi
     {
         readonly Settings _settings;
         readonly Container _container;
-        readonly ModuleInformation _info;
         readonly ILog _logger;
         IDisposable _host;
 
-        public Program(ILog logger, Settings settings, Container container, ModuleInformation info)
+        public Program(ILog logger, Settings settings, Container container)
         {
             _logger = logger;
             _settings = settings;
             _container = container;
-            _info = info;
         }
 
         static void Main()
@@ -71,6 +69,7 @@ namespace WebUi
         {
             var physicalFileSystem = new PhysicalFileSystem(@"./www");
             //var physicalFileSystem = new PhysicalFileSystem(@"F:\GitHub\SettopBox\WebUi\www");
+            //var physicalFileSystem = new PhysicalFileSystem(@"C:\Users\Jan\Documents\GitHub\SettopBox\WebUi\www");
             var options = new FileServerOptions
             {
                 EnableDefaultFiles = true,
