@@ -8,6 +8,7 @@ using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
+using SharedComponents.Keyblock;
 
 namespace Keyblock
 {
@@ -21,18 +22,20 @@ namespace Keyblock
         readonly Settings _settings;
         readonly SslTcpClient _sslClient;
         readonly X509CertificateRequest _certificateRequest;
+        readonly Block _block;
 
         byte[] _sessionKey;
         string _timestamp;
         string _ski;
         byte[] _password;
 
-        public Keyblock(Settings settings, SslTcpClient sslClient, ILog logger, X509CertificateRequest certificateRequest)
+        public Keyblock(Settings settings, SslTcpClient sslClient, ILog logger, X509CertificateRequest certificateRequest, Block block)
         {
             _settings = settings;
             _sslClient = sslClient;
             _logger = logger;
             _certificateRequest = certificateRequest;
+            _block = block;
         }
 
         bool GetCertificate()
@@ -205,6 +208,25 @@ namespace Keyblock
             return true;
         }
 
+        bool ValidateKeyBlock()
+        {
+            _logger.Debug("Start validating the keyblock data");
+            var data = File.ReadAllBytes(KeyblockFile);
+            _block.Load(data);
+            if (_block.NrOfChannels < 1)
+            {
+                _logger.Error("No channels found in the keyblock data");
+                return false;
+            }
+            var expected = DateTime.Now.AddHours(1);
+            if (_block.ValidTo < expected)
+            {
+                _logger.Error($"The keyblock data is only valid till {_block.ValidTo}, we expected at least till {expected}");
+                return false;
+            }
+            return true;
+        }
+
         public bool DownloadNew()
         {
             _settings.EnsureDataFolderExists(_settings.DataFolder);
@@ -225,6 +247,7 @@ namespace Keyblock
                 retValue = retValue && SaveEncryptedPassword();
             }
             retValue = retValue && LoadKeyBlock();
+            retValue = retValue && ValidateKeyBlock();
             return retValue;
         }
 

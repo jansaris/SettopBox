@@ -52,6 +52,8 @@
     <Compile Include="DependencyInjection\SharedContainer.cs" />
     <Compile Include="DependencyInjection\ContextDependentExtensions.cs" />
     <Compile Include="DependencyInjection\DependecyContext.cs" />
+    <Compile Include="Keyblock\Block.cs" />
+    <Compile Include="Keyblock\Channel.cs" />
     <Compile Include="Module\BaseModule.cs" />
     <Compile Include="Module\IModule.cs" />
     <Compile Include="Module\IModuleInfo.cs" />
