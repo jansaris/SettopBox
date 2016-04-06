@@ -4,6 +4,7 @@ export class NewCamd {
     static inject() { return [HttpClient]; }
     module: IModule;
     info: INewcamdInfo;
+    panelColor: string;
 
     constructor(private http: HttpClient) {
         http.configure(config => { config.withBaseUrl("/api/"); });
@@ -13,11 +14,11 @@ export class NewCamd {
     getStatusClass(status: string): string {
         switch (status) {
             case "Running":
-                return "alert-success";
+                return "panel-success";
             case "Disabled":
-                return "alert-warning";
+                return "panel-warning";
             default:
-                return "alert-info";
+                return "panel-info";
         }
     }
 
@@ -31,6 +32,7 @@ export class NewCamd {
                 .then(moduleFromResponse => {
                     this.module = <IModule>moduleFromResponse;
                     this.info = <INewcamdInfo>this.module.Info;
+                    this.panelColor = this.getStatusClass(this.module.Status);
                 }));
     }
 }
