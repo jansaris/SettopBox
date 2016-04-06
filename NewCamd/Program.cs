@@ -104,7 +104,7 @@ namespace NewCamd
             _listener.Start();
             _listening = true;
             _listeningAdress = $"{ip}:{_settings.Port}";
-            _logger.Info($"Start listening at ${_listeningAdress}");
+            _logger.Info($"Start listening at {_listeningAdress}");
         }
 
         IPAddress GetIpAdress()

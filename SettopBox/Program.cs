@@ -38,6 +38,7 @@ namespace SettopBox
         {
             foreach (var module in _modules)
             {
+                _logger.Info($"Stop {module.Name}");
                 _moduleInformation.UnRegister(module);
                 module.Stop();
             }

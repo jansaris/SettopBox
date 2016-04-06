@@ -48,6 +48,10 @@ namespace Keyblock
 
         void LoadKeyBlock()
         {
+            if (!_settings.ForceInitialKeyblockDownload && _keyblock.ValidateKeyBlock())
+            {
+                return;
+            }
             for (var i = 1; i <= _settings.MaxRetries; i++)
             {
                 if(_cancelSource.IsCancellationRequested) return;
@@ -70,13 +74,11 @@ namespace Keyblock
 
         protected override void StartModule()
         {
-            _logger.Info("Start Keyblock");
             _runningKeyblockTask = Task.Run(() => Run(), _cancelSource.Token);
         }
 
         protected override void StopModule()
         {
-            _logger.Info("Stop Keyblock");
             _cancelSource.Cancel();
             if (_runningKeyblockTask == null || _runningKeyblockTask.Status != AsyncTaskIsRunning) return;
 

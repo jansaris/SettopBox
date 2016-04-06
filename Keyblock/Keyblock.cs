@@ -208,9 +208,14 @@ namespace Keyblock
             return true;
         }
 
-        bool ValidateKeyBlock()
+        public bool ValidateKeyBlock()
         {
             _logger.Debug("Start validating the keyblock data");
+            if (!File.Exists(KeyblockFile))
+            {
+                _logger.Warn("No keyblock data found on disk");
+                return false;
+            }
             var data = File.ReadAllBytes(KeyblockFile);
             _block.Load(data);
             if (_block.NrOfChannels < 1)
@@ -218,12 +223,13 @@ namespace Keyblock
                 _logger.Error("No channels found in the keyblock data");
                 return false;
             }
-            var expected = DateTime.Now.AddHours(1);
+            var expected = DateTime.Now.AddHours(_settings.KeyblockValidationInHours);
             if (_block.ValidTo < expected)
             {
                 _logger.Error($"The keyblock data is only valid till {_block.ValidTo}, we expected at least till {expected}");
                 return false;
             }
+            _logger.Info($"Keyblock is valid between {_block.ValidFrom:yyyy-MM-dd} and {_block.ValidTo:yyyy-MM-dd}");
             return true;
         }
 

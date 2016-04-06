@@ -49,6 +49,8 @@ namespace Keyblock
         public bool DontUseRealServerButMessagesFromDisk { get; private set; } = false;
         public int MaxRetries { get; set; } = 3;
         public int WaitOnFailingBlockRetrievalInMilliseconds { get; private set; } = 1000;
+        public double KeyblockValidationInHours { get; set; } = 1;
+        public bool ForceInitialKeyblockDownload { get; set; } = false;
 
         public Settings()
         {
