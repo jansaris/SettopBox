@@ -145,6 +145,33 @@ namespace NewCamd
             }
         }
 
+        public override void ProcessDataFromOtherModule(string moduleName, Data data)
+        {
+            if (!ShouldWeProcessNewData(moduleName, data)) return;
+            _logger.Info($"Handle new {data} from {moduleName}");
+            _keyblock.Prepare();
+            lock (_syncObject)
+            {
+                _activeClients.ForEach(c => c.RefreshKeyblock());
+            }
+        }
+
+        bool ShouldWeProcessNewData(string moduleName, Data data)
+        {
+            _logger.Debug($"Validate if we need to handle {data} from {moduleName}");
+            if (State != ModuleState.Running)
+            {
+                _logger.Debug($"Current state {State}, so we don't handle new data");
+                return false;
+            }
+            if (data != Data.KeyBlock)
+            {
+                _logger.Debug($"{data} is not relevant for us");
+                return false;
+            }
+            return true;
+        }
+
         void ClientClosed(object sender, EventArgs e)
         {
             var client = (NewCamdApi)sender;

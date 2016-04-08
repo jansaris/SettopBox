@@ -11,7 +11,9 @@ namespace SharedComponents.Module
         void Disable();
 
         IModuleInfo GetModuleInfo();
+        void ProcessDataFromOtherModule(string moduleName, Data data);
 
         event EventHandler<ModuleState> StatusChanged;
+        event EventHandler<Data> NewDataAvailable;
     }
 }

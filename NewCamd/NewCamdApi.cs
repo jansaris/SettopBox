@@ -132,5 +132,10 @@ namespace NewCamd
             _disposing = true;
             _communication.Dispose();
         }
+
+        public void RefreshKeyblock()
+        {
+            _keyblock.Prepare();
+        }
     }
 }

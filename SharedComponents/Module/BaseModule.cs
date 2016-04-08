@@ -11,6 +11,7 @@ namespace SharedComponents.Module
 
         public abstract IModuleInfo GetModuleInfo();
         public event EventHandler<ModuleState> StatusChanged;
+        public event EventHandler<Data> NewDataAvailable;
 
         protected const TaskStatus AsyncTaskIsRunning = TaskStatus.WaitingForActivation;
 
@@ -54,6 +55,16 @@ namespace SharedComponents.Module
         protected void Error()
         {
             ChangeState(ModuleState.Error);
+        }
+
+        protected void SignalNewData(Data data)
+        {
+            NewDataAvailable?.Invoke(this, data);
+        }
+
+        public virtual void ProcessDataFromOtherModule(string moduleName, Data data)
+        {
+            
         }
 
         void ChangeState(ModuleState newState)

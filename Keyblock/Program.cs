@@ -96,6 +96,7 @@ namespace Keyblock
                 {
                     _logger.Info($"Succesfully loaded a new keyblock at run {i}/{_settings.MaxRetries}");
                     _lastRetrieval = DateTime.Now;
+                    SignalNewData(Data.KeyBlock);
                     return;
                 }
                 _logger.Error($"Failed to download a new keyblock at run {i}/{_settings.MaxRetries}");

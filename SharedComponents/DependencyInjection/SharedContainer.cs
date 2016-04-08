@@ -48,7 +48,7 @@ namespace SharedComponents.DependencyInjection
                 if(configurator.Module != null) modules.Add(configurator.Module);
             }
             container.RegisterCollection<IModule>(modules);
-            container.RegisterSingleton<ModuleInformation>();
+            container.RegisterSingleton<ModuleCommunication>();
             Logger.Debug("Verify container");
             container.Verify(VerificationOption.VerifyOnly);
             Logger.Debug("Created container");

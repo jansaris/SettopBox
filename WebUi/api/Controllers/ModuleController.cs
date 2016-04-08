@@ -8,9 +8,9 @@ namespace WebUi.api.Controllers
 {
     public class ModuleController : ApiController
     {
-        readonly ModuleInformation _info;
+        readonly ModuleCommunication _info;
 
-        public ModuleController(ModuleInformation info)
+        public ModuleController(ModuleCommunication info)
         {
             _info = info;
         }

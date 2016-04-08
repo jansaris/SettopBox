@@ -55,10 +55,11 @@
     <Compile Include="Keyblock\Block.cs" />
     <Compile Include="Keyblock\Channel.cs" />
     <Compile Include="Module\BaseModule.cs" />
+    <Compile Include="Module\Data.cs" />
     <Compile Include="Module\IModule.cs" />
     <Compile Include="Module\IModuleInfo.cs" />
     <Compile Include="Module\KeyblockInfo.cs" />
-    <Compile Include="Module\ModuleInformation.cs" />
+    <Compile Include="Module\ModuleCommunication.cs" />
     <Compile Include="Module\ModuleState.cs" />
     <Compile Include="Module\NewCamdInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
