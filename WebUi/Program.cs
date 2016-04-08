@@ -9,6 +9,7 @@ using Owin;
 using SharedComponents.Module;
 using SimpleInjector;
 using SimpleInjector.Integration.WebApi;
+using WebUi.api.Logging;
 
 namespace WebUi
 {
@@ -16,14 +17,16 @@ namespace WebUi
     {
         readonly Settings _settings;
         readonly Container _container;
+        readonly InMemoryLogger _logAppender;
         readonly ILog _logger;
         IDisposable _host;
 
-        public Program(ILog logger, Settings settings, Container container)
+        public Program(ILog logger, Settings settings, Container container, InMemoryLogger logAppender)
         {
             _logger = logger;
             _settings = settings;
             _container = container;
+            _logAppender = logAppender;
         }
 
         static void Main()
@@ -57,7 +60,7 @@ namespace WebUi
                 _logger.Debug("Exception", ex);
             }
         }
-
+        
         void StartWeb(IAppBuilder app)
         {
             app.UseOwinContextInjector(_container);

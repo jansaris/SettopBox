@@ -26,3 +26,11 @@ interface IKeyblockInfo extends IModuleInfo {
     ValidFrom: Date;
     ValidTo: Date;
 }
+
+interface ILog {
+    Timestamp: Date;
+    Module: string;
+    Component: string;
+    Message: string;
+    Level: string;
+}

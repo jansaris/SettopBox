@@ -108,7 +108,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="api\Controllers\HomeController.cs" />
+    <Compile Include="api\Controllers\LoggingController.cs" />
     <Compile Include="api\Controllers\ModuleController.cs" />
+    <Compile Include="api\Logging\InMemoryLogger.cs" />
+    <Compile Include="api\Logging\LimitedList.cs" />
+    <Compile Include="api\Models\LogModel.cs" />
     <Compile Include="api\Models\Module.cs" />
     <Compile Include="DependencyConfig.cs" />
     <Compile Include="Program.cs" />
@@ -2522,6 +2526,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="www\jspm_packages\system.src.js" />
+    <Content Include="www\src\log.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www\src\keyblock.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -2602,6 +2609,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="www\src\module.ts">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\src\log.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <TypeScriptCompile Include="www\src\models\models.ts">

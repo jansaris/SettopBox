@@ -29,6 +29,7 @@ export class App {
             }
         } else {
             routes.push({ route: ['', 'home'], moduleId: 'home', nav: true, title: 'Welcome' });
+            routes.push({ route: ['log'], moduleId: 'log', nav: true, title: 'Log' });
         }
 
         config.map(routes);
