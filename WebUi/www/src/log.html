@@ -1,4 +1,5 @@
 <template>
+    <require from="./helpers/DateFormatValueConverter"></require>
     <div class="page-header">
         <div class="clearfix">
             <div class="pull-left">
@@ -13,18 +14,16 @@
         <thead>
             <tr>
                 <th>Time</th>
-                <th>Module</th>
-                <th>Component</th>
                 <th>Level</th>
+                <th>Module</th>
                 <th>Message</th>
             </tr>
         </thead>
         <tbody>
         <tr repeat.for="log of list">
-            <td>${log.Timestamp}</td>
-            <td>${log.Module}</td>
-            <td>${log.Component}</td>
+            <td class="text-nowrap">${log.Timestamp | dateFormat}</td>
             <td>${log.Level}</td>
+            <td>${log.Module}</td>
             <td>${log.Message}</td>
         </tr>
         </tbody>

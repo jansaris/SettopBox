@@ -188,5 +188,6 @@
   "github:frankwallis/plugin-typescript@2.6.0": {
     "typescript": "npm:typescript@1.7.5"
   },
-  "npm:typescript@1.8.0": {}
+  "npm:typescript@1.8.0": {},
+  "npm:moment@2.12.0": {}
 }

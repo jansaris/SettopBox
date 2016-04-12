@@ -70,8 +70,8 @@ namespace WebUi
 
         FileServerOptions GenerateFileServerConfig()
         {
-            var physicalFileSystem = new PhysicalFileSystem(@"./www");
-            //var physicalFileSystem = new PhysicalFileSystem(@"F:\GitHub\SettopBox\WebUi\www");
+            //var physicalFileSystem = new PhysicalFileSystem(@"./www");
+            var physicalFileSystem = new PhysicalFileSystem(@"F:\GitHub\SettopBox\WebUi\www");
             //var physicalFileSystem = new PhysicalFileSystem(@"C:\Users\Jan\Documents\GitHub\SettopBox\WebUi\www");
             var options = new FileServerOptions
             {
