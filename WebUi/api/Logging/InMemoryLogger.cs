@@ -41,6 +41,15 @@ namespace WebUi.api.Logging
         public IEnumerable<LogModel> GetAll()
         {
             return _logList.AsReadOnly();
-        } 
+        }
+
+        public IEnumerable<string> GetLevels()
+        {
+            yield return Level.Debug.DisplayName;
+            yield return Level.Info.DisplayName;
+            yield return Level.Warn.DisplayName;
+            yield return Level.Error.DisplayName;
+            yield return Level.Fatal.DisplayName;
+        }
     }
 }

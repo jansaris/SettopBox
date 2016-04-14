@@ -19,7 +19,18 @@ namespace WebUi.api.Controllers
 
         public IHttpActionResult Get(string name)
         {
-            return Ok(_logmodule.GetByModule(name));
+            switch (name)
+            {
+                case "Levels":
+                    return Ok(_logmodule.GetLevels());
+                default:
+                    return Ok(_logmodule.GetByModule(name));
+            }
+        }
+
+        public IHttpActionResult Levels()
+        {
+            return Ok(_logmodule.GetLevels());
         }
     }
 }

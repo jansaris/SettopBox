@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Web.Http;
 using log4net;
+using log4net.Repository.Hierarchy;
 using Microsoft.Owin.FileSystems;
 using SharedComponents.DependencyInjection;
 using Microsoft.Owin.Hosting;
@@ -9,7 +11,6 @@ using Owin;
 using SharedComponents.Module;
 using SimpleInjector;
 using SimpleInjector.Integration.WebApi;
-using WebUi.api.Logging;
 
 namespace WebUi
 {
@@ -17,16 +18,14 @@ namespace WebUi
     {
         readonly Settings _settings;
         readonly Container _container;
-        readonly InMemoryLogger _logAppender;
         readonly ILog _logger;
         IDisposable _host;
 
-        public Program(ILog logger, Settings settings, Container container, InMemoryLogger logAppender)
+        public Program(ILog logger, Settings settings, Container container)
         {
             _logger = logger;
             _settings = settings;
             _container = container;
-            _logAppender = logAppender;
         }
 
         static void Main()
@@ -70,9 +69,9 @@ namespace WebUi
 
         FileServerOptions GenerateFileServerConfig()
         {
-            var physicalFileSystem = new PhysicalFileSystem(@"./www");
-            //var physicalFileSystem = new PhysicalFileSystem(@"F:\GitHub\SettopBox\WebUi\www");
-            //var physicalFileSystem = new PhysicalFileSystem(@"C:\Users\Jan\Documents\GitHub\SettopBox\WebUi\www");
+            var folder = new DirectoryInfo(_settings.WwwRootFolder);
+            _logger.Info($"Use public www root: {folder.FullName}");
+            var physicalFileSystem = new PhysicalFileSystem(folder.FullName);
             var options = new FileServerOptions
             {
                 EnableDefaultFiles = true,
