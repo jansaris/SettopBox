@@ -317,6 +317,7 @@
     <None Include="www\jspm_packages\npm\inherits%402.0.1\LICENSE" />
     <None Include="www\jspm_packages\npm\inherits%402.0.1\package.json" />
     <None Include="www\jspm_packages\npm\inherits%402.0.1\README.md" />
+    <None Include="www\jspm_packages\npm\moment%402.12.0\.jspm-hash" />
     <None Include="www\jspm_packages\npm\path-browserify%400.0.0\.jspm-hash" />
     <None Include="www\jspm_packages\npm\path-browserify%400.0.0\LICENSE" />
     <None Include="www\jspm_packages\npm\path-browserify%400.0.0\package.json" />
@@ -2477,6 +2478,109 @@
     <Content Include="www\jspm_packages\npm\inherits%402.0.1.js" />
     <Content Include="www\jspm_packages\npm\inherits%402.0.1\inherits.js" />
     <Content Include="www\jspm_packages\npm\inherits%402.0.1\inherits_browser.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\af.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ar-ma.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ar-sa.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ar-tn.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ar.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\az.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\be.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\bg.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\bn.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\bo.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\br.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\bs.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ca.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\cs.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\cv.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\cy.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\da.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\de-at.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\de.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\dv.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\el.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\en-au.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\en-ca.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\en-gb.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\en-ie.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\en-nz.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\eo.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\es.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\et.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\eu.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\fa.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\fi.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\fo.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\fr-ca.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\fr-ch.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\fr.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\fy.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\gd.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\gl.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\he.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\hi.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\hr.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\hu.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\hy-am.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\id.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\is.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\it.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ja.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\jv.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ka.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\kk.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\km.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ko.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\lb.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\lo.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\lt.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\lv.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\me.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\mk.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ml.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\mr.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ms-my.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ms.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\my.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\nb.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ne.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\nl.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\nn.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\pa-in.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\pl.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\pt-br.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\pt.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ro.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ru.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\se.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\si.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\sk.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\sl.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\sq.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\sr-cyrl.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\sr.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\sv.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\sw.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\ta.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\te.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\th.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\tl-ph.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\tlh.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\tr.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\tzl.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\tzm-latn.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\tzm.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\uk.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\uz.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\vi.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\zh-cn.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\locale\zh-tw.js" />
+    <Content Include="www\jspm_packages\npm\moment%402.12.0\moment.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www\jspm_packages\npm\path-browserify%400.0.0.js" />
     <Content Include="www\jspm_packages\npm\path-browserify%400.0.0\index.js" />
     <Content Include="www\jspm_packages\npm\process%400.11.2.js">
@@ -2579,6 +2683,12 @@
     <TypeScriptCompile Include="www\jspm_packages\npm\aurelia-templating-binding%401.0.0-beta.1.1.1\aurelia-templating-binding.d.ts" />
     <TypeScriptCompile Include="www\jspm_packages\npm\aurelia-templating-resources%401.0.0-beta.1.1.1\aurelia-templating-resources.d.ts" />
     <TypeScriptCompile Include="www\jspm_packages\npm\aurelia-templating-router%401.0.0-beta.1.1.1\aurelia-templating-router.d.ts" />
+    <TypeScriptCompile Include="www\jspm_packages\npm\moment%402.12.0\moment-node.d.ts">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="www\jspm_packages\npm\moment%402.12.0\moment.d.ts">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="www\jspm_packages\npm\typescript%401.7.5\lib\lib.core.d.ts" />
     <TypeScriptCompile Include="www\jspm_packages\npm\typescript%401.7.5\lib\lib.core.es6.d.ts" />
     <TypeScriptCompile Include="www\jspm_packages\npm\typescript%401.7.5\lib\lib.d.ts" />
@@ -2614,6 +2724,7 @@
     <None Include="www\src\log.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <TypeScriptCompile Include="www\src\helpers\DateFormatValueConverter.ts" />
     <TypeScriptCompile Include="www\src\models\models.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </TypeScriptCompile>

@@ -49,6 +49,7 @@ System.config({
     "core-js": "npm:core-js@2.1.0",
     "fetch": "github:github/fetch@0.10.1",
     "font-awesome": "npm:font-awesome@4.5.0",
+    "moment": "npm:moment@2.12.0",
     "text": "github:systemjs/plugin-text@0.0.3",
     "traceur": "github:jmcriffey/bower-traceur@0.0.91",
     "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.91",
