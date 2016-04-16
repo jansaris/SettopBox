@@ -91,11 +91,13 @@ namespace WebUi
         {
             var config = new HttpConfiguration();
             config.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(_container);
+            config.MapHttpAttributeRoutes();
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+            config.EnsureInitialized();
             return config;
         }
 

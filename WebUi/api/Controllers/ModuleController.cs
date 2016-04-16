@@ -1,11 +1,11 @@
 using System.Linq;
 using System.Web.Http;
-using SharedComponents;
 using SharedComponents.Module;
 using WebUi.api.Models;
 
 namespace WebUi.api.Controllers
 {
+    [RoutePrefix("api/module")]
     public class ModuleController : ApiController
     {
         readonly ModuleCommunication _info;
@@ -18,6 +18,13 @@ namespace WebUi.api.Controllers
         public IHttpActionResult Get()
         {
             return Ok(_info.Modules.Select(Map));
+        }
+
+        [Route("names")]
+        [HttpGet]
+        public IHttpActionResult Names()
+        {
+            return Ok(_info.Modules);
         }
 
         public IHttpActionResult Get(string name)

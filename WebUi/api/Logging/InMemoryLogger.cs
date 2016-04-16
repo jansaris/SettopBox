@@ -51,5 +51,24 @@ namespace WebUi.api.Logging
             yield return Level.Error.DisplayName;
             yield return Level.Fatal.DisplayName;
         }
+
+        /// <summary>
+        /// Returns the list of levels to filter on
+        /// The higher the given level, the less in the filter
+        /// ERROR returns: Error and Fatal
+        /// If no match, all the levels are given
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public IList<string> GetLevelsFilter(string level)
+        {
+            var levels = GetLevels().ToList();
+            while (levels.Count > 0)
+            {
+                if (levels[0].EqualsIgnoreCase(level)) break;
+                levels.RemoveAt(0);
+            }
+            return (levels.Any() ? levels : GetLevels()).ToList();
+        }
     }
 }

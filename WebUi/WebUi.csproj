@@ -110,6 +110,7 @@
     <Compile Include="api\Controllers\HomeController.cs" />
     <Compile Include="api\Controllers\LoggingController.cs" />
     <Compile Include="api\Controllers\ModuleController.cs" />
+    <Compile Include="api\Extensions.cs" />
     <Compile Include="api\Logging\InMemoryLogger.cs" />
     <Compile Include="api\Logging\LimitedList.cs" />
     <Compile Include="api\Models\LogModel.cs" />
@@ -385,11 +386,15 @@
     <Content Include="www\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="www\jspm_packages\github\components\jquery%402.2.0.js" />
+    <Content Include="www\jspm_packages\github\components\jquery%402.2.0.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www\jspm_packages\github\components\jquery%402.2.0\.gitignore" />
     <Content Include="www\jspm_packages\github\components\jquery%402.2.0\jquery-migrate.js" />
     <Content Include="www\jspm_packages\github\components\jquery%402.2.0\jquery-migrate.min.js" />
-    <Content Include="www\jspm_packages\github\components\jquery%402.2.0\jquery.js" />
+    <Content Include="www\jspm_packages\github\components\jquery%402.2.0\jquery.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www\jspm_packages\github\components\jquery%402.2.0\jquery.min.js" />
     <Content Include="www\jspm_packages\github\frankwallis\plugin-typescript%402.6.0.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -474,7 +479,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="www\jspm_packages\github\systemjs\plugin-text%400.0.3\text.txt" />
-    <Content Include="www\jspm_packages\github\twbs\bootstrap%403.3.6.js" />
+    <Content Include="www\jspm_packages\github\twbs\bootstrap%403.3.6.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www\jspm_packages\github\twbs\bootstrap%403.3.6\css\bootstrap-theme.css" />
     <Content Include="www\jspm_packages\github\twbs\bootstrap%403.3.6\css\bootstrap-theme.min.css" />
     <Content Include="www\jspm_packages\github\twbs\bootstrap%403.3.6\css\bootstrap.css" />
@@ -484,7 +491,9 @@
     <Content Include="www\jspm_packages\github\twbs\bootstrap%403.3.6\fonts\glyphicons-halflings-regular.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="www\jspm_packages\github\twbs\bootstrap%403.3.6\js\bootstrap.js" />
+    <Content Include="www\jspm_packages\github\twbs\bootstrap%403.3.6\js\bootstrap.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www\jspm_packages\github\twbs\bootstrap%403.3.6\js\bootstrap.min.js" />
     <Content Include="www\jspm_packages\github\twbs\bootstrap%403.3.6\js\npm.js" />
     <Content Include="www\jspm_packages\npm\assert%401.3.0.js" />
@@ -2724,7 +2733,9 @@
     <None Include="www\src\log.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <TypeScriptCompile Include="www\src\helpers\DateFormatValueConverter.ts" />
+    <TypeScriptCompile Include="www\src\helpers\DateFormatValueConverter.ts">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="www\src\models\models.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </TypeScriptCompile>
