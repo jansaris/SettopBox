@@ -18,11 +18,11 @@ namespace WebUi
 
         public override void RegisterComponents(Container container)
         {
-            container.Register<HomeController>();
             container.Register<InMemoryLogger>(Lifestyle.Singleton);
         }
 
         public override Type Module => typeof(Program);
+        public override Type Settings => typeof(Settings);
     }
 
     public static class DependencyConfigExtension

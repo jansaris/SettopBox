@@ -34,3 +34,8 @@ interface ILog {
     Message: string;
     Level: string;
 }
+
+interface ISetting {
+    Name: string;
+    Value: any;
+}

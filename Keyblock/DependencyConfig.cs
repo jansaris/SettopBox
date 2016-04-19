@@ -21,5 +21,6 @@ namespace Keyblock
         }
 
         public override Type Module => typeof (Program);
+        public override Type Settings => typeof(Settings);
     }
 }

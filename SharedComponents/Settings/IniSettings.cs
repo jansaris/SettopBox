@@ -15,7 +15,7 @@ namespace SharedComponents.Settings
         const string Filename = "Settings.ini";
         abstract protected string Name { get; }
 
-        static object _syncRoot = new object();
+        static readonly object SyncRoot = new object();
 
         protected IniSettings()
         {
@@ -33,7 +33,7 @@ namespace SharedComponents.Settings
             Logger.Info($"Read {Filename}");
             _decoder = _noDecode;
             var atLeastOneLineOfTheBlockFound = false;
-            lock (_syncRoot)
+            lock (SyncRoot)
             {
                 try
                 {
@@ -74,13 +74,13 @@ namespace SharedComponents.Settings
             }
         }
 
-        protected void Save()
+        public void Save()
         {
             Logger.Info($"Save {Filename}");
             try
             {
                 
-                lock (_syncRoot)
+                lock (SyncRoot)
                 {
                     //Read current ini file
                     var iniLines = File.ReadAllLines(Filename).ToList();
@@ -134,7 +134,17 @@ namespace SharedComponents.Settings
             }
 
             return list;
-        } 
+        }
+
+        public List<Setting> GetAll()
+        {
+            var properties = GetType().GetProperties(PropertyFlags);
+            return properties.Select(p => new Setting
+            {
+                Name = p.Name,
+                Value = p.GetValue(this)
+            }).ToList();
+        }
 
         void ReadConfigItem(string line)
         {
@@ -147,7 +157,7 @@ namespace SharedComponents.Settings
             SetValue(keyvalue[0], _decoder(keyvalue[1]));
         }
 
-        void SetValue(string key, string value)
+        public void SetValue(string key, string value)
         {
             var propertyInfo = GetType().GetProperty(key, PropertyFlags);
             if (propertyInfo == null)

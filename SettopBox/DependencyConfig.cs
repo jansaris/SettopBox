@@ -17,5 +17,6 @@ namespace SettopBox
         }
 
         public override Type Module => null;
+        public override Type Settings => typeof(Settings);
     }
 }

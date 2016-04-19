@@ -110,6 +110,7 @@
     <Compile Include="api\Controllers\HomeController.cs" />
     <Compile Include="api\Controllers\LoggingController.cs" />
     <Compile Include="api\Controllers\ModuleController.cs" />
+    <Compile Include="api\Controllers\SettingsController.cs" />
     <Compile Include="api\Extensions.cs" />
     <Compile Include="api\Logging\InMemoryLogger.cs" />
     <Compile Include="api\Logging\LimitedList.cs" />
@@ -2645,6 +2646,9 @@
     <Content Include="www\src\keyblock.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="www\src\settings.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www\src\newcamd.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -2743,6 +2747,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="www\src\keyblock.ts">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\src\settings.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

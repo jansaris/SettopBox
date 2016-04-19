@@ -4,6 +4,7 @@ using System.IO;
 using log4net;
 using log4net.Config;
 using SharedComponents.Module;
+using SharedComponents.Settings;
 using SimpleInjector;
 
 namespace SharedComponents.DependencyInjection
@@ -40,14 +41,17 @@ namespace SharedComponents.DependencyInjection
         {
             var container = Create(log4Netconfig);
             var modules = new List<Type>();
+            var settings = new List<Type>();
             foreach (var type in configurators)
             {
                 Logger.Debug($"Register components for {type.FullName}");
                 var configurator = CreateConfigurator(type);
                 configurator.RegisterComponents(container);
                 if(configurator.Module != null) modules.Add(configurator.Module);
+                if(configurator.Settings != null) settings.Add(configurator.Settings);
             }
             container.RegisterCollection<IModule>(modules);
+            container.RegisterCollection<IniSettings>(settings);
             container.RegisterSingleton<ModuleCommunication>();
             Logger.Debug("Verify container");
             container.Verify(VerificationOption.VerifyOnly);

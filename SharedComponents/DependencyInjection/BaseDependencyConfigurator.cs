@@ -15,5 +15,6 @@ namespace SharedComponents.DependencyInjection
         public abstract void RegisterComponents(Container container);
 
         public abstract Type Module { get; }
+        public abstract Type Settings { get; }
     }
 }

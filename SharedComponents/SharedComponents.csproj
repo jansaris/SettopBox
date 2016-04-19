@@ -64,6 +64,7 @@
     <Compile Include="Module\NewCamdInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\IniSettings.cs" />
+    <Compile Include="Settings\Setting.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
