@@ -142,7 +142,8 @@ namespace SharedComponents.Settings
             return properties.Select(p => new Setting
             {
                 Name = p.Name,
-                Value = p.GetValue(this)
+                Value = p.GetValue(this),
+                Type = p.PropertyType.Name
             }).ToList();
         }
 

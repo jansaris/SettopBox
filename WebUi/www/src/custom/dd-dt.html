@@ -1,0 +1,20 @@
+<template bindable="dd, dt, type">
+    <dt class="col-md-5">${dt}</dt>
+    <dd class="col-md-3">
+        <div if.bind="type === 'Int32'">
+            <input value.bind="dd" type="number">
+        </div>
+        <div if.bind="type === 'Double'">
+            <input value.bind="dd" type="number">
+        </div>
+        <div if.bind="type === 'String'">
+            <input value.bind="dd" type="text">
+        </div>
+        <div if.bind="type === 'Boolean'" class="checkbox">
+            <label>
+                <input checked.bind="dd" type="checkbox">
+                ${dd ? 'Yes' : 'No'}
+            </label>
+        </div>
+    </dd>
+</template>

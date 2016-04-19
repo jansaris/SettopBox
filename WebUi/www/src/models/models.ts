@@ -38,4 +38,5 @@ interface ILog {
 interface ISetting {
     Name: string;
     Value: any;
+    Type: string;
 }

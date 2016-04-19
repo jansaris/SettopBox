@@ -1,11 +1,9 @@
 <template>
+    <require from='./custom/dd-dt.html'></require>
     <div class="row">
-        <div class="col-md-12">
-            <dl>
-                <dd>Hallo</dd>
-                <dt>Setting</dt>
-                <!--<dd repeat.for="setting in settings">${setting.Name}</dd>
-                <dd repeat.for="setting in settings">${setting.Value}</dd>-->
-            </dl>
-        </div>
+    <div class="col-md-12">
+        <dl>
+            <dd-dt repeat.for="setting of settings" dt="${setting.Name}" dd="${setting.Value}" type="${setting.Type}"/>
+        </dl>
+    </div>
 </template>
