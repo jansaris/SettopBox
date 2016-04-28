@@ -14,14 +14,23 @@ export class Settings {
         this.module = params.moduleId;
         return this.http.fetch(`settings/?module=${this.module}`)
             .then(response => response.json()
-            .then(settings => {
-                this.settings = <ISetting[]>settings;
-                for (var index in this.settings) {
-                    var set = this.settings[index];
-                    if (set.Type != 'Boolean') continue;
-                    if (set.Value === 'True') set.Value = true;
-                    if (set.Value === 'False') set.Value = false;
-                }
-            }));
+                .then(settings => {
+                    this.settings = <ISetting[]>settings;
+                    for (var index in this.settings) {
+                        var set = this.settings[index];
+                        switch (set.Type) {
+                            case "Boolean":
+                                set.InputType = "checkbox";
+                                break;
+                            case "Int32":
+                            case "Double":
+                                set.InputType = "number";
+                                break;
+                            default:
+                                set.InputType = "text";
+                                break;
+                        }
+                    }
+                }));
     }
 }

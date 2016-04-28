@@ -39,4 +39,5 @@ interface ISetting {
     Name: string;
     Value: any;
     Type: string;
+    InputType: string;
 }
