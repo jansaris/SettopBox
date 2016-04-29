@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2BC70BDC-4906-4682-A061-9743BD3DB822}</ProjectGuid>
+    <ProjectGuid>{17D51186-F17C-440C-8650-78EA07B4D756}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SettopBox</RootNamespace>
-    <AssemblyName>SettopBox</AssemblyName>
+    <RootNamespace>RunAndMonitor</RootNamespace>
+    <AssemblyName>RunAndMonitor</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -35,14 +35,6 @@
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Owin.Host.HttpListener, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Host.HttpListener.3.0.1\lib\net45\Microsoft.Owin.Host.HttpListener.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
-      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SimpleInjector, Version=3.1.2.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
@@ -75,25 +67,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Keyblock\Keyblock.csproj">
-      <Project>{e62c2573-7885-4eb6-92c1-a708e7736f34}</Project>
-      <Name>Keyblock</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NewCamd\NewCamd.csproj">
-      <Project>{9b439ea3-b20c-4a50-9657-4d393ad2d72d}</Project>
-      <Name>NewCamd</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RunAndMonitor\RunAndMonitor.csproj">
-      <Project>{17d51186-f17c-440c-8650-78ea07b4d756}</Project>
-      <Name>RunAndMonitor</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
       <Project>{17e72fdd-c439-4955-8fa6-125f08702a79}</Project>
       <Name>SharedComponents</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WebUi\WebUi.csproj">
-      <Project>{61aca837-0874-4bcc-8815-b3e64207480d}</Project>
-      <Name>WebUi</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

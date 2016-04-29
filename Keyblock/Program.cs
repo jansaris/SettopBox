@@ -31,7 +31,7 @@ namespace Keyblock
             prog.Start();
             Console.WriteLine("Press enter to exit");
             Console.ReadLine();
-            prog._cancelSource.Cancel();
+            prog.Stop();
         }
 
         void LoadKeyBlockLoop()

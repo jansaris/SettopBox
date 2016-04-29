@@ -2,7 +2,6 @@
 using System.IO;
 using System.Web.Http;
 using log4net;
-using log4net.Repository.Hierarchy;
 using Microsoft.Owin.FileSystems;
 using SharedComponents.DependencyInjection;
 using Microsoft.Owin.Hosting;

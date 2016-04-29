@@ -19,8 +19,7 @@ export class Settings {
                 for (var index in this.settings) {
                     var set = this.settings[index];
                     if (set.Type != 'Boolean') continue;
-                    if (set.Value === 'True') set.Value = true;
-                    if (set.Value === 'False') set.Value = false;
+                    if (set.Value) set.Value = 'checked';
                 }
             }));
     }
