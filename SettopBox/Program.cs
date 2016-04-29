@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using log4net;
-using SharedComponents;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Module;
 
@@ -26,6 +25,7 @@ namespace SettopBox
             var container = SharedContainer.CreateAndFill<DependencyConfig, 
                                                           NewCamd.DependencyConfig, 
                                                           Keyblock.DependencyConfig,
+                                                          RunAndMonitor.DependencyConfig,
                                                           WebUi.DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
             prog.Start();
