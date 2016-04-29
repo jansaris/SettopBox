@@ -2737,12 +2737,12 @@
     <None Include="www\src\log.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <TypeScriptCompile Include="www\src\helpers\DateFormatValueConverter.ts">
+    <None Include="www\src\helpers\DateFormatValueConverter.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="www\src\models\models.ts">
+    </None>
+    <None Include="www\src\models\models.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </TypeScriptCompile>
+    </None>
     <None Include="www\src\newcamd.ts">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

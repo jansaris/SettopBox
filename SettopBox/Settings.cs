@@ -28,6 +28,12 @@ namespace SettopBox
             set { UpdateModule(nameof(WebUi), value); }
         }
 
+        public bool RunAndMonitor
+        {
+            get { return GetModule(nameof(RunAndMonitor)); }
+            set { UpdateModule(nameof(RunAndMonitor), value); }
+        }
+
         public IReadOnlyList<Tuple<string, bool>> GetModules()
         {
             return _modules.Select(m => new Tuple<string, bool>(m.Key, m.Value)).ToList();

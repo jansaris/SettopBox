@@ -105,7 +105,7 @@ namespace WebUi
             try
             {
                 _logger.Info("Exit WebUi");
-                _host.Dispose();
+                _host?.Dispose();
             }
             catch (Exception ex)
             {

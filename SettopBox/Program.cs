@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Module;
+using ThreadState = System.Diagnostics.ThreadState;
 
 namespace SettopBox
 {
@@ -32,6 +36,7 @@ namespace SettopBox
             Console.WriteLine("Hit 'Enter' to exit");
             Console.ReadLine();
             prog.Stop();
+            Environment.Exit(0);
         }
 
         void Stop()
@@ -41,12 +46,13 @@ namespace SettopBox
                 _logger.Info($"Stop {module.Name}");
                 _moduleCommunication.UnRegister(module);
                 module.Stop();
+                _logger.Debug($"Stopped {module.Name}");
             }
+            _logger.Info("Bye bye");
         }
-
         void Start()
         {
-            _logger.Info("Welcome to Settopbox");
+            _logger.Info($"Welcome to Settopbox ({Process.GetCurrentProcess().Id})");
             _settings.Load();
             foreach (var module in _modules)
             {
