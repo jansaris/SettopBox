@@ -11,6 +11,7 @@ namespace RunAndMonitor
         static Process _process;
         readonly Settings _settings;
         readonly ILog _logger;
+        string _status = "Initial";
 
         public Program(Settings settings, ILog logger)
         {
@@ -35,19 +36,14 @@ namespace RunAndMonitor
             {
                 PID = $"{_process?.Id}",
                 ProcessName = _process?.ProcessName,
-                Status = GetStatus()
+                Status = _status
             };
-        }
-
-        string GetStatus()
-        {
-            if (_process == null) return "Not started";
-            return _process.HasExited ? "Exited" : "Running";
         }
 
         protected override void StartModule()
         {
             _logger.Info("Welcome to RunAndMonitor");
+            _status = "Starting";
             _settings.Load();
             if (string.IsNullOrWhiteSpace(_settings.Executable))
             {
@@ -58,6 +54,30 @@ namespace RunAndMonitor
         }
 
         void StartProcess()
+        {
+            CreateProcess();
+            _logger.Info($"Start {_settings.Executable}");
+            //Register on output events
+            _process.OutputDataReceived += (sender, args) => Log(args.Data, _logger.Debug);
+            _process.ErrorDataReceived += (sender, args) => Log(args.Data, _logger.Error);
+            _process.Exited += ProcessExited;
+            //Start process
+            var result = _process.Start();
+            if (!result)
+            {
+                _logger.Error($"Failed to start {_settings.Executable}");
+                _status = "Failed to start";
+                return;
+            }
+
+            //Start listening on output 
+            _process.BeginOutputReadLine();
+            _process.BeginErrorReadLine();
+            _logger.Info($"Succesfully started {_process.ProcessName} with Id {_process.Id}");
+            _status = "Running";
+        }
+
+        void CreateProcess()
         {
             _logger.Debug($"Create process for {_settings.Executable}");
             var startInfo = new ProcessStartInfo(_settings.Executable)
@@ -76,26 +96,18 @@ namespace RunAndMonitor
                 _logger.Debug($"Use working directory {_settings.WorkingDirectory}");
                 startInfo.WorkingDirectory = _settings.WorkingDirectory;
             }
+            _process = new Process
+            {
+                StartInfo = startInfo,
+                EnableRaisingEvents = true
+            };
+        }
 
-            _process = new Process { StartInfo = startInfo };
-            _logger.Info($"Start {_settings.Executable}");
-            //Register on output events
-            _process.OutputDataReceived += (sender, args) => Log(args.Data, _logger.Debug);
-            _process.ErrorDataReceived += (sender, args) => Log(args.Data, _logger.Error);
-            _process.Exited += (sender, args) => Log($"{_process.ProcessName} exited with code {_process.ExitCode}", _logger.Info);
-            //Start process
-            var result = _process.Start();
-            //Start listening on output 
-            _process.BeginOutputReadLine();
-            _process.BeginErrorReadLine();
-            if (result)
-            {
-                _logger.Info($"Succesfully started {_process.ProcessName}");
-            }
-            else
-            {
-                _logger.Error($"Failed to start {_settings.Executable}");
-            }
+        void ProcessExited(object sender, EventArgs e)
+        {
+            _logger.Info($"{_process.ProcessName} exited with code {_process.ExitCode}");
+            _status = "Program exited";
+            _process = null;
         }
 
         void Log(string message, Action<string> logger)
@@ -114,7 +126,11 @@ namespace RunAndMonitor
                 if (KillApplication(name)) return;
                 if (!_process.HasExited)
                 {
-                    _logger.Fatal($"Failed to stop process {name} with Id {id}");
+                    _logger.Error($"Failed to stop process {name} with Id {id}");
+                }
+                else
+                {
+                    _logger.Info($"Stopped process {name} with Id {id}");
                 }
             }
             catch (Exception ex)
