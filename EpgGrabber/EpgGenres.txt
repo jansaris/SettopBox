@@ -1,0 +1,19 @@
+﻿Sport;Sports
+Overige;Broadcasting / Press
+Film;Movie / Drama
+Comedy;Comedy
+Misdaad;Detective / Thriller
+Actualiteit;News / Current affairs
+Erotiek;Adult movie / Drama
+Serie;Variety show
+Docu;Documentary
+Amusement;Variety show
+Info;News magazine
+Religieus;Religion
+Muziek;Music / Ballet / Dance
+Natuur;Nature / Animals / Environment
+Jeugd;Children's / Youth programmes
+Wetenschap;Technology / Natural sciences;Education / Science / Factual topics
+Cultuur;Popular culture / Traditional arts
+Educatief;Education / Science / Factual topics;Further education
+Animatie;Cartoons / Puppets
