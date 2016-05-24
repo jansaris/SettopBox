@@ -15,40 +15,29 @@ namespace EpgGrabber.IO
             _logger = logger;
         }
 
-        /// <summary>
-        /// Decompresses the specified compressed file using SharpZipLib
-        /// MkBundle doesn't support GZipStream
-        /// </summary>
-        /// <param name="gzipFileName">The compressed file.</param>
-        /// <param name="filename">The uncompressed file.</param>
-        public bool Decompress(string gzipFileName, string filename)
+        public byte[] Decompress(byte[] data)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(gzipFileName))
+                if (data == null)
                 {
                     throw new Exception("Null gzipFieName");
                 }
 
                 // Use a 4K buffer. Any larger is a waste.    
                 var dataBuffer = new byte[4096];
+                var outputStream = new MemoryStream();
 
-                using (Stream fs = new FileStream(gzipFileName, FileMode.Open, FileAccess.Read))
-                using (var gzipStream = new GZipInputStream(fs))
+                using (var gzipStream = new GZipInputStream(new MemoryStream(data)))
                 {
-                    // Change this to your needs
-                    //var fnOut = Path.Combine(targetDir, Path.GetFileNameWithoutExtension(gzipFileName));
-                    using (var fsOut = File.Create(filename))
-                    {
-                        StreamUtils.Copy(gzipStream, fsOut, dataBuffer);
-                    }
+                    StreamUtils.Copy(gzipStream, outputStream, dataBuffer);
                 }
-                return true;
+                return outputStream.ToArray();
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to extract {gzipFileName}", ex);
-                return false;
+                _logger.Error("Failed to extract GZip data", ex);
+                return null;
             }
         }
     }

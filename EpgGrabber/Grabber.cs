@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.IO;
 using System.Linq;
+using System.Text;
 using EpgGrabber.IO;
 using EpgGrabber.Models;
 using log4net;
@@ -33,12 +33,52 @@ namespace EpgGrabber
         public void Download()
         {
             _logger.Info("Start grabbing EPG");
-            DownloadEpgfiles();
-            DecompressEpgFiles();
-            var epg = ReadEpgfiles();
-            epg = DownloadDetails(epg);
-            GenerateXmlTv(epg);
+            var date = DateTime.Today;
+            var epg = new List<Channel>();
 
+            //Download EPG for a couple of days
+            for (var dayNr = 0; dayNr < _settings.NumberOfEpgDays; dayNr++)
+            {
+                //EPG is downloaded in 8 parts per day
+                for (var dayPart = 0; dayPart < 8; dayPart++)
+                {
+                    _logger.Info($"Download EPG data for day {dayNr} part {dayPart}");
+                    var zip = DownloadEpgfile(date, dayNr, dayPart);
+                    var file = _compression.Decompress(zip);
+                    var epgString = Encoding.Default.GetString(file);
+                    var epgData = ParseEpgData(epgString);
+                    DownloadDetails(epgData);
+                    _logger.Info($"Downloaded EPG data for {epgData.SelectMany(channel => channel.Programs).Count()} programs");
+
+                    epg.AddRange(epgData);
+                }
+            }
+
+            //Order all programs
+            foreach (var channel in epg)
+            {
+                channel.Programs = channel.Programs.OrderBy(c => c.Start).ToList();
+            }
+
+            GenerateXmlTv(epg);
+        }
+
+        byte[] DownloadEpgfile(DateTime now, int dayNr, int dayPart)
+        {
+            //EPG url example: http://w.zt6.nl/epgdata/epgdata.20141128.1.json.gz
+            var url = $"epgdata.{now.AddDays(dayNr):yyyyMMdd}.{dayPart}.json.gz";
+            url = string.Concat(_settings.EpgUrl, url);
+
+            //Download the file
+            try
+            {
+                return _downloader.DownloadBinary(url);
+            }
+            catch (Exception err)
+            {
+                _logger.Error($"Unable to download EPG for URL '{url}'", err);
+                return null;
+            }
         }
 
         /// <summary>
@@ -58,28 +98,19 @@ namespace EpgGrabber
             }
         }
 
-        List<Channel> DownloadDetails(List<Channel> epg)
+        void DownloadDetails(List<Channel> epg)
         {
             var programs = epg.SelectMany(channel => channel.Programs).ToList();
             //Loop over all the programs and try to load the details
             DownloadDetails(programs);
             TranslateProgramGenres(programs.Where(p => p.Genres != null));
-
-            return epg;
         }
 
         void DownloadDetails(IReadOnlyCollection<Models.Program> list)
         {
-            int succes = 0, failed = 0, percent = 0;
+            int failed = 0;
             foreach (var program in list)
             {
-                //Log percentage of completion
-                var current = (int)(((succes + failed) / (float)list.Count) * 100);
-                if (current != percent)
-                {
-                    percent = current;
-                    _logger.InfoFormat("Downloading {0}% EPG program details", percent);
-                }
                 //Download string
                 _logger.DebugFormat("Try to download details for: {0}", program.Id);
                 var details = DownloadDetails(program.Id);
@@ -95,12 +126,8 @@ namespace EpgGrabber
                 {
                     program.Genres = parsed.Genres.Select(g => new Genre { Name = g, Language = "nl" }).ToList();
                 }
-                _logger.DebugFormat("Updated program {0}", program.Id);
-                succes++;
             }
-
-            _logger.InfoFormat("Succesfully loaded details for {0} programs", succes);
-            _logger.InfoFormat("Failed to load details for {0} programs", failed);
+            if(failed > 0) _logger.InfoFormat("Failed to load details for {0} programs", failed);
         }
 
         void TranslateProgramGenres(IEnumerable<Models.Program> programs)
@@ -113,139 +140,66 @@ namespace EpgGrabber
             }
         }
 
-        void DecompressEpgFiles()
+       List<Channel> ParseEpgData(string data)
         {
-            foreach (var file in Directory.GetFiles(_settings.EpgFolder, "*.gz"))
-            {
-                _logger.Debug($"Decompress {file}");
-                _compression.Decompress(file, file.Substring(0, file.Length - 3));
-            }
-        }
+            List<Channel> result = new List<Channel>();
 
-        /// <summary>
-        /// Reads the EPG files into a list of EPG objects
-        /// </summary>
-        List<Channel> ReadEpgfiles()
-        {
-            var result = new List<Channel>();
+            var converter = new ExpandoObjectConverter();
+            dynamic json = JsonConvert.DeserializeObject<ExpandoObject>(data, converter);
+            if (json == null) return result;
 
-            var date = DateTime.Today;
-            for (var dayNr = 0; dayNr < _settings.NumberOfEpgDays; dayNr++)
+            foreach (var channelName in json)
             {
-                //EPG is in 8 parts
-                for (var dayPart = 0; dayPart < 8; dayPart++)
+                var channel = result.FirstOrDefault(c => c.Name.Equals((string)channelName.Key, StringComparison.InvariantCultureIgnoreCase));
+                if (channel == null)
                 {
-                    var name = $"epgdata.{date.AddDays(dayNr):yyyyMMdd}.{dayPart}.json";
-                    var uncompressedFile = Path.Combine(_settings.EpgFolder, name);
+                    channel = new Channel { Programs = new List<Models.Program>() };
+                    result.Add(channel);
+                    channel.Name = (string)channelName.Key;
+                }
 
-                    //Read the JSON file
-                    try
+                //Add programms
+                foreach (var program in channelName.Value)
+                {
+                    var prog = new Models.Program();
+
+                    foreach (var programProperty in program)
                     {
-                        if (File.Exists(uncompressedFile))
+                        string key = programProperty.Key?.ToString();
+                        string value = programProperty.Value?.ToString();
+                        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value)) continue;
+
+                        switch (key.ToLower())
                         {
-                            var converter = new ExpandoObjectConverter();
-                            dynamic json = JsonConvert.DeserializeObject<ExpandoObject>(File.ReadAllText(uncompressedFile), converter);
-                            if (json == null) continue;
-                            
-                            foreach (var channelName in json)
-                            {
-                                var channel = result.FirstOrDefault(c => c.Name.Equals((string)channelName.Key, StringComparison.InvariantCultureIgnoreCase));
-                                if (channel == null)
-                                {
-                                    channel = new Channel { Programs = new List<Models.Program>() };
-                                    result.Add(channel);
-                                    channel.Name = (string)channelName.Key;
-                                }
-
-                                //Add programms
-                                foreach (var program in channelName.Value)
-                                {
-                                    var prog = new Models.Program();
-
-                                    foreach (var programProperty in program)
-                                    {
-                                        string key = programProperty.Key?.ToString();
-                                        string value = programProperty?.Value?.ToString();
-                                        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value)) continue;
-
-                                        switch (key.ToLower())
-                                        {
-                                            case "id":
-                                                prog.Id = value;
-                                                break;
-                                            case "name":
-                                                prog.Name = value.DecodeNonAsciiCharacters();
-                                                break;
-                                            case "start":
-                                                prog.SetStart(value);
-                                                break;
-                                            case "end":
-                                                prog.SetEnd(value);
-                                                break;
-                                            case "disablerestart":
-                                                //Ignore
-                                                break;
-                                            default:
-                                                //I'm curious which other data is present
-                                                prog.OtherData = $"{prog.OtherData}{key}={value};";
-                                                break;
-                                        }
-                                    }
-
-                                    //Add the program when it does not exist yet
-                                    if (!channel.Programs.Any(p => p.Start == prog.Start && p.End == prog.End))
-                                        channel.Programs.Add(prog);
-                                }
-                            }
-                            
-                        }
-                        else
-                        {
-                            _logger.Debug($"EPG file {name} not found to read");
+                            case "id":
+                                prog.Id = value;
+                                break;
+                            case "name":
+                                prog.Name = value.DecodeNonAsciiCharacters();
+                                break;
+                            case "start":
+                                prog.SetStart(value);
+                                break;
+                            case "end":
+                                prog.SetEnd(value);
+                                break;
+                            case "disablerestart":
+                                //Ignore
+                                break;
+                            default:
+                                //I'm curious which other data is present
+                                prog.OtherData = $"{prog.OtherData}{key}={value};";
+                                break;
                         }
                     }
-                    catch (Exception err)
-                    {
-                        _logger.Error($"Unable to decompress EPG file '{name}'", err);
-                    }
+
+                    //Add the program when it does not exist yet
+                    if (!channel.Programs.Any(p => p.Start == prog.Start && p.End == prog.End))
+                        channel.Programs.Add(prog);
                 }
             }
-
-            //Order all programs
-            foreach (var channel in result)
-                channel.Programs = channel.Programs.OrderBy(c => c.Start).ToList();
 
             return result;
-        }
-
-        /// <summary>
-        /// Downloads the EPG (compressed) files.
-        /// </summary>
-        void DownloadEpgfiles()
-        {
-            //EPG url example: http://w.zt6.nl/epgdata/epgdata.20141128.1.json.gz
-            var date = DateTime.Today;
-            for (var dayNr = 0; dayNr < _settings.NumberOfEpgDays; dayNr++)
-            {
-                //EPG is downloaded in 8 parts
-                for (var dayPart = 0; dayPart < 8; dayPart++)
-                {
-
-                    var url = $"epgdata.{date.AddDays(dayNr):yyyyMMdd}.{dayPart}.json.gz";
-                    var localFile = Path.Combine(_settings.EpgFolder, url);
-                    url = string.Concat(_settings.EpgUrl, url);
-
-                    //Download the file
-                    try
-                    {
-                        _downloader.DownloadBinaryFile(url, localFile);
-                    }
-                    catch (Exception err)
-                    {
-                        _logger.Error($"Unable to download EPG for URL '{url}'", err);
-                    }
-                }
-            }
         }
 
         string DownloadDetails(string id)
@@ -261,7 +215,6 @@ namespace EpgGrabber
                 var url = $"{_settings.EpgUrl}{dir}/{id}.json";
                 _logger.Debug($"Try to download {url}");
                 var data = _downloader.DownloadString(url);
-                //var data = "{\"id\":\"061079be-1516-4a4d-ad50-ba394557b6ad\",\"name\":\"NOS Journaal / Actueel / herhalingen NOS Journaal / Extra onderwerpen\",\"start\":1431075600,\"end\":1431097200,\"description\":\"Het nieuws van de dag.\",\"genres\":[\"Actualiteit\",\"Info\"],\"disableRestart\":false}";
                 _logger.Debug($"Downloaded details: {data}");
                 return data;
             }
