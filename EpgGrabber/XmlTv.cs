@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Xml;
 using EpgGrabber.Models;
 using log4net;
@@ -34,6 +37,26 @@ namespace EpgGrabber
             //Save xml
             _xml.InsertBefore(_xml.CreateXmlDeclaration("1.0", "UTF-8", null), _xml.DocumentElement);
             _xml.Save(_settings.XmlTvFileName);
+
+            if (!string.IsNullOrWhiteSpace(_settings.XmlTvUnixSocket))
+                WriteXmlToSocket();
+        }
+
+        void WriteXmlToSocket()
+        {
+            try
+            {
+                EndPoint ep = new UnixEndPoint(_settings.XmlTvUnixSocket);
+                using (var socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP))
+                {
+                    socket.Connect(ep);
+                    socket.Send(File.ReadAllBytes(_settings.XmlTvFileName));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn($"Failed to write XML data to {_settings.XmlTvUnixSocket}", ex);
+            }
         }
 
         /// <summary>
