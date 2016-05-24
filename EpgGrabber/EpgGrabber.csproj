@@ -75,7 +75,9 @@
     <Compile Include="IO\IWebDownloader.cs" />
     <Compile Include="IO\NullWebDownloader.cs" />
     <Compile Include="Models\Channel.cs" />
-    <Compile Include="Models\EpgChannel.cs" />
+    <Compile Include="Models\Details.cs" />
+    <Compile Include="Models\Genre.cs" />
+    <Compile Include="Models\Program.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />

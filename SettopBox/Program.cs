@@ -36,6 +36,7 @@ namespace SettopBox
             Console.WriteLine("Hit 'Enter' to exit");
             Console.ReadLine();
             prog.Stop();
+            container.Dispose();
             Environment.Exit(0);
         }
 

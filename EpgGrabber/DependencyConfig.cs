@@ -19,7 +19,6 @@ namespace EpgGrabber
             container.Register<IFileDownloader, FileDownloader>();
             container.Register<IDownloader, Downloader>();
             container.Register<IGenreTranslator, TvhGenreTranslator>();
-            container.RegisterInitializer<CachedWebDownloader>(c => c.LoadCache());
             container.RegisterInitializer<TvhGenreTranslator>(c => c.Load());
         }
 

@@ -3,18 +3,7 @@ using System.Collections.Generic;
 
 namespace EpgGrabber.Models
 {
-    public class EpgChannel
-    {
-        public string Channel { get; set; }
-        public List<EpgProgram> Programs { get; set; }
-
-        public override string ToString()
-        {
-            return $"{Channel}. {Programs?.Count ?? 0} progs";
-        }
-    }
-
-    public class EpgProgram
+    public class Program
     {
         private const string XmlTvDateFormat = "yyyyMMddHHmmss"; //yyyyMMddHHmmss zzz";
 
@@ -24,7 +13,7 @@ namespace EpgGrabber.Models
         public DateTime End { get; set; }
         public string OtherData { get; set; }
         public string Description { get; set; }
-        public List<EpgGenre> Genres { get; set; }
+        public List<Genre> Genres { get; set; }
         //TODO: more info to read from Glashart EPG
 
         /// <summary>
@@ -58,23 +47,5 @@ namespace EpgGrabber.Models
         {
             return $"{Start:dd-MM-yy HH:mm} / {End:dd-MM-yy HH:mm}  {Name}";
         }
-    }
-
-    public class EpgGenre
-    {
-        public string Language { get; set; }
-        public string Genre { get; set; }
-    }
-
-    public class EpgDetails
-    {
-        //{"id":"838882ca-79c4-409f-9966-2f9121c94f0e","name":"Lara","start":1430757300,"end":1430760300,"description":"","genres":["Serie"],"disableRestart":false}
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Start { get; set; }
-        public string End { get; set; }
-        public string Description { get; set; }
-        public List<string> Genres { get; set; }
-        public bool DisableRestart { get; set; }
     }
 }

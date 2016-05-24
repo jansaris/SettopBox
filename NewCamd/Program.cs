@@ -41,6 +41,7 @@ namespace NewCamd
             Console.WriteLine("Hit 'Enter' to exit");
             Console.ReadLine();
             prog.Stop();
+            container.Dispose();
         }
 
         public override IModuleInfo GetModuleInfo()

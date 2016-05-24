@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EpgGrabber.IO;
 using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Module;
@@ -32,6 +33,7 @@ namespace EpgGrabber
             Console.WriteLine("Press enter to exit");
             Console.ReadLine();
             prog.Stop();
+            container.Dispose();
         }
 
         public override IModuleInfo GetModuleInfo()
@@ -47,6 +49,7 @@ namespace EpgGrabber
         {
             _logger.Info("Welcome to EPG Grabber");
             _settings.Load();
+            CachedWebDownloader.LoadCache(_settings.DataFolder);
             _runningEpgGrabTask = Task.Run(() => DownloadEpgGrabberLoop(), _cancelSource.Token);
         }
 
@@ -108,6 +111,7 @@ namespace EpgGrabber
         protected override void StopModule()
         {
             _cancelSource.Cancel();
+            CachedWebDownloader.SaveCache(_settings.DataFolder, _settings.NumberOfEpgDays);
             if (_runningEpgGrabTask == null || _runningEpgGrabTask.Status != AsyncTaskIsRunning) return;
 
             _logger.Warn("Wait max 10 sec for EPG Grabber to stop");

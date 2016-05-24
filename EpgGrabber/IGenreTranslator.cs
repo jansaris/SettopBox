@@ -5,6 +5,6 @@ namespace EpgGrabber
 {
     public interface IGenreTranslator
     {
-        List<EpgGenre> Translate(List<EpgGenre> genres);
+        List<Genre> Translate(List<Genre> genres);
     }
 }

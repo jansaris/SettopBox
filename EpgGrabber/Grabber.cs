@@ -44,7 +44,7 @@ namespace EpgGrabber
         /// <summary>
         /// Generates the XMLTV file
         /// </summary>
-        public void GenerateXmlTv(List<EpgChannel> epg)
+        void GenerateXmlTv(List<Channel> epg)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace EpgGrabber
             }
         }
 
-        public List<EpgChannel> DownloadDetails(List<EpgChannel> epg)
+        List<Channel> DownloadDetails(List<Channel> epg)
         {
             var programs = epg.SelectMany(channel => channel.Programs).ToList();
             //Loop over all the programs and try to load the details
@@ -68,7 +68,7 @@ namespace EpgGrabber
             return epg;
         }
 
-        private void DownloadDetails(IReadOnlyCollection<EpgProgram> list)
+        void DownloadDetails(IReadOnlyCollection<Models.Program> list)
         {
             int succes = 0, failed = 0, percent = 0;
             foreach (var program in list)
@@ -89,11 +89,11 @@ namespace EpgGrabber
                     continue;
                 }
                 //Parse and update
-                var parsed = JsonConvert.DeserializeObject<EpgDetails>(details);
+                var parsed = JsonConvert.DeserializeObject<Details>(details);
                 program.Description = parsed.Description;
                 if (parsed.Genres != null && parsed.Genres.Any())
                 {
-                    program.Genres = parsed.Genres.Select(g => new EpgGenre { Genre = g, Language = "nl" }).ToList();
+                    program.Genres = parsed.Genres.Select(g => new Genre { Name = g, Language = "nl" }).ToList();
                 }
                 _logger.DebugFormat("Updated program {0}", program.Id);
                 succes++;
@@ -103,7 +103,7 @@ namespace EpgGrabber
             _logger.InfoFormat("Failed to load details for {0} programs", failed);
         }
 
-        void TranslateProgramGenres(IEnumerable<EpgProgram> programs)
+        void TranslateProgramGenres(IEnumerable<Models.Program> programs)
         {
             foreach (var program in programs)
             {
@@ -125,9 +125,9 @@ namespace EpgGrabber
         /// <summary>
         /// Reads the EPG files into a list of EPG objects
         /// </summary>
-        List<EpgChannel> ReadEpgfiles()
+        List<Channel> ReadEpgfiles()
         {
-            var result = new List<EpgChannel>();
+            var result = new List<Channel>();
 
             var date = DateTime.Today;
             for (var dayNr = 0; dayNr < _settings.NumberOfEpgDays; dayNr++)
@@ -149,18 +149,18 @@ namespace EpgGrabber
                             
                             foreach (var channelName in json)
                             {
-                                var channel = result.FirstOrDefault(c => c.Channel.Equals((string)channelName.Key, StringComparison.InvariantCultureIgnoreCase));
+                                var channel = result.FirstOrDefault(c => c.Name.Equals((string)channelName.Key, StringComparison.InvariantCultureIgnoreCase));
                                 if (channel == null)
                                 {
-                                    channel = new EpgChannel { Programs = new List<EpgProgram>() };
+                                    channel = new Channel { Programs = new List<Models.Program>() };
                                     result.Add(channel);
-                                    channel.Channel = (string)channelName.Key;
+                                    channel.Name = (string)channelName.Key;
                                 }
 
                                 //Add programms
                                 foreach (var program in channelName.Value)
                                 {
-                                    var prog = new EpgProgram();
+                                    var prog = new Models.Program();
 
                                     foreach (var programProperty in program)
                                     {

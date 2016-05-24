@@ -23,7 +23,7 @@ namespace EpgGrabber
         /// Generates the XMLtv file
         /// </summary>
         /// <param name="epgChannels">The epg channels.</param>
-        public void GenerateXmlTv(List<EpgChannel> epgChannels)
+        public void GenerateXmlTv(List<Channel> epgChannels)
         {
             _logger.Info($"Generating XMLTV file {_settings.XmlTvFileName}");
             _xml = new XmlDocument();
@@ -50,15 +50,15 @@ namespace EpgGrabber
         /// Generates the channels.
         /// </summary>
         /// <param name="epgChannels"></param>
-        private void GenerateChannels(List<EpgChannel> epgChannels)
+        private void GenerateChannels(List<Channel> epgChannels)
         {
             var root = _xml.DocumentElement;
             //Loop through the channels
             foreach (var channel in epgChannels)
             {
                 var channelNode = AppendNode(root, "channel");
-                AppendAttribute(channelNode, "id", channel.Channel);
-                var displayNode = AppendNode(channelNode, "display-name", channel.Channel);
+                AppendAttribute(channelNode, "id", channel.Name);
+                var displayNode = AppendNode(channelNode, "display-name", channel.Name);
                 AppendAttribute(displayNode, "lang", "nl"); //just setting everything to NL
                 //var icon = channel.Icons.FirstOrDefault(ico => File.Exists(Path.Combine(_settings.IconFolder, ico)));
                 //if (icon == null) continue;
@@ -74,7 +74,7 @@ namespace EpgGrabber
         /// Generates the programs.
         /// </summary>
         /// <param name="epgChannels">The epg channels.</param>
-        private void GeneratePrograms(List<EpgChannel> epgChannels)
+        private void GeneratePrograms(List<Channel> epgChannels)
         {
             var root = _xml.DocumentElement;
 
@@ -90,7 +90,7 @@ namespace EpgGrabber
                         var progNode = AppendNode(root, "programme");
                         AppendAttribute(progNode, "start", prog.StartString);
                         AppendAttribute(progNode, "stop", prog.EndString);
-                        AppendAttribute(progNode, "channel", channel.Channel);
+                        AppendAttribute(progNode, "channel", channel.Name);
                         var titleNode = AppendNode(progNode, "title", prog.Name);
                         AppendAttribute(titleNode, "lang", "nl");
                         if (!string.IsNullOrWhiteSpace(prog.Description))
@@ -102,7 +102,7 @@ namespace EpgGrabber
 
                         foreach (var genre in prog.Genres)
                         {
-                            var categoryNode = AppendNode(progNode, "category", genre.Genre);
+                            var categoryNode = AppendNode(progNode, "category", genre.Name);
                             AppendAttribute(categoryNode, "lang", genre.Language);
                         }
                     }

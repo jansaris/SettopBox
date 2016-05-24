@@ -27,6 +27,7 @@ namespace RunAndMonitor
             Console.WriteLine("Press enter to exit");
             Console.ReadLine();
             prog.Stop();
+            container.Dispose();
         }
 
         public override IModuleInfo GetModuleInfo()

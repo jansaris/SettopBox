@@ -32,6 +32,7 @@ namespace Keyblock
             Console.WriteLine("Press enter to exit");
             Console.ReadLine();
             prog.Stop();
+            container.Dispose();
         }
 
         void LoadKeyBlockLoop()

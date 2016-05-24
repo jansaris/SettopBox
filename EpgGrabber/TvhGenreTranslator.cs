@@ -25,12 +25,12 @@ namespace EpgGrabber
         {
             if (!File.Exists(_settings.EpgTranslationsFile))
             {
-                _logger.WarnFormat("Translation file {0} doesn't exist", _settings.EpgTranslationsFile);
+                _logger.Warn($"Translation file {_settings.EpgTranslationsFile} doesn't exist");
                 return;
             }
             try
             {
-                _logger.DebugFormat("Load {0}", _settings.EpgTranslationsFile);
+                _logger.Debug($"Load {_settings.EpgTranslationsFile}");
                 var lines = File.ReadAllLines(_settings.EpgTranslationsFile);
                 foreach (var line in lines)
                 {
@@ -54,38 +54,38 @@ namespace EpgGrabber
             }
         }
 
-        public List<EpgGenre> Translate(List<EpgGenre> genres)
+        public List<Genre> Translate(List<Genre> genres)
         {
             foreach (var genre in genres.Where(NoTranslation))
             {
-                _logger.WarnFormat("Failed to translate genre: {0}", genre.Genre);
+                _logger.WarnFormat($"Failed to translate genre: {genre.Name}");
             }
 
             return genres
                 .Where(AnyTranslation)
                 .SelectMany(GetTranslations)
-                .Select(translation => new EpgGenre
+                .Select(translation => new Genre
                 {
                     Language = Language,
-                    Genre = translation
+                    Name = translation
                 })
                 .ToList();
         }
 
-        private IEnumerable<string> GetTranslations(EpgGenre genre)
+        private IEnumerable<string> GetTranslations(Genre genre)
         {
             return _translations
-                .Where(t => t.Item1 == genre.Genre)
+                .Where(t => t.Item1 == genre.Name)
                 .Select(t => t.Item2)
                 .ToList();
         }
 
-        private bool AnyTranslation(EpgGenre genre)
+        private bool AnyTranslation(Genre genre)
         {
-            return _translations.Any(t => t.Item1 == genre.Genre);
+            return _translations.Any(t => t.Item1 == genre.Name);
         }
 
-        private bool NoTranslation(EpgGenre genre)
+        private bool NoTranslation(Genre genre)
         {
             return !AnyTranslation(genre);
         }
