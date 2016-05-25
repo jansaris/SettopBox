@@ -111,11 +111,13 @@ namespace EpgGrabber
         protected override void StopModule()
         {
             _cancelSource.Cancel();
+            Task.Delay(100).Wait();
+            if (_runningEpgGrabTask != null && _runningEpgGrabTask.Status == AsyncTaskIsRunning)
+            {
+                _logger.Warn("Wait max 10 sec for EPG Grabber to stop");
+                _runningEpgGrabTask.Wait(10000);
+            }
             CachedWebDownloader.SaveCache(_settings.DataFolder, _settings.NumberOfEpgDays);
-            if (_runningEpgGrabTask == null || _runningEpgGrabTask.Status != AsyncTaskIsRunning) return;
-
-            _logger.Warn("Wait max 10 sec for EPG Grabber to stop");
-            _runningEpgGrabTask.Wait(10000);
         }
     }
 }

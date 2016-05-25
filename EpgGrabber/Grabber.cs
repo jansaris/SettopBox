@@ -32,7 +32,8 @@ namespace EpgGrabber
 
         public void Download()
         {
-            _logger.Info("Start grabbing EPG");
+            _settings.Load();
+            _logger.Info($"Start grabbing EPG for {_settings.NumberOfEpgDays} days");
             var date = DateTime.Today;
             var epg = new List<Channel>();
 
