@@ -50,8 +50,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyInjection\BaseDependencyConfigurator.cs" />
+    <Compile Include="DependencyInjection\ContainerExtensions.cs" />
+    <Compile Include="DependencyInjection\TypedLogger.cs" />
     <Compile Include="DependencyInjection\SharedContainer.cs" />
-    <Compile Include="DependencyInjection\ContextDependentExtensions.cs" />
     <Compile Include="DependencyInjection\DependecyContext.cs" />
     <Compile Include="Keyblock\Block.cs" />
     <Compile Include="Keyblock\Channel.cs" />

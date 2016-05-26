@@ -17,9 +17,9 @@ namespace SharedComponents.Settings
 
         static readonly object SyncRoot = new object();
 
-        protected IniSettings()
+        protected IniSettings(ILog logger)
         {
-            Logger = LogManager.GetLogger(GetType());
+            Logger = logger;
         }
 
         //Decode if ini contains flag

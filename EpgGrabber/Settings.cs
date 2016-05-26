@@ -1,9 +1,13 @@
-﻿using SharedComponents.Settings;
+﻿using log4net;
+using SharedComponents.Settings;
 
 namespace EpgGrabber
 {
     public class Settings : IniSettings
     {
+        public Settings(ILog logger) : base(logger)
+        {
+        }
         protected override string Name => "EpgGrabber";
         public int Hour { get; set; } = 21;
         public int Minute { get; set; } = 0;

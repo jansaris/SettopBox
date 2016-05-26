@@ -14,12 +14,13 @@ namespace EpgGrabber
 
         public override void RegisterComponents(Container container)
         {
-            container.Register<IWebDownloader, HttpWebDownloader>();
-            container.RegisterDecorator<IWebDownloader, CachedWebDownloader>();
-            container.Register<IFileDownloader, FileDownloader>();
+            container.Register<IWebDownloader, HttpWebDownloader>(Lifestyle.Singleton);
+            container.RegisterDecorator<IWebDownloader, CachedWebDownloader>(Lifestyle.Singleton);
+            container.Register<IFileDownloader, FileDownloader>(Lifestyle.Singleton);
             container.Register<IDownloader, Downloader>();
-            container.Register<IGenreTranslator, TvhGenreTranslator>();
+            container.Register<IGenreTranslator, TvhGenreTranslator>(Lifestyle.Singleton);
             container.RegisterInitializer<TvhGenreTranslator>(c => c.Load());
+            container.RegisterInitializer<CachedWebDownloader>(c => c.LoadCache());
         }
 
         public override Type Module => typeof(Program);

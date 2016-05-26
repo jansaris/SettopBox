@@ -52,7 +52,7 @@ namespace Keyblock
         public double KeyblockValidationInHours { get; set; } = 1;
         public bool ForceInitialKeyblockDownload { get; set; } = false;
 
-        public Settings()
+        public Settings(ILog logger) : base(logger)
         {
             _random = new Random();
         }

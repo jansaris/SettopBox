@@ -75,6 +75,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EpgGrabber\EpgGrabber.csproj">
+      <Project>{22e85e47-b5f5-46db-85c5-1d24d69a330d}</Project>
+      <Name>EpgGrabber</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Keyblock\Keyblock.csproj">
       <Project>{e62c2573-7885-4eb6-92c1-a708e7736f34}</Project>
       <Name>Keyblock</Name>

@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using log4net;
 using SharedComponents.Settings;
 
 namespace NewCamd
 {
     public class Settings : IniSettings
     {
+        public Settings(ILog logger) : base(logger)
+        {
+        }
         protected override string Name => "NewCamd";
         public string Username { get; private set; } = "user";
         public string Password { get; private set; } = "pass";

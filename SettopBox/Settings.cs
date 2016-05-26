@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using log4net;
 using SharedComponents.Settings;
 
 namespace SettopBox
 {
     public class Settings : IniSettings
     {
+        public Settings(ILog logger) : base(logger)
+        {
+        }
         protected override string Name => "SettopBox";
 
         readonly Dictionary<string, bool> _modules = new Dictionary<string, bool>();

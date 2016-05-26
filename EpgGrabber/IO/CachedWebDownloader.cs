@@ -9,15 +9,17 @@ namespace EpgGrabber.IO
     public class CachedWebDownloader : IWebDownloader
     {
         const string Filename = "HttpCache.dat";
-        static ILog _logger;
-        static readonly List<CacheObject> Cache = new List<CacheObject>();
+        readonly ILog _logger;
+        readonly List<CacheObject> _cache = new List<CacheObject>();
 
         readonly IWebDownloader _webDownloader;
+        readonly Settings _settings;
 
-        public CachedWebDownloader(ILog logger, IWebDownloader webDownloader)
+        public CachedWebDownloader(ILog logger, IWebDownloader webDownloader, Settings settings)
         {
             _logger = logger;
             _webDownloader = webDownloader;
+            _settings = settings;
         }
 
         public byte[] DownloadBinary(string url)
@@ -25,7 +27,7 @@ namespace EpgGrabber.IO
             var data = GetFromCache(url);
             if (data != null) return data.ByteData;
             var webData = _webDownloader.DownloadBinary(url);
-            if (webData != null) Cache.Add(new CacheObject(url, webData));
+            if (webData != null) _cache.Add(new CacheObject(url, webData));
             return webData;
         }
 
@@ -41,12 +43,12 @@ namespace EpgGrabber.IO
         private void AddToCache(CacheObject obj)
         {
             _logger.DebugFormat("Add {0} data to cache for {1}", obj.DataType, obj.Url);
-            Cache.Add(obj);
+            _cache.Add(obj);
         }
 
         private CacheObject GetFromCache(string url)
         {
-            var cacheObj = Cache.FirstOrDefault(c => c.Url == url);
+            var cacheObj = _cache.FirstOrDefault(c => c.Url == url);
             if (cacheObj != null)
             {
                 _logger.DebugFormat("Load from cache for {0}", url);
@@ -54,9 +56,9 @@ namespace EpgGrabber.IO
             return cacheObj;
         }
 
-        public static void LoadCache(string path)
+        public void LoadCache()
         {
-            var file = Path.Combine(path, Filename);
+            var file = Path.Combine(_settings.DataFolder, Filename);
             try
             {
                 if (!File.Exists(file))
@@ -73,7 +75,7 @@ namespace EpgGrabber.IO
                     {
                         var obj = new CacheObject();
                         obj.Deserialize(reader);
-                        Cache.Add(obj);
+                        _cache.Add(obj);
                     }
                 }
             }
@@ -83,16 +85,16 @@ namespace EpgGrabber.IO
             }
         }
 
-        public static void SaveCache(string path, int daysToCache)
+        public void SaveCache()
         {
-            var file = Path.Combine(path, Filename);
+            var file = Path.Combine(_settings.DataFolder, Filename);
             try
             {
-                var data = Cache;
-                if (daysToCache > 0)
+                var data = _cache;
+                if (_settings.NumberOfEpgDays > 0)
                 {
-                    _logger.Debug($"Filter the current cache to {daysToCache} days");
-                    data = Cache.Where(c => c.Date.AddDays(daysToCache) >= DateTime.Now).ToList();
+                    _logger.Debug($"Filter the current cache to {_settings.NumberOfEpgDays} days");
+                    data = _cache.Where(c => c.Date.AddDays(_settings.NumberOfEpgDays) >= DateTime.Now).ToList();
                 }
                 _logger.Debug($"Save cache to {file}");
                 using (var writer = new BinaryWriter(File.OpenWrite(file)))

@@ -13,16 +13,18 @@ namespace EpgGrabber
         readonly ILog _logger;
         readonly Settings _settings;
         readonly Grabber _epgGrabber;
+        readonly CachedWebDownloader _webDownloader;
         readonly CancellationTokenSource _cancelSource = new CancellationTokenSource();
         Task _runningEpgGrabTask;
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
-        public Program(ILog logger, Settings settings, Grabber epgGrabber)
+        public Program(ILog logger, Settings settings, Grabber epgGrabber, CachedWebDownloader webDownloader)
         {
             _logger = logger;
             _settings = settings;
             _epgGrabber = epgGrabber;
+            _webDownloader = webDownloader;
         }
 
         static void Main()
@@ -49,7 +51,6 @@ namespace EpgGrabber
         {
             _logger.Info("Welcome to EPG Grabber");
             _settings.Load();
-            CachedWebDownloader.LoadCache(_settings.DataFolder);
             _runningEpgGrabTask = Task.Run(() => DownloadEpgGrabberLoop(), _cancelSource.Token);
         }
 
@@ -117,7 +118,7 @@ namespace EpgGrabber
                 _logger.Warn("Wait max 10 sec for EPG Grabber to stop");
                 _runningEpgGrabTask.Wait(10000);
             }
-            CachedWebDownloader.SaveCache(_settings.DataFolder, _settings.NumberOfEpgDays);
+            _webDownloader.SaveCache();
         }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading;
 using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Module;
-using ThreadState = System.Diagnostics.ThreadState;
 
 namespace SettopBox
 {
@@ -30,6 +27,7 @@ namespace SettopBox
                                                           NewCamd.DependencyConfig, 
                                                           Keyblock.DependencyConfig,
                                                           RunAndMonitor.DependencyConfig,
+                                                          EpgGrabber.DependencyConfig,
                                                           WebUi.DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
             prog.Start();
