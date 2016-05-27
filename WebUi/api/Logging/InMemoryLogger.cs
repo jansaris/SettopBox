@@ -9,7 +9,7 @@ namespace WebUi.api.Logging
 {
     public class InMemoryLogger : AppenderSkeleton
     {
-        private readonly LimitedList<LogModel> _logList = new LimitedList<LogModel>(500);
+        readonly LimitedList<LogModel> _logList = new LimitedList<LogModel>(500);
 
         public InMemoryLogger()
         {
