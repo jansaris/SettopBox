@@ -146,10 +146,10 @@ namespace NewCamd
             }
         }
 
-        public override void ProcessDataFromOtherModule(string moduleName, Data data)
+        public override void ProcessDataFromOtherModule(string moduleName, CommunicationData data)
         {
-            if (!ShouldWeProcessNewData(moduleName, data)) return;
-            _logger.Info($"Handle new {data} from {moduleName}");
+            if (!ShouldWeProcessNewData(moduleName, data.Type)) return;
+            _logger.Info($"Handle new {data.Type} from {moduleName}");
             _keyblock.Prepare();
             lock (_syncObject)
             {
@@ -157,17 +157,17 @@ namespace NewCamd
             }
         }
 
-        bool ShouldWeProcessNewData(string moduleName, Data data)
+        bool ShouldWeProcessNewData(string moduleName, DataType dataType)
         {
-            _logger.Debug($"Validate if we need to handle {data} from {moduleName}");
+            _logger.Debug($"Validate if we need to handle {dataType} from {moduleName}");
             if (State != ModuleState.Running)
             {
                 _logger.Debug($"Current state {State}, so we don't handle new data");
                 return false;
             }
-            if (data != Data.KeyBlock)
+            if (dataType != DataType.KeyBlock)
             {
-                _logger.Debug($"{data} is not relevant for us");
+                _logger.Debug($"{dataType} is not relevant for us");
                 return false;
             }
             return true;

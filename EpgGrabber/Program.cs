@@ -81,7 +81,11 @@ namespace EpgGrabber
             if (_cancelSource.IsCancellationRequested) return;
             try
             {
-                _epgGrabber.Download();
+                var epgFile = _epgGrabber.Download();
+                if (epgFile != null)
+                {
+                    SignalNewData(DataType.Epg, epgFile);
+                }
                 _lastRetrieval = DateTime.Now;
                 _nextRetrieval = DetermineNextRetrieval();
             }

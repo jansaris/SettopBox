@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Xml;
 using EpgGrabber.Models;
 using log4net;
@@ -12,9 +10,9 @@ namespace EpgGrabber
 {
     public sealed class XmlTv
     {
-        private XmlDocument _xml;
-        private readonly ILog _logger;
-        private readonly Settings _settings;
+        XmlDocument _xml;
+        readonly ILog _logger;
+        readonly Settings _settings;
 
         public XmlTv(Settings settings, ILog logger)
         {
@@ -26,7 +24,7 @@ namespace EpgGrabber
         /// Generates the XMLtv file
         /// </summary>
         /// <param name="epgChannels">The epg channels.</param>
-        public void GenerateXmlTv(List<Channel> epgChannels)
+        public string GenerateXmlTv(List<Channel> epgChannels)
         {
             _logger.Info($"Generating XMLTV file {_settings.XmlTvFileName}");
             _xml = new XmlDocument();
@@ -36,34 +34,16 @@ namespace EpgGrabber
 
             //Save xml
             _xml.InsertBefore(_xml.CreateXmlDeclaration("1.0", "UTF-8", null), _xml.DocumentElement);
-            _xml.Save(_settings.XmlTvFileName);
-
-            if (!string.IsNullOrWhiteSpace(_settings.XmlTvUnixSocket))
-                WriteXmlToSocket();
-        }
-
-        void WriteXmlToSocket()
-        {
-            try
-            {
-                EndPoint ep = new UnixEndPoint(_settings.XmlTvUnixSocket);
-                using (var socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP))
-                {
-                    socket.Connect(ep);
-                    socket.Send(File.ReadAllBytes(_settings.XmlTvFileName));
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Warn($"Failed to write XML data to {_settings.XmlTvUnixSocket}", ex);
-            }
+            var file = new FileInfo(_settings.XmlTvFileName);
+            _xml.Save(file.FullName);
+            return file.FullName;
         }
 
         /// <summary>
         /// Generates the root node
         /// </summary>
         /// <returns></returns>
-        private void GenerateRoot()
+        void GenerateRoot()
         {
             var node = AppendNode(_xml, "tv");
             AppendAttribute(node, "generator-info-name", "GlashartEPGgrabber (by Dennieku & jansaris)");
@@ -73,7 +53,7 @@ namespace EpgGrabber
         /// Generates the channels.
         /// </summary>
         /// <param name="epgChannels"></param>
-        private void GenerateChannels(List<Channel> epgChannels)
+        void GenerateChannels(List<Channel> epgChannels)
         {
             var root = _xml.DocumentElement;
             //Loop through the channels
@@ -97,7 +77,7 @@ namespace EpgGrabber
         /// Generates the programs.
         /// </summary>
         /// <param name="epgChannels">The epg channels.</param>
-        private void GeneratePrograms(List<Channel> epgChannels)
+        void GeneratePrograms(List<Channel> epgChannels)
         {
             var root = _xml.DocumentElement;
 
@@ -145,7 +125,7 @@ namespace EpgGrabber
         /// <param name="name">The name.</param>
         /// <param name="innerText"></param>
         /// <returns></returns>
-        private XmlNode AppendNode(XmlNode parent, string name, string innerText = null)
+        XmlNode AppendNode(XmlNode parent, string name, string innerText = null)
         {
             XmlNode node = _xml.CreateElement(name);
             parent.AppendChild(node);
@@ -161,7 +141,7 @@ namespace EpgGrabber
         /// <param name="name">The name.</param>
         /// <param name="value">The value.</param>
         /// <returns></returns>
-        private void AppendAttribute(XmlNode node, string name, string value)
+        void AppendAttribute(XmlNode node, string name, string value)
         {
             var attr = _xml.CreateAttribute(name);
             attr.Value = value;

@@ -24,12 +24,12 @@ namespace SharedComponents.Module
             _modules.Add(module);
         }
 
-        private void Module_StatusChanged(object sender, ModuleState newState)
+        void Module_StatusChanged(object sender, ModuleState newState)
         {
             OnUpdate();
         }
 
-        private void Module_NewDataAvailable(object sender, Data newData)
+        void Module_NewDataAvailable(object sender, CommunicationData newData)
         {
             var senderName = (sender as IModule)?.Name ?? "Unknown";
             foreach (var module in _modules)
@@ -74,7 +74,7 @@ namespace SharedComponents.Module
             return _modules.FirstOrDefault(m => m.Name == name);
         }
 
-        private void OnUpdate()
+        void OnUpdate()
         {
             //Inform the users in a new thread
             Task.Run(() =>

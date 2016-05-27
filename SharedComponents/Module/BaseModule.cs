@@ -10,8 +10,9 @@ namespace SharedComponents.Module
         public ModuleState State { get; private set; }
 
         public abstract IModuleInfo GetModuleInfo();
+
         public event EventHandler<ModuleState> StatusChanged;
-        public event EventHandler<Data> NewDataAvailable;
+        public event EventHandler<CommunicationData> NewDataAvailable;
 
         protected const TaskStatus AsyncTaskIsRunning = TaskStatus.WaitingForActivation;
 
@@ -57,12 +58,12 @@ namespace SharedComponents.Module
             ChangeState(ModuleState.Error);
         }
 
-        protected void SignalNewData(Data data)
+        protected void SignalNewData(DataType dataType, object data)
         {
-            NewDataAvailable?.Invoke(this, data);
+            NewDataAvailable?.Invoke(this, new CommunicationData(dataType, data));
         }
 
-        public virtual void ProcessDataFromOtherModule(string moduleName, Data data)
+        public virtual void ProcessDataFromOtherModule(string moduleName, CommunicationData data)
         {
             
         }

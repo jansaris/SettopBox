@@ -30,7 +30,7 @@ namespace EpgGrabber
             _genreTranslator = genreTranslator;
         }
 
-        public void Download()
+        public string Download()
         {
             _logger.Info($"Start grabbing EPG for {_settings.NumberOfEpgDays} days");
             var date = DateTime.Today;
@@ -60,7 +60,7 @@ namespace EpgGrabber
                 channel.Programs = channel.Programs.OrderBy(c => c.Start).ToList();
             }
 
-            GenerateXmlTv(epg);
+            return GenerateXmlTv(epg);
         }
 
         byte[] DownloadEpgfile(DateTime now, int dayNr, int dayPart)
@@ -84,17 +84,19 @@ namespace EpgGrabber
         /// <summary>
         /// Generates the XMLTV file
         /// </summary>
-        void GenerateXmlTv(List<Channel> epg)
+        string GenerateXmlTv(List<Channel> epg)
         {
             try
             {
                 //Generate XMLTV file
-                _xmlTv.GenerateXmlTv(epg);
+                var file = _xmlTv.GenerateXmlTv(epg);
                 _logger.Info("XMLTV file generated");
+                return file;
             }
             catch (Exception err)
             {
                 _logger.Error(err);
+                return null;
             }
         }
 

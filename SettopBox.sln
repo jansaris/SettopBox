@@ -75,6 +75,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunAndMonitor", "RunAndMoni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpgGrabber", "EpgGrabber\EpgGrabber.csproj", "{22E85E47-B5F5-46DB-85C5-1D24D69A330D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TvHeadendIntegration", "TvHeadendIntegration\TvHeadendIntegration.csproj", "{7F602308-99F7-4516-934D-3DCC28DC6782}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,6 +115,10 @@ Global
 		{22E85E47-B5F5-46DB-85C5-1D24D69A330D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22E85E47-B5F5-46DB-85C5-1D24D69A330D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22E85E47-B5F5-46DB-85C5-1D24D69A330D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F602308-99F7-4516-934D-3DCC28DC6782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F602308-99F7-4516-934D-3DCC28DC6782}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F602308-99F7-4516-934D-3DCC28DC6782}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F602308-99F7-4516-934D-3DCC28DC6782}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
