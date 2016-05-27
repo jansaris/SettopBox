@@ -68,6 +68,7 @@
     <Compile Include="Module\NewCamdInfo.cs" />
     <Compile Include="Module\RunAndMonitorInfo.cs" />
     <Compile Include="Module\TvHeadendIntegrationInfo.cs" />
+    <Compile Include="PriorityScheduler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\IniSettings.cs" />
     <Compile Include="Settings\Setting.cs" />

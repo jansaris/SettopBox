@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
+using SharedComponents;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Module;
 
@@ -116,7 +117,7 @@ namespace Keyblock
         {
             _logger.Info("Welcome to Keyblock");
             _settings.Load();
-            _runningKeyblockTask = Task.Run(() => LoadKeyBlockLoop(), _cancelSource.Token);
+            _runningKeyblockTask = Task.Factory.StartNew(LoadKeyBlockLoop, _cancelSource.Token, TaskCreationOptions.None, PriorityScheduler.BelowNormal);
         }
 
         protected override void StopModule()

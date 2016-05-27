@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EpgGrabber.IO;
 using log4net;
+using SharedComponents;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Module;
 
@@ -51,7 +52,7 @@ namespace EpgGrabber
         {
             _logger.Info("Welcome to EPG Grabber");
             _settings.Load();
-            _runningEpgGrabTask = Task.Run(() => DownloadEpgGrabberLoop(), _cancelSource.Token);
+            _runningEpgGrabTask = Task.Factory.StartNew(DownloadEpgGrabberLoop, _cancelSource.Token, TaskCreationOptions.None, PriorityScheduler.Lowest);
         }
 
         void DownloadEpgGrabberLoop()
