@@ -20,14 +20,17 @@ namespace NewCamd
             _settings = settings;
         }
 
-        public void Prepare()
+        public void Prepare(string keyblockFile = null)
         {
-            Load(ReadKeyBlock());
+            if (string.IsNullOrWhiteSpace(keyblockFile))
+            {
+                keyblockFile = Path.Combine(_settings.DataFolder, _settings.KeyblockFile);
+            }
+            Load(ReadKeyBlock(keyblockFile));
         }
 
-        byte[] ReadKeyBlock()
+        byte[] ReadKeyBlock(string file)
         {
-            var file = Path.Combine(_settings.DataFolder, _settings.KeyblockFile);
             if (!File.Exists(file))
             {
                 _logger.Warn($"Keyblock file '{file}' doesn't exists");

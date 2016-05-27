@@ -149,11 +149,13 @@ namespace NewCamd
         public override void ProcessDataFromOtherModule(string moduleName, CommunicationData data)
         {
             if (!ShouldWeProcessNewData(moduleName, data.Type)) return;
-            _logger.Info($"Handle new {data.Type} from {moduleName}");
-            _keyblock.Prepare();
+            _logger.Info($"Handle new {data.Type} from {moduleName} with value {data.Data}");
+            string keyblockFile = null;
+            if (data.Data != null) keyblockFile = data.Data.ToString();
+            _keyblock.Prepare(keyblockFile);
             lock (_syncObject)
             {
-                _activeClients.ForEach(c => c.RefreshKeyblock());
+                _activeClients.ForEach(c => c.RefreshKeyblock(keyblockFile));
             }
         }
 

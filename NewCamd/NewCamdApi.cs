@@ -133,9 +133,9 @@ namespace NewCamd
             _communication.Dispose();
         }
 
-        public void RefreshKeyblock()
+        public void RefreshKeyblock(string keyblockFile)
         {
-            _keyblock.Prepare();
+            _keyblock.Prepare(keyblockFile);
         }
     }
 }
