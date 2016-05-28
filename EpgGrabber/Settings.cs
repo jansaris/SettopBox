@@ -16,6 +16,7 @@ namespace EpgGrabber
         public string XmlTvFileName { get; set; } = "Epg.xml";
         public string XmlTvUnixSocket { get; set; } = "/volume1/@appstore/tvheadend-4.0/var/epggrab/xmltv.sock";
         public string DataFolder { get; set; } = "Data";
-        public string EpgTranslationsFile { get; set; } = "EpgGenres.txt";
+        public string EpgTranslationsFile { get; set; } = "TvhEpgGenres.txt";
+        public string EpgChannelListFile { get; set; } = "Channels.txt";
     }
 }

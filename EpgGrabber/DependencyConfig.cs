@@ -18,8 +18,8 @@ namespace EpgGrabber
             container.RegisterDecorator<IWebDownloader, CachedWebDownloader>(Lifestyle.Singleton);
             container.Register<IFileDownloader, FileDownloader>(Lifestyle.Singleton);
             container.Register<IDownloader, Downloader>();
-            container.Register<IGenreTranslator, TvhGenreTranslator>(Lifestyle.Singleton);
-            container.RegisterInitializer<TvhGenreTranslator>(c => c.Load());
+            container.RegisterInitializer<GenreTranslator>(c => c.Load());
+            container.RegisterInitializer<ChannelList>(c => c.LoadChannelsFromDisk());
             container.RegisterInitializer<CachedWebDownloader>(c => c.LoadCache());
         }
 

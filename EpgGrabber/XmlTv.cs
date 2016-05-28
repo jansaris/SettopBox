@@ -26,7 +26,8 @@ namespace EpgGrabber
         /// <param name="epgChannels">The epg channels.</param>
         public string GenerateXmlTv(List<Channel> epgChannels)
         {
-            _logger.Info($"Generating XMLTV file {_settings.XmlTvFileName}");
+            var fileName = Path.Combine(_settings.DataFolder, _settings.XmlTvFileName);
+            _logger.Info($"Generating XMLTV file {fileName}");
             _xml = new XmlDocument();
             GenerateRoot();
             GenerateChannels(epgChannels);
@@ -34,7 +35,7 @@ namespace EpgGrabber
 
             //Save xml
             _xml.InsertBefore(_xml.CreateXmlDeclaration("1.0", "UTF-8", null), _xml.DocumentElement);
-            var file = new FileInfo(_settings.XmlTvFileName);
+            var file = new FileInfo(fileName);
             _xml.Save(file.FullName);
             return file.FullName;
         }

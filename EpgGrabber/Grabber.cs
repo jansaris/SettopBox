@@ -18,9 +18,10 @@ namespace EpgGrabber
         readonly IDownloader _downloader;
         readonly Compression _compression;
         readonly XmlTv _xmlTv;
-        readonly IGenreTranslator _genreTranslator;
+        readonly GenreTranslator _genreTranslator;
+        readonly ChannelList _channelList;
 
-        public Grabber(ILog logger, Settings settings, IDownloader downloader, Compression compression, XmlTv xmlTv, IGenreTranslator genreTranslator)
+        public Grabber(ILog logger, Settings settings, IDownloader downloader, Compression compression, XmlTv xmlTv, GenreTranslator genreTranslator, ChannelList channelList)
         {
             _logger = logger;
             _settings = settings;
@@ -28,6 +29,7 @@ namespace EpgGrabber
             _compression = compression;
             _xmlTv = xmlTv;
             _genreTranslator = genreTranslator;
+            _channelList = channelList;
         }
 
         public string Download()
@@ -47,6 +49,7 @@ namespace EpgGrabber
                     var file = _compression.Decompress(zip);
                     var epgString = Encoding.Default.GetString(file);
                     var epgData = ParseEpgData(epgString);
+                    epgData = _channelList.FilterOnSelectedChannels(epgData);
                     DownloadDetails(epgData);
                     _logger.Info($"Downloaded EPG data for {epgData.SelectMany(channel => channel.Programs).Count()} programs");
 

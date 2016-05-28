@@ -7,7 +7,7 @@ using log4net;
 
 namespace EpgGrabber
 {
-    public class TvhGenreTranslator : IGenreTranslator
+    public class GenreTranslator
     {
         readonly ILog _logger;
         readonly Settings _settings;
@@ -15,7 +15,7 @@ namespace EpgGrabber
         private const string Language = "TVH";
         private readonly List<Tuple<string, string>> _translations = new List<Tuple<string, string>>();
 
-        public TvhGenreTranslator(ILog logger, Settings settings)
+        public GenreTranslator(ILog logger, Settings settings)
         {
             _logger = logger;
             _settings = settings;
@@ -23,15 +23,16 @@ namespace EpgGrabber
 
         public void Load()
         {
-            if (!File.Exists(_settings.EpgTranslationsFile))
+            var filename = Path.Combine(_settings.DataFolder, _settings.EpgTranslationsFile);
+            if (!File.Exists(filename))
             {
-                _logger.Warn($"Translation file {_settings.EpgTranslationsFile} doesn't exist");
+                _logger.Warn($"Translation file {filename} doesn't exist");
                 return;
             }
             try
             {
-                _logger.Debug($"Load {_settings.EpgTranslationsFile}");
-                var lines = File.ReadAllLines(_settings.EpgTranslationsFile);
+                _logger.Debug($"Load {filename}");
+                var lines = File.ReadAllLines(filename);
                 foreach (var line in lines)
                 {
                     var splitted = line.Split(';');
@@ -50,7 +51,7 @@ namespace EpgGrabber
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to load {_settings.EpgTranslationsFile}", ex);
+                _logger.Error($"Failed to load {filename}", ex);
             }
         }
 
