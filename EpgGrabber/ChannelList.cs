@@ -11,7 +11,7 @@ namespace EpgGrabber
     {
         readonly Settings _settings;
         readonly ILog _logger;
-        public List<string> Channels { get; private set; } = new List<string>();
+        public Dictionary<string, string> Channels { get; private set; } = new Dictionary<string, string>();
 
         public ChannelList(Settings settings, ILog logger)
         {
@@ -29,13 +29,27 @@ namespace EpgGrabber
             }
             try
             {
-                Channels = File.ReadAllLines(file.FullName).ToList();
+                Channels = File.ReadAllLines(file.FullName)
+                    .Select(ParseLine)
+                    .Where(item => item != null)
+                    .ToDictionary(k => k.Item1, v => v.Item2);
             }
             catch (Exception ex)
             {
                 _logger.Warn($"Failed to read channel list file '{file.FullName}'. No channels will be filtered", ex);
-                Channels = new List<string>();
+                Channels = new Dictionary<string, string>();
             }
+        }
+
+        Tuple<string, string> ParseLine(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line)) return null;
+
+            var splitted = line.Split('|');
+            if (splitted.Length == 2) return new Tuple<string, string>(splitted[0], splitted[1]);
+
+            _logger.Warn("Failed to read line '{item}' in '{file.FullName}' (expect key|name)");
+            return null;
         }
 
         public List<Channel> FilterOnSelectedChannels(List<Channel> epgData)
@@ -43,7 +57,7 @@ namespace EpgGrabber
             if(Channels.Count == 0) return epgData;
 
             var current = epgData.Count;
-            var filtered = epgData.Where(e => Channels.Contains(e.Name)).ToList();
+            var filtered = epgData.Where(e => Channels.ContainsKey(e.Name)).ToList();
             if (current != filtered.Count)
             {
                 _logger.Debug($"Filtered {current - filtered.Count} channels");

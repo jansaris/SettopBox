@@ -1,3 +1,26 @@
-﻿ned1
-ned2
-ned3
+﻿ned1|NPO 1
+ned2|NPO 2
+ned3|NPO 3
+rtl4|RTL 4
+rtl5|RTL 5
+sbs6|SBS 6
+rtl7|RTL 7
+veronica|Veronica/Disney XD
+net5|Net5
+rtl8|RTL 8
+een|één
+canvas|Canvas
+ketnet|Ketnet/OP12
+sbs9|SBS 9
+discovery|Discovery
+tlc|TLC
+animalplanet|Animal Planet
+ngc|National Geographic
+bbc1|BBC One
+bbc2|BBC Two
+eurosport|Eurosport
+nickelodeon|Nickelodeon
+nickjr|Nick Junior
+nicktoons|Nick Toons
+comcentral|Comedy Central
+cartoon|Cartoon Network

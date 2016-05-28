@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EpgGrabber.IO;
@@ -47,7 +48,7 @@ namespace EpgGrabber
             {
                 LastRetrieval = _lastRetrieval,
                 NextRetrieval = _nextRetrieval,
-                Channels = _channelList.Channels.ToArray()
+                Channels = _channelList.Channels.Select(kv => kv.Value).ToArray()
             };
         }
 
