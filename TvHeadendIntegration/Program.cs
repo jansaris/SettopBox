@@ -13,7 +13,7 @@ namespace TvHeadendIntegration
         readonly Settings _settings;
         readonly UpdateEpg _epg;
 
-        Program(ILog logger, Settings settings, UpdateEpg epg)
+        public Program(ILog logger, Settings settings, UpdateEpg epg)
         {
             _logger = logger;
             _settings = settings;
@@ -42,8 +42,15 @@ namespace TvHeadendIntegration
             _settings.Load();
             if (!string.IsNullOrWhiteSpace(_settings.InitialEpgFile))
             {
-                _epg.SendToTvheadend(Path.Combine(_settings.DataFolder, _settings.InitialEpgFile));
+                UpdateEpg(Path.Combine(_settings.DataFolder, _settings.InitialEpgFile));
+                
             }
+        }
+
+        void UpdateEpg(string file)
+        {
+            _info.LastEpgUpdateSuccessfull = _epg.SendToTvheadend(file);
+            _info.LastEpgUpdate = DateTime.Now;
         }
 
         public override void ProcessDataFromOtherModule(string moduleName, CommunicationData data)
@@ -52,8 +59,7 @@ namespace TvHeadendIntegration
             switch (data.Type)
             {
                 case DataType.Epg:
-                    _info.LastEpgUpdateSuccessfull = _epg.SendToTvheadend(data.Data.ToString());
-                    _info.LastEpgUpdate = DateTime.Now;
+                    UpdateEpg(data.Data.ToString());
                     break;
                 default:
                     //Ignore other 

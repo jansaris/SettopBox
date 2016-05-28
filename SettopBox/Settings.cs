@@ -38,6 +38,18 @@ namespace SettopBox
             set { UpdateModule(nameof(RunAndMonitor), value); }
         }
 
+        public bool TvHeadendIntegration
+        {
+            get { return GetModule(nameof(TvHeadendIntegration)); }
+            set { UpdateModule(nameof(TvHeadendIntegration), value); }
+        }
+
+        public bool EpgGrabber
+        {
+            get { return GetModule(nameof(EpgGrabber)); }
+            set { UpdateModule(nameof(EpgGrabber), value); }
+        }
+
         public IReadOnlyList<Tuple<string, bool>> GetModules()
         {
             return _modules.Select(m => new Tuple<string, bool>(m.Key, m.Value)).ToList();

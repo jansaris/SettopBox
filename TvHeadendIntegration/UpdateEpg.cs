@@ -16,16 +16,18 @@ namespace TvHeadendIntegration
             _settings = settings;
         }
 
-        public bool SendToTvheadend(string epgFile)
+        public bool SendToTvheadend(string file)
         {
-            var file = ValidateEpgFile(epgFile);
-            return WriteXmlToSocket(file);
+            var fileinfo = ValidateEpgFile(file);
+            var result = WriteXmlToSocket(fileinfo);
+            if(result) _logger.Info($"Successfully sended {file} to Tvheadend");
+            return result;
         }
 
         FileInfo ValidateEpgFile(string epgFile)
         {
             var file = new FileInfo(epgFile);
-            if (file.Exists)
+            if (!file.Exists)
             {
                 _logger.Warn($"EPG file {file.FullName} doesn't exists");
                 return null;
@@ -33,16 +35,16 @@ namespace TvHeadendIntegration
             return file;
         }
 
-        bool WriteXmlToSocket(FileInfo epgFile)
+        bool WriteXmlToSocket(FileInfo file)
         {
-            if (epgFile == null) return false;
+            if (file == null) return false;
             try
             {
                 EndPoint ep = new UnixEndPoint(_settings.XmlTvSocket);
                 using (var socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP))
                 {
                     socket.Connect(ep);
-                    socket.Send(File.ReadAllBytes(epgFile.FullName));
+                    socket.Send(File.ReadAllBytes(file.FullName));
                 }
                 return true;
             }

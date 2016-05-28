@@ -28,6 +28,7 @@ namespace SettopBox
                                                           Keyblock.DependencyConfig,
                                                           RunAndMonitor.DependencyConfig,
                                                           EpgGrabber.DependencyConfig,
+                                                          TvHeadendIntegration.DependencyConfig,
                                                           WebUi.DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
             prog.Start();

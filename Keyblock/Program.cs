@@ -39,6 +39,7 @@ namespace Keyblock
 
         void LoadKeyBlockLoop()
         {
+            _nextRetrieval = _settings.InitialLoadKeyblock ? DateTime.Now : DetermineNextRetrieval();
             while (!_cancelSource.IsCancellationRequested)
             {
                 var nextRunAt = _nextRetrieval ?? DateTime.Now;

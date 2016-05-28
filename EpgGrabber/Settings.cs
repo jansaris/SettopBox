@@ -17,5 +17,6 @@ namespace EpgGrabber
         public string DataFolder { get; set; } = "Data";
         public string EpgTranslationsFile { get; set; } = "TvhEpgGenres.txt";
         public string EpgChannelListFile { get; set; } = "Channels.txt";
+        public bool InitialEpgGrab { get; set; } = true;
     }
 }

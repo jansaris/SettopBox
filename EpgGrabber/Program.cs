@@ -61,6 +61,7 @@ namespace EpgGrabber
 
         void DownloadEpgGrabberLoop()
         {
+            _nextRetrieval = _settings.InitialEpgGrab ? DateTime.Now : DetermineNextRetrieval();
             while (!_cancelSource.IsCancellationRequested)
             {
                 var nextRunAt = _nextRetrieval ?? DateTime.Now;

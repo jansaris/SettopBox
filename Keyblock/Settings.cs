@@ -51,6 +51,7 @@ namespace Keyblock
         public int WaitOnFailingBlockRetrievalInMilliseconds { get; private set; } = 1000;
         public double KeyblockValidationInHours { get; set; } = 1;
         public bool ForceInitialKeyblockDownload { get; set; } = false;
+        public bool InitialLoadKeyblock { get; set; } = true;
 
         public Settings(ILog logger) : base(logger)
         {
