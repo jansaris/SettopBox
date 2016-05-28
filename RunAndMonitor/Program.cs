@@ -51,7 +51,14 @@ namespace RunAndMonitor
                 _logger.Info("No program to run and monitor");
                 return;
             }
-            StartProcess();
+            try
+            {
+                StartProcess();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to start the process", ex);
+            }
         }
 
         void StartProcess()
