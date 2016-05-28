@@ -44,15 +44,7 @@ namespace EpgGrabber
                 //EPG is downloaded in 8 parts per day
                 for (var dayPart = 0; dayPart < 8; dayPart++)
                 {
-                    _logger.Info($"Download EPG data for day {dayNr} part {dayPart}");
-                    var zip = DownloadEpgfile(date, dayNr, dayPart);
-                    var file = _compression.Decompress(zip);
-                    var epgString = Encoding.Default.GetString(file);
-                    var epgData = ParseEpgData(epgString);
-                    epgData = _channelList.FilterOnSelectedChannels(epgData);
-                    DownloadDetails(epgData);
-                    _logger.Info($"Downloaded EPG data for {epgData.SelectMany(channel => channel.Programs).Count()} programs");
-
+                    var epgData = DownloadPart(dayNr, dayPart, date);
                     epg.AddRange(epgData);
                 }
             }
@@ -64,6 +56,27 @@ namespace EpgGrabber
             }
 
             return GenerateXmlTv(epg);
+        }
+
+        List<Channel> DownloadPart(int dayNr, int dayPart, DateTime now)
+        {
+            var epgData = new List<Channel>();
+            try
+            {
+                _logger.Info($"Download EPG data for day {dayNr} part {dayPart}");
+                var zip = DownloadEpgfile(now, dayNr, dayPart);
+                var file = _compression.Decompress(zip);
+                var epgString = Encoding.Default.GetString(file);
+                var data = ParseEpgData(epgString);
+                epgData = _channelList.FilterOnSelectedChannels(data);
+                DownloadDetails(epgData);
+                _logger.Info($"Downloaded EPG data for {epgData.SelectMany(channel => channel.Programs).Count()} programs");
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn($"Failed during download day {dayNr} part {dayPart}", ex);
+            }
+            return epgData;
         }
 
         byte[] DownloadEpgfile(DateTime now, int dayNr, int dayPart)

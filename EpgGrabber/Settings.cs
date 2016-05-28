@@ -14,7 +14,6 @@ namespace EpgGrabber
         public string EpgUrl { get; set; } = "http://w.zt6.nl/epgdata/";
         public int NumberOfEpgDays { get; set; } = 7;
         public string XmlTvFileName { get; set; } = "Epg.xml";
-        public string XmlTvUnixSocket { get; set; } = "/volume1/@appstore/tvheadend-4.0/var/epggrab/xmltv.sock";
         public string DataFolder { get; set; } = "Data";
         public string EpgTranslationsFile { get; set; } = "TvhEpgGenres.txt";
         public string EpgChannelListFile { get; set; } = "Channels.txt";
