@@ -10,5 +10,7 @@ namespace TvHeadendIntegration
         }
         protected override string Name => "TvHeadendIntegration";
         public string XmlTvSocket { get; set; } = "/volume1/@appstore/tvheadend-4.0/var/epggrab/xmltv.sock";
+        public string DataFolder { get; set; } = "Data";
+        public string InitialEpgFile { get; set; } = "Epg.xml";
     }
 }

@@ -18,18 +18,31 @@ namespace TvHeadendIntegration
 
         public bool SendToTvheadend(string epgFile)
         {
-            return WriteXmlToSocket(epgFile);
+            var file = ValidateEpgFile(epgFile);
+            return WriteXmlToSocket(file);
         }
 
-        bool WriteXmlToSocket(string epgFile)
+        FileInfo ValidateEpgFile(string epgFile)
         {
+            var file = new FileInfo(epgFile);
+            if (file.Exists)
+            {
+                _logger.Warn($"EPG file {file.FullName} doesn't exists");
+                return null;
+            }
+            return file;
+        }
+
+        bool WriteXmlToSocket(FileInfo epgFile)
+        {
+            if (epgFile == null) return false;
             try
             {
                 EndPoint ep = new UnixEndPoint(_settings.XmlTvSocket);
                 using (var socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP))
                 {
                     socket.Connect(ep);
-                    socket.Send(File.ReadAllBytes(epgFile));
+                    socket.Send(File.ReadAllBytes(epgFile.FullName));
                 }
                 return true;
             }

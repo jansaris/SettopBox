@@ -74,6 +74,9 @@
     <Compile Include="Settings\Setting.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="log4net.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

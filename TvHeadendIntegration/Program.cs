@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Module;
@@ -39,6 +40,10 @@ namespace TvHeadendIntegration
         {
             _logger.Info("Welcome to TvHeadendIntegration");
             _settings.Load();
+            if (!string.IsNullOrWhiteSpace(_settings.InitialEpgFile))
+            {
+                _epg.SendToTvheadend(Path.Combine(_settings.DataFolder, _settings.InitialEpgFile));
+            }
         }
 
         public override void ProcessDataFromOtherModule(string moduleName, CommunicationData data)
