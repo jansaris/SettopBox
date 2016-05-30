@@ -28,6 +28,7 @@ SYNO_GROUP_DESC="SynoCommunity's media related group"
 
 syno_group_create ()
 {
+	echo 'syno_group_create'
     # Create syno group (Does nothing when group already exists)
     synogroup --add ${SYNO_GROUP} ${USER} > /dev/null
     # Set description of the syno group
@@ -39,6 +40,7 @@ syno_group_create ()
 
 syno_group_remove ()
 {
+	echo 'syno_group_remove'
     # Remove user from syno group
     delgroup ${USER} ${SYNO_GROUP}
 
@@ -51,11 +53,13 @@ syno_group_remove ()
 
 preinst ()
 {
+	echo 'preinst'
     exit 0
 }
 
 postinst ()
 {
+	echo 'postinst'
     # Link
     ln -s ${SYNOPKG_PKGDEST} ${INSTALL_DIR}
 
@@ -85,6 +89,7 @@ postinst ()
 
 preuninst ()
 {
+	echo 'preuninst'
     # Stop the package
     ${SSS} stop > /dev/null
 
@@ -106,6 +111,7 @@ preuninst ()
 
 postuninst ()
 {
+	echo 'postuninst'
     # Remove Link
     rm -f ${INSTALL_DIR}
 
@@ -144,6 +150,7 @@ preupgrade ()
 
 postupgrade ()
 {
+	echo 'postupgrade'
     # Restore some stuff
     rm -fr ${INSTALL_DIR}/var
     mv ${TMP_DIR}/${PACKAGE}/var ${INSTALL_DIR}/

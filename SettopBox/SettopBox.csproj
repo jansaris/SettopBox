@@ -117,7 +117,16 @@ mkdir $(SolutionDir)Synology\package.tgz\share\SettopBox\www
 XCOPY $(TargetDir)Data $(SolutionDir)Synology\package.tgz\share\SettopBox\Data /sy
 XCOPY $(TargetDir)www $(SolutionDir)Synology\package.tgz\share\SettopBox\www /sy
 del $(SolutionDir)Synology\package.tgz\share\SettopBox\*vshost*
-del $(SolutionDir)Synology\package.tgz\share\SettopBox\packages.config</PostBuildEvent>
+del $(SolutionDir)Synology\package.tgz\share\SettopBox\packages.config
+IF EXIST $(SolutionDir)Synology\package.tgz\package.tar del $(SolutionDir)Synology\package.tgz\package.tar
+IF EXIST $(SolutionDir)Synology\package.tgz\package.tgz del $(SolutionDir)Synology\package.tgz\package.tgz
+$(SolutionDir)Synology\7za\7za.exe a -ttar $(SolutionDir)Synology\package.tgz\package.tar $(SolutionDir)Synology\package.tgz\*
+$(SolutionDir)Synology\7za\7za.exe a -tgzip $(SolutionDir)Synology\package.tgz\package.tgz $(SolutionDir)Synology\package.tgz\package.tar
+XCOPY $(SolutionDir)Synology\package.tgz\package.tgz  $(SolutionDir)Synology\spk\package.tgz /y
+IF EXIST $(SolutionDir)Synology\spk\SettopBox.tar del $(SolutionDir)Synology\spk\SettopBox.tar
+IF EXIST $(SolutionDir)Synology\spk\SettopBox.spk del $(SolutionDir)Synology\spk\SettopBox.spk
+$(SolutionDir)Synology\7za\7za.exe a -ttar $(SolutionDir)Synology\spk\SettopBox.tar $(SolutionDir)Synology\spk\*
+$(SolutionDir)Synology\7za\7za.exe a -tgzip $(SolutionDir)Synology\spk\SettopBox.spk $(SolutionDir)Synology\spk\SettopBox.tar</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
