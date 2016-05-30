@@ -105,6 +105,20 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>deltree $(SolutionDir)Synology\package.tgz\share\SettopBox /y
+mkdir $(SolutionDir)Synology\package.tgz\share\SettopBox
+XCOPY $(TargetDir)*.exe $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
+XCOPY $(TargetDir)*.dll $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
+XCOPY $(TargetDir)*.config $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
+XCOPY $(TargetDir)*.ini $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
+mkdir $(SolutionDir)Synology\package.tgz\share\SettopBox\Data
+mkdir $(SolutionDir)Synology\package.tgz\share\SettopBox\www
+XCOPY $(TargetDir)Data $(SolutionDir)Synology\package.tgz\share\SettopBox\Data /sy
+XCOPY $(TargetDir)www $(SolutionDir)Synology\package.tgz\share\SettopBox\www /sy
+del $(SolutionDir)Synology\package.tgz\share\SettopBox\*vshost*
+del $(SolutionDir)Synology\package.tgz\share\SettopBox\packages.config</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

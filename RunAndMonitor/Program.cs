@@ -58,6 +58,8 @@ namespace RunAndMonitor
             catch (Exception ex)
             {
                 _logger.Error("Failed to start the process", ex);
+                _status = "Error during start";
+                _process = null;
             }
         }
 
@@ -75,6 +77,7 @@ namespace RunAndMonitor
             {
                 _logger.Error($"Failed to start {_settings.Executable}");
                 _status = "Failed to start";
+                _process = null;
                 return;
             }
 
