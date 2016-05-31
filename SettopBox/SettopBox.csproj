@@ -128,6 +128,9 @@ IF EXIST $(SolutionDir)Synology\spk\SettopBox.spk del $(SolutionDir)Synology\spk
 $(SolutionDir)Synology\7za\7za.exe a -ttar $(SolutionDir)Synology\spk\SettopBox.tar $(SolutionDir)Synology\spk\*
 $(SolutionDir)Synology\7za\7za.exe a -tgzip $(SolutionDir)Synology\spk\SettopBox.spk $(SolutionDir)Synology\spk\SettopBox.tar</PostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>IF EXIST deltree $(TargetDir)Logs</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

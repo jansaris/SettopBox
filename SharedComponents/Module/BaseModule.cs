@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SharedComponents.Module
@@ -20,6 +22,7 @@ namespace SharedComponents.Module
 
         public void Start()
         {
+            Directory.SetCurrentDirectory(AssemblyDirectory);
             if (State == ModuleState.Disabled) return;
             ChangeState(ModuleState.Starting);
             StartModule();
@@ -72,6 +75,17 @@ namespace SharedComponents.Module
         {
             State = newState;
             StatusChanged?.Invoke(this, newState);
+        }
+
+        static string AssemblyDirectory
+        {
+            get
+            {
+                var codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                var uri = new UriBuilder(codeBase);
+                var path = Uri.UnescapeDataString(uri.Path);
+                return Path.GetDirectoryName(path);
+            }
         }
     }
 }

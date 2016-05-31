@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Module;
@@ -23,6 +25,7 @@ namespace SettopBox
         }
         static void Main()
         {
+            Directory.SetCurrentDirectory(AssemblyDirectory);
             var container = SharedContainer.CreateAndFill<DependencyConfig, 
                                                           NewCamd.DependencyConfig, 
                                                           Keyblock.DependencyConfig,
@@ -72,6 +75,17 @@ namespace SettopBox
         {
             _logger.Info($"Start {module.Name}");
             module.Start();
+        }
+
+        static string AssemblyDirectory
+        {
+            get
+            {
+                var codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                var uri = new UriBuilder(codeBase);
+                var path = Uri.UnescapeDataString(uri.Path);
+                return Path.GetDirectoryName(path);
+            }
         }
     }
 }
