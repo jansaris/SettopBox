@@ -10,7 +10,7 @@ namespace SettopBox
     {
         SettopBox _settopBox;
 
-        static void Main()
+        static void Main(string[] args)
         {
             HostFactory.Run(x =>                                 
             {
@@ -20,11 +20,13 @@ namespace SettopBox
                     s.WhenStarted(tc => tc.Start());              
                     s.WhenStopped(tc => tc.Stop());               
                 });
+
+                x.UseLinuxIfAvailable();
                 x.UseLog4Net();
 
-                x.SetDescription(".Net SettopBox");       
-                x.SetDisplayName("SettopBox");
-                x.SetServiceName("settopbox");
+                //x.SetDescription(".Net SettopBox");       
+                //x.SetDisplayName("SettopBox");
+                //x.SetServiceName("settopbox");
             });
         }
 

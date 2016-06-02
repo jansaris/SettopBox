@@ -13,25 +13,29 @@ PID_FILE="${USER_HOME}/.config/SettopBox/settopbox.pid"
 INSTALL_LOG="${INSTALL_DIR}/var/install.log"
 MONO_PATH="/var/packages/Mono/target/usr/bin"
 MONO="${MONO_PATH}/mono-service"
-SETTOPBOX="${INSTALL_DIR}/share/SettopBox/SettopBox.exe"
-COMMAND="env PATH=${MONO_PATH}:${PATH} ${MONO} -- --debug ${SETTOPBOX}"
+SETTOPBOXDIR="${INSTALL_DIR}/share/SettopBox/"
+SETTOPBOX="${SETTOPBOXDIR}SettopBox.exe"
+COMMAND="env PATH=${MONO_PATH}:${PATH} ${MONO} ${SETTOPBOX}"
 
 start_daemon ()
 {
 	echo 'Start ${COMMAND}'
-    start-stop-daemon -c ${USER} -S -q -b -N 10 -p ${PID_FILE} -x ${COMMAND} > /dev/null
-    sleep 2
+	${MONO} -d:${SETTOPBOXDIR} -l:${PID_FILE} ${SETTOPBOX}
+	sleep 2
 }
 
 stop_daemon ()
 {
-    start-stop-daemon -K -q -u ${USER} -p ${PID_FILE}
-    wait_for_status 1 20 || start-stop-daemon -K -s 9 -q -p ${PID_FILE}
+	kill $(cat ${PID_FILE})
+	sleep 2
 }
 
 daemon_status ()
 {
-    start-stop-daemon -K -q -t -u ${USER} -p ${PID_FILE}
+	if [ -f ${PID_FILE} ]; then
+		return ps -P $(cat ${PID_FILE})
+	fi
+	return false
 }
 
 wait_for_status ()
