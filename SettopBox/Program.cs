@@ -1,81 +1,52 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using log4net;
 using SharedComponents.DependencyInjection;
-using SharedComponents.Module;
+using Topshelf;
 
 namespace SettopBox
 {
     class Program
     {
-        readonly ILog _logger;
-        readonly Settings _settings;
-        readonly IEnumerable<IModule> _modules;
-        readonly ModuleCommunication _moduleCommunication;
+        SettopBox _settopBox;
 
-        public Program(ILog logger, Settings settings, IEnumerable<IModule> modules, ModuleCommunication moduleCommunication)
-        {
-            _logger = logger;
-            _settings = settings;
-            _modules = modules;
-            _moduleCommunication = moduleCommunication;
-        }
         static void Main()
         {
+            HostFactory.Run(x =>                                 
+            {
+                x.Service<Program>(s =>                        
+                {
+                    s.ConstructUsing(name => new Program());     
+                    s.WhenStarted(tc => tc.Start());              
+                    s.WhenStopped(tc => tc.Stop());               
+                });
+                x.UseLog4Net();
+
+                x.SetDescription(".Net SettopBox");       
+                x.SetDisplayName("SettopBox");
+                x.SetServiceName("settopbox");
+            });
+        }
+
+        void Start()
+        {
             Directory.SetCurrentDirectory(AssemblyDirectory);
-            var container = SharedContainer.CreateAndFill<DependencyConfig, 
-                                                          NewCamd.DependencyConfig, 
+            var container = SharedContainer.CreateAndFill<DependencyConfig,
+                                                          NewCamd.DependencyConfig,
                                                           Keyblock.DependencyConfig,
                                                           RunAndMonitor.DependencyConfig,
                                                           EpgGrabber.DependencyConfig,
                                                           TvHeadendIntegration.DependencyConfig,
                                                           WebUi.DependencyConfig>("Log4net.config");
-            var prog = container.GetInstance<Program>();
-            prog.Start();
-            Console.WriteLine("Hit 'Enter' to exit");
-            Console.ReadLine();
-            prog.Stop();
-            container.Dispose();
-            Environment.Exit(0);
+            _settopBox = container.GetInstance<SettopBox>();
+            _settopBox.Start();
         }
 
         void Stop()
         {
-            foreach (var module in _modules)
-            {
-                _logger.Info($"Stop {module.Name}");
-                _moduleCommunication.UnRegister(module);
-                module.Stop();
-                _logger.Debug($"Stopped {module.Name}");
-            }
-            _logger.Info("Bye bye");
-        }
-        void Start()
-        {
-            _logger.Info($"Welcome to Settopbox ({Process.GetCurrentProcess().Id})");
-            _settings.Load();
-            foreach (var module in _modules)
-            {
-                if (_settings.GetModule(module.Name)) Start(module);
-                else Disable(module);
-                _moduleCommunication.Register(module);
-            }
+            _settopBox?.Stop();
         }
 
-        void Disable(IModule module)
-        {
-            _logger.Info($"{module.Name} disabled");
-            module.Disable();
-        }
-
-        void Start(IModule module)
-        {
-            _logger.Info($"Start {module.Name}");
-            module.Start();
-        }
 
         static string AssemblyDirectory
         {
