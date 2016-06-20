@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using log4net;
 using SharedComponents.Module;
@@ -10,36 +11,32 @@ namespace SettopBox
         readonly ILog _logger;
         readonly Settings _settings;
         readonly IEnumerable<IModule> _modules;
-        readonly ModuleCommunication _moduleCommunication;
-        public SettopBox(ILog logger, Settings settings, IEnumerable<IModule> modules, ModuleCommunication moduleCommunication)
+        readonly LinuxSignal _signal;
+
+        public SettopBox(ILog logger, Settings settings, IEnumerable<IModule> modules, LinuxSignal signal)
         {
             _logger = logger;
             _settings = settings;
             _modules = modules;
-            _moduleCommunication = moduleCommunication;
+            _signal = signal;
         }
 
-        public void Stop()
-        {
-            foreach (var module in _modules)
-            {
-                _logger.Info($"Stop {module.Name}");
-                _moduleCommunication.UnRegister(module);
-                module.Stop();
-                _logger.Debug($"Stopped {module.Name}");
-            }
-            _logger.Info("Bye bye");
-        }
         public void Start()
         {
             _logger.Info($"Welcome to Settopbox ({Process.GetCurrentProcess().Id})");
+            _signal.Exit += Stop;
             _settings.Load();
             foreach (var module in _modules)
             {
                 if (_settings.GetModule(module.Name)) Start(module);
                 else Disable(module);
-                _moduleCommunication.Register(module);
             }
+        }
+
+        void Stop(object sender, EventArgs e)
+        {
+            _signal.Exit -= Stop;
+            _logger.Info("Bye bye");
         }
 
         void Disable(IModule module)

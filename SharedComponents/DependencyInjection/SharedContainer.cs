@@ -44,6 +44,9 @@ namespace SharedComponents.DependencyInjection
         static Container CreateAndFill(string log4Netconfig, params Type[] configurators)
         {
             var container = Create(log4Netconfig);
+            container.Register<LinuxSignal>(Lifestyle.Singleton);
+            container.RegisterInitializer<LinuxSignal>(signal => signal.Listen());
+
             var modules = new List<Type>();
             foreach (var type in configurators)
             {

@@ -13,7 +13,7 @@ namespace RunAndMonitor
         readonly ILog _logger;
         string _status = "Initial";
 
-        public Program(Settings settings, ILog logger)
+        public Program(Settings settings, ILog logger, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
         {
             _settings = settings;
             _logger = logger;

@@ -20,7 +20,7 @@ namespace WebUi
         readonly ILog _logger;
         IDisposable _host;
 
-        public Program(ILog logger, Settings settings, Container container)
+        public Program(ILog logger, Settings settings, Container container, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
         {
             _logger = logger;
             _settings = settings;

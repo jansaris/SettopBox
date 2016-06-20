@@ -2,35 +2,14 @@
 using System.IO;
 using System.Reflection;
 using SharedComponents.DependencyInjection;
-using Topshelf;
+using SharedComponents.Module;
+using SimpleInjector;
 
 namespace SettopBox
 {
     class Program
     {
-        SettopBox _settopBox;
-
         static void Main(string[] args)
-        {
-            HostFactory.Run(x =>                                 
-            {
-                x.Service<Program>(s =>                        
-                {
-                    s.ConstructUsing(name => new Program());     
-                    s.WhenStarted(tc => tc.Start());              
-                    s.WhenStopped(tc => tc.Stop());               
-                });
-
-                x.UseLinuxIfAvailable();
-                x.UseLog4Net();
-
-                //x.SetDescription(".Net SettopBox");       
-                //x.SetDisplayName("SettopBox");
-                //x.SetServiceName("settopbox");
-            });
-        }
-
-        void Start()
         {
             Directory.SetCurrentDirectory(AssemblyDirectory);
             var container = SharedContainer.CreateAndFill<DependencyConfig,
@@ -40,15 +19,14 @@ namespace SettopBox
                                                           EpgGrabber.DependencyConfig,
                                                           TvHeadendIntegration.DependencyConfig,
                                                           WebUi.DependencyConfig>("Log4net.config");
-            _settopBox = container.GetInstance<SettopBox>();
-            _settopBox.Start();
+            var settopBox = container.GetInstance<SettopBox>();
+            var signal = container.GetInstance<LinuxSignal>();
+            settopBox.Start();
+            Console.WriteLine("Press enter to exit");
+            Console.ReadLine();
+            signal.Dispose();
+            container.Dispose();
         }
-
-        void Stop()
-        {
-            _settopBox?.Stop();
-        }
-
 
         static string AssemblyDirectory
         {

@@ -7,6 +7,8 @@ namespace SharedComponents.Module
 {
     public abstract class BaseModule : IModule
     {
+        readonly LinuxSignal _signal;
+        readonly ModuleCommunication _moduleCommunication;
         public string Name => GetType().Namespace;
 
         public ModuleState State { get; private set; }
@@ -18,6 +20,12 @@ namespace SharedComponents.Module
 
         protected const TaskStatus AsyncTaskIsRunning = TaskStatus.WaitingForActivation;
 
+        protected BaseModule(LinuxSignal signal, ModuleCommunication moduleCommunication)
+        {
+            _signal = signal;
+            _moduleCommunication = moduleCommunication;
+        }
+
         bool _disposing;
 
         public void Start()
@@ -26,7 +34,14 @@ namespace SharedComponents.Module
             if (State == ModuleState.Disabled) return;
             ChangeState(ModuleState.Starting);
             StartModule();
+            _moduleCommunication.Register(this);
+            _signal.Exit += StopModule;
             ChangeState(ModuleState.Running);
+        }
+
+        void StopModule(object sender, EventArgs e)
+        {
+            Stop();
         }
 
         public void Disable()
@@ -37,7 +52,12 @@ namespace SharedComponents.Module
         public void Stop()
         {
             if (State == ModuleState.Disabled) return;
+            if (State == ModuleState.Stopping) return;
+            if (State == ModuleState.Stopped) return;
+
             ChangeState(ModuleState.Stopping);
+            _signal.Exit -= StopModule;
+            _moduleCommunication.UnRegister(this);
             StopModule();
             ChangeState(ModuleState.Stopped);
         }

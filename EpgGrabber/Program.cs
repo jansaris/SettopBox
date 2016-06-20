@@ -22,7 +22,7 @@ namespace EpgGrabber
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
-        public Program(ILog logger, Settings settings, Grabber epgGrabber, IWebDownloader webDownloader, ChannelList channelList)
+        public Program(ILog logger, Settings settings, Grabber epgGrabber, IWebDownloader webDownloader, ChannelList channelList, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
         {
             _logger = logger;
             _settings = settings;

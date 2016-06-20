@@ -13,7 +13,7 @@ namespace TvHeadendIntegration
         readonly Settings _settings;
         readonly UpdateEpg _epg;
 
-        public Program(ILog logger, Settings settings, UpdateEpg epg)
+        public Program(ILog logger, Settings settings, UpdateEpg epg, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
         {
             _logger = logger;
             _settings = settings;

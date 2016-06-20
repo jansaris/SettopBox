@@ -23,7 +23,7 @@ namespace NewCamd
         Task _listeningTask;
         string _listeningAdress;
 
-        public Program(ILog logger, Settings settings, Func<NewCamdApi> clientFactory, Keyblock keyblock)
+        public Program(ILog logger, Settings settings, Func<NewCamdApi> clientFactory, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
         {
             _logger = logger;
             _settings = settings;
