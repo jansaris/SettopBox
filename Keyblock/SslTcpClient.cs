@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using log4net;
@@ -96,8 +97,17 @@ namespace Keyblock
             if (useSsl)
             {
                 _logger.Debug("Wrap the TCP connection in a SSL stream");
+                /*
+                 * TODO: Fix to support 1024 bit
+                 I've managed to set the minimum key length for schannel using windows registry.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\KeyExchangeAlgorithms\Diffie-Hellman]
+"ClientMinKeyBitLength"=dword:00000200
+But it's not the desired solution, because it changes the setting for the whole system and I would like to set it temporarily and only in the scope of my application.
+
+                https://msdn.microsoft.com/fr-fr/library/cc783349(v=ws.10).aspx
+                 */
                 var sslStream = new SslStream(client.GetStream(), true, ValidateServerCertificate, null);
-                sslStream.AuthenticateAsClient(server);
+                sslStream.AuthenticateAsClient(server, null, SslProtocols.Tls, false);
                 stream = sslStream;
             }
             else
