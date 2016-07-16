@@ -11,6 +11,7 @@ namespace SharedComponents.Module
         readonly ILog _logger;
         bool _disposing;
         bool _running;
+        Task _listeningTask;
 
         public LinuxSignal(ILog logger)
         {
@@ -21,7 +22,12 @@ namespace SharedComponents.Module
 
         public void Listen()
         {
-            Task.Run(() => ListenForSignal());
+            _listeningTask = Task.Run(() => ListenForSignal());
+        }
+
+        public void WaitForListenTaskToComplete()
+        {
+            _listeningTask.Wait();
         }
 
         void ListenForSignal()
@@ -71,6 +77,7 @@ namespace SharedComponents.Module
             {
                 _logger.Info("Unable to listen on unix signals");
             }
+            _logger.Info("Finished listening to unix signals");
         }
 
         protected virtual void OnExit()

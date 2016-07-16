@@ -14,7 +14,7 @@ PATH="${INSTALL_DIR}/bin:${PATH}"
 USER="${PACKAGE}"
 GROUP="users"
 PID_FILE="${INSTALL_DIR}/var/.config/SettopBox/settopbox.pid"
-MONO_PATH="/usr/local/mono/bin"
+MONO_PATH="/volume1/@appstore/Mono/usr/bin"
 MONO="${MONO_PATH}/mono"
 SETTOPBOX="${INSTALL_DIR}/share/SettopBox/SettopBox.exe"
 SPK_SETTOPBOX="${SYNOPKG_PKGINST_TEMP_DIR}/share/SettopBox/SettopBox.exe"
@@ -28,7 +28,6 @@ SYNO_GROUP_DESC="SynoCommunity's media related group"
 
 syno_group_create ()
 {
-	echo "|| Add ${USER} to syno group ${SYNO_GROUP} ||" >> ${INSTALL_LOG}
     # Create syno group (Does nothing when group already exists)
     synogroup --add ${SYNO_GROUP} ${USER} > /dev/null
     # Set description of the syno group
@@ -40,8 +39,6 @@ syno_group_create ()
 
 syno_group_remove ()
 {
-	echo "|| Remove ${USER} from syno group ${SYNO_GROUP} ||" >> ${INSTALL_LOG}
-	
     # Remove user from syno group
     delgroup ${USER} ${SYNO_GROUP}
 
@@ -64,7 +61,7 @@ postinst ()
 
     # Logging Install
     mkdir -p ${INSTALL_DIR}/var
-    echo "|| Installing package $(grep 'version' /var/packages/${PACKAGE}/INFO sed "s/\"/'/g") - $(date) ||" >> ${INSTALL_LOG}
+    echo "|| Installing package $(grep "version" /var/packages/${PACKAGE}/INFO) - $(date) ||" >> ${INSTALL_LOG}
 
     # Install busybox stuff
     ${INSTALL_DIR}/bin/busybox --install ${INSTALL_DIR}/bin
@@ -72,26 +69,22 @@ postinst ()
     # Create user
     adduser -h ${INSTALL_DIR}/var -g "${DNAME} User" -G ${GROUP} -s /bin/sh -S -D ${USER}
 
-    # Create group and add user
     syno_group_create
 
     # Correct the files ownership
-    echo "|| Correct the ownership ||" >> ${INSTALL_LOG}
     chown -R ${USER}:root ${SYNOPKG_PKGDEST}
 
     # Add firewall config
-	
     ${SERVICETOOL} --install-configure-file --package ${FWPORTS} >> /dev/null
-	echo "|| Configure Firewall for ports ${FWPORTS} ||" >> ${INSTALL_LOG}
+
     # Log
-    echo "|| Package Install Completed - ${date} ||" >> ${INSTALL_LOG}
+    echo "|| Package Install Completed - $(date) ||" >> ${INSTALL_LOG}
 
     exit 0
 }
 
 preuninst ()
 {
-	echo 'preuninst'
     # Stop the package
     ${SSS} stop > /dev/null
 
@@ -113,7 +106,6 @@ preuninst ()
 
 postuninst ()
 {
-	echo 'postuninst'
     # Remove Link
     rm -f ${INSTALL_DIR}
 
@@ -152,7 +144,6 @@ preupgrade ()
 
 postupgrade ()
 {
-	echo 'postupgrade'
     # Restore some stuff
     rm -fr ${INSTALL_DIR}/var
     mv ${TMP_DIR}/${PACKAGE}/var ${INSTALL_DIR}/
@@ -169,7 +160,7 @@ postupgrade ()
     rm ${INSTALL_DIR}/var/KEEP_VAR
 
     # Finish Logging
-    echo "|| Package upgraded to $(grep "version" /var/packages/${PACKAGE}/INFO sed "s/\"/'/g") - $(date) ||" >> ${INSTALL_LOG}
+    echo "|| Package upgraded to $(grep "version" /var/packages/${PACKAGE}/INFO) - $(date) ||" >> ${INSTALL_LOG}
 
     exit 0
 }

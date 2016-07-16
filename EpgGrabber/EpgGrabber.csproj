@@ -68,6 +68,9 @@
     <Compile Include="IO\CacheObject.cs" />
     <Compile Include="IO\Compression.cs" />
     <Compile Include="IO\Downloader.cs" />
+    <Compile Include="IO\EpgWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="IO\FileDownloader.cs" />
     <Compile Include="IO\FileHelper.cs" />
     <Compile Include="IO\HttpWebDownloader.cs" />

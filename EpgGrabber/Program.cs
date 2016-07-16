@@ -35,9 +35,12 @@ namespace EpgGrabber
         {
             var container = SharedContainer.CreateAndFill<DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
+            var signal = container.GetInstance<LinuxSignal>();
             prog.Start();
             Console.WriteLine("Press enter to exit");
             Console.ReadLine();
+            signal.Dispose();
+            Console.WriteLine("Signal disposed, stop program");
             prog.Stop();
             container.Dispose();
         }
@@ -87,7 +90,7 @@ namespace EpgGrabber
             if (_cancelSource.IsCancellationRequested) return;
             try
             {
-                var epgFile = _epgGrabber.Download();
+                var epgFile = _epgGrabber.Download(_cancelSource);
                 if (epgFile != null)
                 {
                     SignalNewData(DataType.Epg, epgFile);

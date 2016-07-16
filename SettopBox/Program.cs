@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Module;
-using SimpleInjector;
 
 namespace SettopBox
 {
@@ -22,8 +22,17 @@ namespace SettopBox
             var settopBox = container.GetInstance<SettopBox>();
             var signal = container.GetInstance<LinuxSignal>();
             settopBox.Start();
-            Console.WriteLine("Press enter to exit");
-            Console.ReadLine();
+            if (Console.IsInputRedirected)
+            {
+                LogManager.GetLogger("SettopBox").Info("Wait for kill-signal");
+                signal.WaitForListenTaskToComplete();
+            }
+            else
+            {
+                LogManager.GetLogger("SettopBox").Info("Wait for keyboard input");
+                Console.WriteLine("Press enter to exit");
+                Console.ReadLine();
+            }
             signal.Dispose();
             container.Dispose();
         }

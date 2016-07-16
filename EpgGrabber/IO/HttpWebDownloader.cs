@@ -1,18 +1,23 @@
 ﻿using System;
-using System.Net;
 using log4net;
 
 namespace EpgGrabber.IO
 {
     public class HttpWebDownloader : IWebDownloader
     {
+        readonly Func<EpgWebClient> _webClientFactory;
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CachedWebDownloader));
+
+        public HttpWebDownloader(Func<EpgWebClient> webClientFactory)
+        {
+            _webClientFactory = webClientFactory;
+        }
 
         public byte[] DownloadBinary(string url)
         {
             try
             {
-                var webClient = new WebClient();
+                var webClient = _webClientFactory();
                 return webClient.DownloadData(url);
             }
             catch (Exception ex)
@@ -26,7 +31,7 @@ namespace EpgGrabber.IO
         {
             try
             {
-                var webClient = new WebClient();
+                var webClient = _webClientFactory();
                 return webClient.DownloadString(url);
             }
             catch (Exception ex)
