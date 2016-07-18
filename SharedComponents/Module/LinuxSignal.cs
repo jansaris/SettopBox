@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using Mono.Unix;
@@ -11,7 +12,7 @@ namespace SharedComponents.Module
         readonly ILog _logger;
         bool _disposing;
         bool _running;
-        Task _listeningTask;
+        Thread _listeningThread;
 
         public LinuxSignal(ILog logger)
         {
@@ -22,12 +23,16 @@ namespace SharedComponents.Module
 
         public void Listen()
         {
-            _listeningTask = Task.Run(() => ListenForSignal());
+            _listeningThread = new Thread(ListenForSignal);
+            _listeningThread.Start();
         }
 
-        public void WaitForListenTaskToComplete()
+        public void WaitForListenThreadToComplete()
         {
-            _listeningTask.Wait();
+            while (_listeningThread.IsAlive)
+            {
+                Task.Delay(1000).Wait();
+            }
         }
 
         void ListenForSignal()
@@ -48,14 +53,14 @@ namespace SharedComponents.Module
                     if (idx < 0 || idx >= signals.Length) continue;
                     if (!_running) return;
 
-                    _logger.Info("daemon: received signal " + signals[idx].Signum);
+                    _logger.Info("LinuxSignal: received signal " + signals[idx].Signum);
 
                     if ((intr.IsSet || term.IsSet))
                     {
                         intr.Reset();
                         term.Reset();
 
-                        _logger.Info("daemon: stopping...");
+                        _logger.Info("LinuxSignal: stopping...");
 
                         _running = false;
                         OnExit();
@@ -91,6 +96,7 @@ namespace SharedComponents.Module
             _disposing = true;
             _running = false;
             OnExit();
+            WaitForListenThreadToComplete();
         }
     }
 }

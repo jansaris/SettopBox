@@ -25,7 +25,7 @@ namespace SettopBox
             if (Console.IsInputRedirected)
             {
                 LogManager.GetLogger("SettopBox").Info("Wait for kill-signal");
-                signal.WaitForListenTaskToComplete();
+                signal.WaitForListenThreadToComplete();
             }
             else
             {
