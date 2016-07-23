@@ -181,12 +181,6 @@ namespace Keyblock
             var hash = GenerateSignedHash();
 
             var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{_timestamp}~{_settings.MachineId}~";
-            /*
-             msglen = sprintf((char*) msg,
-                            "%s~%s~%s~%s~%s~GetAllChannelKeys~%s~%s~%s~%s~ ~ ~", api_msgformat,
-                            api_company, timestamp, api_machineID, api_clientID, api_company, ski,
-                            signedhash, api_machineID);
-            */
             var encryptedMsgPart = $"{_settings.ClientId}~GetAllChannelKeys~{_settings.Company}~{_ski.ToUpper()}~{hash}~{_settings.MachineId}~ ~ ~";
 
             var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
@@ -234,12 +228,12 @@ namespace Keyblock
                 return false;
             }
             var expected = DateTime.Now.AddHours(_settings.KeyblockValidationInHours);
-            if (_block.ValidTo < expected)
+            if (_block.NeedsRefreshAfter < expected)
             {
-                _logger.Error($"The keyblock data is only valid till {_block.ValidTo}, we expected at least till {expected}");
+                _logger.Error($"The keyblock data is only valid till {_block.NeedsRefreshAfter}, we expected at least till {expected}");
                 return false;
             }
-            _logger.Info($"Keyblock is valid between {_block.ValidFrom:yyyy-MM-dd} and {_block.ValidTo:yyyy-MM-dd}");
+            _logger.Info($"Keyblock is valid between {_block.ValidFrom:yyyy-MM-dd} and {_block.ValidTo:yyyy-MM-dd} and needs a refresh after {_block.NeedsRefreshAfter:yyyy-MM-dd}");
             return true;
         }
 

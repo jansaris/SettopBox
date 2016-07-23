@@ -11,6 +11,7 @@ namespace SharedComponents.Keyblock
         const int Blocksize = 108;
 
         List<Channel> _blocks = new List<Channel>();
+        DateTime _refreshDate;
 
         public Block(ILog logger)
         {
@@ -28,11 +29,26 @@ namespace SharedComponents.Keyblock
             _logger.Debug("Start splitting keyblocks");
             _blocks = SplitKeyBlock(data);
             _logger.Debug($"Parsed {_blocks.Count} channel blocks");
+
+                //Group all the blocks by ChannelId and
+            var grouped = _blocks.GroupBy(c => c.ChannelId)
+                //And order the blocks within the channel by date
+                .ToDictionary(c => c.Key, c => c.OrderBy(ch => ch.From).ToList());
+            //Then take the minimal last date per block 
+            //often we got 2 blocks per channel, 1 block per week
+            //So take always the last block as reference point for refresh
+            _refreshDate = grouped.Min(g => g.Value.Last().To);
+
+            //foreach (var keyvalue in grouped)
+            //{
+            //    _logger.Debug($"Channel {keyvalue.Key}: {keyvalue.Value.Count} blocks, valid between: {keyvalue.Value.First().From} - {keyvalue.Value.Last().To}");
+            //}
         }
 
         public int NrOfChannels => _blocks.Count;
         public DateTime ValidFrom => _blocks.Count > 0 ? _blocks.Min(c => c.From) : DateTime.MinValue;
-        public DateTime ValidTo => _blocks.Count > 0 ? _blocks.Min(c => c.To) : DateTime.MinValue;
+        public DateTime ValidTo => _blocks.Count > 0 ? _blocks.Max(c => c.To) : DateTime.MinValue;
+        public DateTime NeedsRefreshAfter => _refreshDate;
         protected Channel GetChannelById(int channel)
         {
             return _blocks.FirstOrDefault(b => b.ChannelId == channel && b.From < DateTime.Now && b.To > DateTime.Now);
