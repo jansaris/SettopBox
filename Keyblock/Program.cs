@@ -77,13 +77,13 @@ namespace Keyblock
                 _logger.Warn("Can't calculate next retrieval because the keyblock is not valid");
                 return nextRetrieval;
             }
-            if (!_keyblock.BlockValidTo.HasValue || _keyblock.BlockValidTo.Value == DateTime.MinValue)
+            if (!_keyblock.BlockRefreshAfter.HasValue || _keyblock.BlockRefreshAfter.Value == DateTime.MinValue)
             {
                 _logger.Warn("Can't calculate next retrieval because the loaded keyblock has no valid data");
                 return nextRetrieval;
             }
             _logger.Debug($"Keyblock needs to be valid for at least {_settings.KeyblockValidationInHours} hours");
-            return _keyblock.BlockValidTo.Value.AddHours(-1*_settings.KeyblockValidationInHours);
+            return _keyblock.BlockRefreshAfter.Value.AddHours(-1*_settings.KeyblockValidationInHours);
         }
 
         void LoadKeyBlock()
@@ -136,6 +136,7 @@ namespace Keyblock
                 HasValidKeyblock = _keyblock.IsValid,
                 ValidFrom = _keyblock.BlockValidFrom,
                 ValidTo = _keyblock.BlockValidTo,
+                RefreshAfter = _keyblock.BlockRefreshAfter,
                 LastRetrieval = _lastRetrieval,
                 NextRetrieval = _nextRetrieval
             };

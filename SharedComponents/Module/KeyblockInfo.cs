@@ -9,5 +9,6 @@ namespace SharedComponents.Module
         public DateTime? NextRetrieval { get; set; }
         public DateTime? ValidFrom { get; set; }
         public DateTime? ValidTo { get; set; }
+        public DateTime? RefreshAfter { get; set; }
     }
 }

@@ -17,6 +17,7 @@ namespace Keyblock
         public bool IsValid { get; private set; }
         public DateTime? BlockValidFrom => IsValid ? _block.ValidFrom : (DateTime?)null;
         public DateTime? BlockValidTo => IsValid ? _block.ValidTo : (DateTime?)null;
+        public DateTime? BlockRefreshAfter => IsValid ? _block.NeedsRefreshAfter : (DateTime?)null;
 
         //Filenames
         string SignedCertificateFile => Path.Combine(_settings.DataFolder, "SignedCert.der");

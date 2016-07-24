@@ -25,6 +25,7 @@ interface IKeyblockInfo extends IModuleInfo {
     LastRetrieval: Date;
     ValidFrom: Date;
     ValidTo: Date;
+    RefreshAfter: Date;
 }
 
 interface ILog {
