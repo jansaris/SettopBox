@@ -58,6 +58,8 @@
     <Compile Include="DependencyInjection\TypedLogger.cs" />
     <Compile Include="DependencyInjection\SharedContainer.cs" />
     <Compile Include="DependencyInjection\DependecyContext.cs" />
+    <Compile Include="Helpers\LinuxSignal.cs" />
+    <Compile Include="Helpers\Clock.cs" />
     <Compile Include="Keyblock\Block.cs" />
     <Compile Include="Keyblock\Channel.cs" />
     <Compile Include="Module\BaseModule.cs" />
@@ -67,7 +69,6 @@
     <Compile Include="Module\IModuleInfo.cs" />
     <Compile Include="Module\EpgGrabberInfo.cs" />
     <Compile Include="Module\KeyblockInfo.cs" />
-    <Compile Include="Module\LinuxSignal.cs" />
     <Compile Include="Module\ModuleCommunication.cs" />
     <Compile Include="Module\ModuleState.cs" />
     <Compile Include="Module\NewCamdInfo.cs" />

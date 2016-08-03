@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using log4net;
 using SharedComponents;
 using SharedComponents.DependencyInjection;
+using SharedComponents.Helpers;
 using SharedComponents.Module;
 
 namespace Keyblock
@@ -14,16 +15,18 @@ namespace Keyblock
         readonly ILog _logger;
         readonly Settings _settings;
         readonly Keyblock _keyblock;
+        readonly Clock _clock;
         readonly CancellationTokenSource _cancelSource = new CancellationTokenSource();
         Task _runningKeyblockTask;
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
-        public Program(ILog logger, Settings settings, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
+        public Program(ILog logger, Settings settings, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication, Clock clock) : base(signal, communication)
         {
             _logger = logger;
             _settings = settings;
             _keyblock = keyblock;
+            _clock = clock;
         }
 
         static void Main()
@@ -49,12 +52,8 @@ namespace Keyblock
 
         async Task WaitAndRun(DateTime executionTime)
         {
-            var waitTime = executionTime - DateTime.Now;
-            if (waitTime.TotalMilliseconds > 0)
-            {
-                _logger.Info($"Next keyblock will be fetched at {executionTime:yyyy-MM-dd HH:mm:ss}");
-                await Task.Delay(executionTime - DateTime.Now, _cancelSource.Token);
-            }
+            _logger.Info($"Next keyblock will be fetched at {executionTime:yyyy-MM-dd HH:mm:ss}");
+            await _clock.WaitForTimestamp(executionTime, _cancelSource, "Keyblock");
             if (_cancelSource.IsCancellationRequested) return;
             try
             {

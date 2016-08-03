@@ -7,6 +7,7 @@ using SharedComponents.DependencyInjection;
 using Microsoft.Owin.Hosting;
 using Microsoft.Owin.StaticFiles;
 using Owin;
+using SharedComponents.Helpers;
 using SharedComponents.Module;
 using SimpleInjector;
 using SimpleInjector.Integration.WebApi;

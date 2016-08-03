@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using log4net;
 using SharedComponents.DependencyInjection;
-using SharedComponents.Module;
+using SharedComponents.Helpers;
 
 namespace SettopBox
 {

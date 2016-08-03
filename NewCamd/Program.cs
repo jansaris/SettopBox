@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using log4net;
 using SharedComponents.DependencyInjection;
+using SharedComponents.Helpers;
 using SharedComponents.Module;
 
 namespace NewCamd
