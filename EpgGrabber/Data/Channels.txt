@@ -24,3 +24,4 @@ nickjr|Nick Junior
 nicktoons|Nick Toons
 comcentral|Comedy Central
 cartoon|Cartoon Network
+fox|Fox
