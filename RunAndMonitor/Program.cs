@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using log4net;
 using SharedComponents.DependencyInjection;
+using SharedComponents.Helpers;
 using SharedComponents.Module;
 
 namespace RunAndMonitor

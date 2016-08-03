@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using log4net;
+using SharedComponents.Helpers;
 using SharedComponents.Module;
 
 namespace SettopBox

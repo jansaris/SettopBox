@@ -6,6 +6,7 @@ using EpgGrabber.IO;
 using log4net;
 using SharedComponents;
 using SharedComponents.DependencyInjection;
+using SharedComponents.Helpers;
 using SharedComponents.Module;
 
 namespace EpgGrabber
@@ -18,17 +19,19 @@ namespace EpgGrabber
         readonly ChannelList _channelList;
         readonly CachedWebDownloader _webDownloader;
         readonly CancellationTokenSource _cancelSource = new CancellationTokenSource();
+        readonly Clock _clock;
         Task _runningEpgGrabTask;
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
-        public Program(ILog logger, Settings settings, Grabber epgGrabber, IWebDownloader webDownloader, ChannelList channelList, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
+        public Program(ILog logger, Settings settings, Grabber epgGrabber, IWebDownloader webDownloader, ChannelList channelList, LinuxSignal signal, ModuleCommunication communication, Clock clock) : base(signal, communication)
         {
             _logger = logger;
             _settings = settings;
             _epgGrabber = epgGrabber;
             _webDownloader = webDownloader as CachedWebDownloader;
             _channelList = channelList;
+            _clock = clock;
         }
 
         static void Main()
@@ -81,12 +84,8 @@ namespace EpgGrabber
 
         async Task WaitAndRun(DateTime executionTime)
         {
-            var waitTime = executionTime - DateTime.Now;
-            if (waitTime.TotalMilliseconds > 0)
-            {
-                _logger.Info($"Next EPG will be fetched at {executionTime:yyyy-MM-dd HH:mm:ss}");
-                await Task.Delay(executionTime - DateTime.Now, _cancelSource.Token);
-            }
+            _logger.Info($"Next EPG will be fetched at {executionTime:yyyy-MM-dd HH:mm:ss}");
+            await _clock.WaitForTimestamp(executionTime, _cancelSource, "EpgGrabber");
             if (_cancelSource.IsCancellationRequested) return;
             try
             {

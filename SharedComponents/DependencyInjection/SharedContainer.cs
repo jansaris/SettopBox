@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using log4net;
 using log4net.Config;
+using SharedComponents.Helpers;
 using SharedComponents.Module;
 using SharedComponents.Settings;
 using SimpleInjector;
@@ -16,7 +17,7 @@ namespace SharedComponents.DependencyInjection
 
         static Container Create(string log4NetConfig)
         {
-            XmlConfigurator.Configure(new FileInfo(log4NetConfig));
+            XmlConfigurator.ConfigureAndWatch(new FileInfo(log4NetConfig));
             Logger.Debug("Create container");
             var container = new Container();
             container.RegisterLog4Net();

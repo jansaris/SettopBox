@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using Mono.Unix;
 using Mono.Unix.Native;
 
-namespace SharedComponents.Module
+namespace SharedComponents.Helpers
 {
     public class LinuxSignal : IDisposable
     {
