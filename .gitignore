@@ -216,3 +216,8 @@ ModelManifest.xml
 *.tgz
 *.spk
 /package.tgz/share/
+/package.tgz/share/SettopBox
+Synology/package.tgz/share/SettopBox/
+Synology/spk/package.tgz
+Synology/spk/SettopBox.spk
+Synology/spk/SettopBox.tar
