@@ -222,7 +222,7 @@ namespace Keyblock
                 return false;
             }
             var data = File.ReadAllBytes(KeyblockFile);
-            _block.Load(data);
+            _block.Load(data, _settings.GetChannelsToIgnore());
             if (_block.NrOfChannels < 1)
             {
                 _logger.Error("No channels found in the keyblock data");

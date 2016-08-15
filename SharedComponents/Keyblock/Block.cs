@@ -18,7 +18,7 @@ namespace SharedComponents.Keyblock
             _logger = logger;
         }
 
-        public void Load(byte[] data)
+        public void Load(byte[] data, IList<int> channelsToIgnore)
         {
             if (data == null)
             {
@@ -30,8 +30,11 @@ namespace SharedComponents.Keyblock
             _blocks = SplitKeyBlock(data);
             _logger.Debug($"Parsed {_blocks.Count} channel blocks");
 
+            _logger.Debug($"Skip {channelsToIgnore?.Count} channels from timestamp validation: {string.Join(";",channelsToIgnore ?? new List<int>())}");
                 //Group all the blocks by ChannelId and
             var grouped = _blocks.GroupBy(c => c.ChannelId)
+                //Remove old channels which corrupt our data
+                .Where(c => !channelsToIgnore.Contains(c.Key))
                 //And order the blocks within the channel by date
                 .ToDictionary(c => c.Key, c => c.OrderBy(ch => ch.From).ToList());
             //Then take the minimal last date per block 
@@ -39,10 +42,10 @@ namespace SharedComponents.Keyblock
             //So take always the last block as reference point for refresh
             _refreshDate = grouped.Min(g => g.Value.Last().To);
 
-            //foreach (var keyvalue in grouped)
-            //{
-            //    _logger.Debug($"Channel {keyvalue.Key}: {keyvalue.Value.Count} blocks, valid between: {keyvalue.Value.First().From} - {keyvalue.Value.Last().To}");
-            //}
+            foreach (var keyvalue in grouped)
+            {
+                _logger.Debug($"Channel {keyvalue.Key}: {keyvalue.Value.Count} blocks, valid between: {keyvalue.Value.First().From} - {keyvalue.Value.Last().To}");
+            }
         }
 
         public int NrOfChannels => _blocks.Count;

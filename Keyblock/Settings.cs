@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using log4net;
 using SharedComponents.Settings;
@@ -52,6 +54,25 @@ namespace Keyblock
         public double KeyblockValidationInHours { get; set; } = 1;
         public bool ForceInitialKeyblockDownload { get; set; } = false;
         public bool InitialLoadKeyblock { get; set; } = true;
+        public string KeyblockChannelsToIgnore { get; set; }
+
+        public IList<int> GetChannelsToIgnore()
+        {
+            var retValue = new List<int>();
+            if (string.IsNullOrWhiteSpace(KeyblockChannelsToIgnore)) return retValue;
+            try
+            {
+                return KeyblockChannelsToIgnore
+                    .Split(';')
+                    .Select(v => Convert.ToInt32(v))
+                    .ToList();
+            }
+            catch
+            {
+                Logger.Error($"Failed to parse KeyblockChannelsToIgnore: {KeyblockChannelsToIgnore}");
+            }
+            return retValue;
+        }
 
         public Settings(ILog logger) : base(logger)
         {

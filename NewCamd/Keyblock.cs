@@ -26,7 +26,7 @@ namespace NewCamd
             {
                 keyblockFile = Path.Combine(_settings.DataFolder, _settings.KeyblockFile);
             }
-            Load(ReadKeyBlock(keyblockFile));
+            Load(ReadKeyBlock(keyblockFile), _settings.GetChannelsToIgnore());
         }
 
         byte[] ReadKeyBlock(string file)
