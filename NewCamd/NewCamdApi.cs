@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using log4net;
 using NewCamd.Encryption;
 
@@ -15,6 +16,10 @@ namespace NewCamd
         readonly NewCamdCommunication _communication;
         readonly Keyblock _keyblock;
         readonly EncryptionHelpers _crypto;
+        
+        //Thread variable
+        TcpClient _client;
+        Thread _thread;
 
         public EventHandler Closed;
         public string Name => _communication?.Name;
@@ -33,8 +38,15 @@ namespace NewCamd
         public void HandleClient(TcpClient client)
         {
             _logger.Debug("Start handling new client");
+            _client = client;
+            _thread = new Thread(HandleClient);
+            _thread.Start();
+        }
+
+        void HandleClient()
+        {
             _keyblock.Prepare();
-            _communication.Start(client);
+            _communication.Start(_client);
         }
 
         void ReceiveMessage(NewCamdMessage message)

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
+using System.Threading;
 using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Helpers;
@@ -21,7 +21,7 @@ namespace NewCamd
         readonly List<NewCamdApi> _activeClients;
         TcpListener _listener;
         bool _listening;
-        Task _listeningTask;
+        Thread _listeningTask;
         string _listeningAdress;
 
         public Program(ILog logger, Settings settings, Func<NewCamdApi> clientFactory, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
@@ -68,7 +68,8 @@ namespace NewCamd
                 _settings.Load();
                 _keyblock.Prepare();
                 StartServer();
-                _listeningTask = Listen();
+                _listeningTask = new Thread(Listen);
+                _listeningTask.Start();
             }
             catch (Exception ex)
             {
@@ -88,10 +89,11 @@ namespace NewCamd
                     _logger.Info("Stopped listening");
                 }               
                 CloseClients();
-                if (_listeningTask == null || _listeningTask.Status != AsyncTaskIsRunning) return;
+                if (_listeningTask == null || !_listeningTask.IsAlive) return;
 
                 _logger.Warn("Wait max 10 sec for the Listener to stop");
-                _listeningTask.Wait(10000);
+                Thread.Sleep(10000);
+                if(_listeningTask.IsAlive) _listeningTask.Abort();
             }
             catch (Exception ex)
             {
@@ -109,6 +111,13 @@ namespace NewCamd
             _logger.Info($"Start listening at {_listeningAdress}");
         }
 
+        void ReInitializeListener()
+        {
+            if (!_listening) return;
+            _listener.Stop();
+            StartServer();
+        }
+
         IPAddress GetIpAdress()
         {
             if(string.IsNullOrWhiteSpace(_settings.IpAdress)) return IPAddress.Any;
@@ -123,18 +132,20 @@ namespace NewCamd
             }
         }
 
-        async Task Listen()
+        void Listen()
         {
+            _logger.Debug("Start listening task");
             try
             {
                 while (_listening)
                 {
-                    var client = await _listener.AcceptTcpClientAsync();
+                    var client = _listener.AcceptTcpClient();
                     _logger.Debug("Try to accept new api");
                     var clientHandler = _clientFactory();
                     clientHandler.Closed += ClientClosed;
                     AddClientToWatchList(clientHandler);
                     clientHandler.HandleClient(client);
+                    ReInitializeListener();
                 }
             }
             catch (ObjectDisposedException)
@@ -145,6 +156,15 @@ namespace NewCamd
                 }
                 //Ignore because this is expected to happen when we stopped listening    
             }
+            catch (ThreadAbortException)
+            {
+                if (_listening)
+                {
+                    throw;
+                }
+                //Ignore because this is expected to happen when we stopped listening    
+            }
+            _logger.Debug("Finished listening task");
         }
 
         public override void ProcessDataFromOtherModule(string moduleName, CommunicationData data)

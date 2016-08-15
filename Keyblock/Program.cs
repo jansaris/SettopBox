@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
-using SharedComponents;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
@@ -17,7 +16,7 @@ namespace Keyblock
         readonly Keyblock _keyblock;
         readonly Clock _clock;
         readonly CancellationTokenSource _cancelSource = new CancellationTokenSource();
-        Task _runningKeyblockTask;
+        Thread _runningKeyblockTask;
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
@@ -46,14 +45,14 @@ namespace Keyblock
             while (!_cancelSource.IsCancellationRequested)
             {
                 var nextRunAt = _nextRetrieval ?? DateTime.Now;
-                WaitAndRun(nextRunAt).Wait(_cancelSource.Token);
+                WaitAndRun(nextRunAt);
             }
         }
 
-        async Task WaitAndRun(DateTime executionTime)
+        void WaitAndRun(DateTime executionTime)
         {
             _logger.Info($"Next keyblock will be fetched at {executionTime:yyyy-MM-dd HH:mm:ss}");
-            await _clock.WaitForTimestamp(executionTime, _cancelSource, "Keyblock");
+            _clock.WaitForTimestamp(executionTime, _cancelSource, "Keyblock");
             if (_cancelSource.IsCancellationRequested) return;
             try
             {
@@ -117,16 +116,18 @@ namespace Keyblock
         {
             _logger.Info("Welcome to Keyblock");
             _settings.Load();
-            _runningKeyblockTask = Task.Factory.StartNew(LoadKeyBlockLoop, _cancelSource.Token, TaskCreationOptions.None, PriorityScheduler.BelowNormal);
+            _runningKeyblockTask = new Thread(LoadKeyBlockLoop) {Priority = ThreadPriority.BelowNormal};
+            _runningKeyblockTask.Start();
         }
 
         protected override void StopModule()
         {
             _cancelSource.Cancel();
-            if (_runningKeyblockTask == null || _runningKeyblockTask.Status != AsyncTaskIsRunning) return;
+            if (_runningKeyblockTask == null || _runningKeyblockTask.IsAlive) return;
 
             _logger.Warn("Wait max 10 sec for Keyblock to stop");
-            _runningKeyblockTask.Wait(10000);
+            Thread.Sleep(10000);
+            if(_runningKeyblockTask.IsAlive) _runningKeyblockTask.Abort();
         }
         public override IModuleInfo GetModuleInfo()
         {

@@ -18,7 +18,7 @@ namespace Test.NewCamdClient
         static readonly ILog Logger = LogManager.GetLogger(typeof (Program));
         readonly NewCamdClient _client = new NewCamdClient();
 
-        const string IpAdress = "localhost";
+        const string IpAdress = "192.168.10.50";
         const int Port = 15050;
 
         static void Main(string[] args)

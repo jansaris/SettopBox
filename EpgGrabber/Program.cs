@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using EpgGrabber.IO;
 using log4net;
-using SharedComponents;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
@@ -20,7 +19,7 @@ namespace EpgGrabber
         readonly CachedWebDownloader _webDownloader;
         readonly CancellationTokenSource _cancelSource = new CancellationTokenSource();
         readonly Clock _clock;
-        Task _runningEpgGrabTask;
+        Thread _runningEpgGrabTask;
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
@@ -62,30 +61,38 @@ namespace EpgGrabber
         {
             _logger.Info("Welcome to EPG Grabber");
             _settings.Load();
-            _runningEpgGrabTask = Task.Factory.StartNew(DownloadEpgGrabberLoop, _cancelSource.Token, TaskCreationOptions.None, PriorityScheduler.Lowest);
+            _runningEpgGrabTask = new Thread(DownloadEpgGrabberLoop) {Priority = ThreadPriority.Lowest};
+            _runningEpgGrabTask.Start();
         }
 
         void DownloadEpgGrabberLoop()
         {
-            _nextRetrieval = _settings.InitialEpgGrab ? DateTime.Now : DetermineNextRetrieval();
-            while (!_cancelSource.IsCancellationRequested)
+            try
             {
-                var nextRunAt = _nextRetrieval ?? DateTime.Now;
-                try
+                _nextRetrieval = _settings.InitialEpgGrab ? DateTime.Now : DetermineNextRetrieval();
+                while (!_cancelSource.IsCancellationRequested)
                 {
-                    WaitAndRun(nextRunAt).Wait(_cancelSource.Token);
+                    var nextRunAt = _nextRetrieval ?? DateTime.Now;
+                    try
+                    {
+                        WaitAndRun(nextRunAt);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        //Ignore
+                    }
                 }
-                catch (OperationCanceledException)
-                {
-                    //Ignore
-                }
+            }
+            catch (ThreadAbortException)
+            {
+                _logger.Info("Stopped the EPG Thread");
             }
         }
 
-        async Task WaitAndRun(DateTime executionTime)
+        void WaitAndRun(DateTime executionTime)
         {
             _logger.Info($"Next EPG will be fetched at {executionTime:yyyy-MM-dd HH:mm:ss}");
-            await _clock.WaitForTimestamp(executionTime, _cancelSource, "EpgGrabber");
+            _clock.WaitForTimestamp(executionTime, _cancelSource, "EpgGrabber");
             if (_cancelSource.IsCancellationRequested) return;
             try
             {
@@ -125,10 +132,11 @@ namespace EpgGrabber
         {
             _cancelSource.Cancel();
             Task.Delay(100).Wait();
-            if (_runningEpgGrabTask != null && _runningEpgGrabTask.Status == AsyncTaskIsRunning)
+            if (_runningEpgGrabTask != null && _runningEpgGrabTask.IsAlive)
             {
-                _logger.Warn("Wait max 10 sec for EPG Grabber to stop");
-                _runningEpgGrabTask.Wait(10000);
+                _logger.Warn("Wait max 5 sec for EPG Grabber to stop");
+                Task.Delay(5000).Wait();
+                if(_runningEpgGrabTask.IsAlive) _runningEpgGrabTask.Abort();
             }
             _webDownloader?.SaveCache();
         }

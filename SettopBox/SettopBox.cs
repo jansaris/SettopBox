@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using log4net;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
@@ -49,7 +50,8 @@ namespace SettopBox
         void Start(IModule module)
         {
             _logger.Info($"Start {module.Name}");
-            module.Start();
+            var thread = new Thread(module.Start);
+            thread.Start();
         }
     }
 }

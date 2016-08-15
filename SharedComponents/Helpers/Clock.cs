@@ -1,38 +1,67 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 using log4net;
 
 namespace SharedComponents.Helpers
 {
-    public class Clock
+    public class Clock : IDisposable
     {
         readonly ILog _logger;
+        Thread _thread;
+        bool _disposed;
+
+        DateTime _time;
+        string _waitingFor;
+        CancellationTokenSource _cancelSource;
 
         public Clock(ILog logger)
         {
             _logger = logger;
         }
 
-
-        public async Task WaitForTimestamp(DateTime time, CancellationTokenSource cancelSource, string caller = null)
+        void TickTack()
         {
-            _logger.Debug($"WaitForTimestamp: {caller} - {time:yyyy-mm-dd hh:MM:ss}");
-            if (cancelSource.IsCancellationRequested) return;
-            if (time < DateTime.Now) return;
-            _logger.Info($"WaitForTimestamp: {caller} - {time:yyyy-mm-dd hh:MM:ss}");
             var counter = 0;
-            while (time > DateTime.Now && !cancelSource.IsCancellationRequested)
+            while (_time > DateTime.Now && !_cancelSource.IsCancellationRequested)
             {
                 if (counter > 60)
                 {
                     counter = 0;
-                    _logger.Debug($"WaitForTimestamp: Still waiting for  {caller} - {time:yyyy-mm-dd hh:MM:ss}");
+                    _logger.Debug($"WaitForTimestamp: Still waiting for  {_waitingFor} - {_time:yyyy-MM-dd hh:mm:ss}");
                 }
                 //Wait for 1 second, and re-evaluate the Cancellation Token
-                await Task.Delay(1000);
+                Thread.Sleep(1000);
                 counter++;
             }
+        }
+
+        public void WaitForTimestamp(DateTime time, CancellationTokenSource cancelSource, string caller = null)
+        {
+            _logger.Debug($"WaitForTimestamp: {caller} - {time:yyyy-MM-dd hh:mm:ss}");
+            if (cancelSource.IsCancellationRequested) return;
+            if (time < DateTime.Now) return;
+            _logger.Info($"WaitForTimestamp: {caller} - {time:yyyy-MM-dd hh:mm:ss}");
+            _thread = new Thread(TickTack);
+
+            _time = time;
+            _waitingFor = caller;
+            _cancelSource = cancelSource;
+
+            _thread.Start();
+            while (!_thread.IsAlive) { } //Wait for thread to be up and running
+            _thread.Join();
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                _logger.Warn("Clock is already disposed");
+                return;
+            }
+            _logger.Info("Dispose the clock");
+            _disposed = true;
+            _thread.Abort();
         }
     }
 }
