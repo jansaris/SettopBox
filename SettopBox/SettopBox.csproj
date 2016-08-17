@@ -46,8 +46,8 @@
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SimpleInjector, Version=3.1.5.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\packages\SimpleInjector.3.1.5\lib\net45\SimpleInjector.dll</HintPath>
+    <Reference Include="SimpleInjector, Version=3.2.0.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.3.2.0\lib\net45\SimpleInjector.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -113,6 +113,7 @@ mkdir $(SolutionDir)Synology\package.tgz\share\SettopBox
 XCOPY $(TargetDir)*.exe $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
 XCOPY $(TargetDir)*.dll $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
 XCOPY $(TargetDir)*.config $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
+COPY $(SolutionDir)Synology\package.tgz\share\SettopBox\SettopBox.exe.config $(SolutionDir)Synology\package.tgz\share\SettopBox\WebUi.exe.config /y
 XCOPY $(TargetDir)*.ini $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
 mkdir $(SolutionDir)Synology\package.tgz\share\SettopBox\Data
 mkdir $(SolutionDir)Synology\package.tgz\share\SettopBox\www
