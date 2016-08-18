@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using EpgGrabber.IO;
 using log4net;
 using SharedComponents.DependencyInjection;
@@ -126,6 +125,7 @@ namespace EpgGrabber
         {
             _cancelSource.Cancel();
             _threadHelper.AbortThread(_runningEpgGrabTask, _logger, 5000);
+            _runningEpgGrabTask = null;
             _webDownloader?.SaveCache();
         }
     }

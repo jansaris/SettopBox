@@ -124,6 +124,7 @@ namespace Keyblock
         {
             _cancelSource.Cancel();
             _threadHelper.AbortThread(_runningKeyblockThread, _logger, 10000);
+            _runningKeyblockThread = null;
         }
 
         public override IModuleInfo GetModuleInfo()
