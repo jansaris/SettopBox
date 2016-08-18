@@ -1,37 +1,38 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using log4net;
 using Mono.Unix;
 using Mono.Unix.Native;
+using SharedComponents.Module;
 
 namespace SharedComponents.Helpers
 {
     public class LinuxSignal : IDisposable
     {
         readonly ILog _logger;
+        readonly IThreadHelper _threadHelper;
         bool _disposing;
         bool _running;
         Thread _listeningThread;
 
-        public LinuxSignal(ILog logger)
+        public LinuxSignal(ILog logger, IThreadHelper threadHelper)
         {
             _logger = logger;
+            _threadHelper = threadHelper;
         }
 
         public event EventHandler Exit;
 
         public void Listen()
         {
-            _listeningThread = new Thread(ListenForSignal);
-            _listeningThread.Start();
+            _listeningThread = _threadHelper.RunSafeInNewThread(ListenForSignal, _logger);
         }
 
         public void WaitForListenThreadToComplete()
         {
             while (_listeningThread.IsAlive)
             {
-                Task.Delay(1000).Wait();
+                Thread.Sleep(1000);
             }
         }
 
@@ -97,6 +98,7 @@ namespace SharedComponents.Helpers
             _running = false;
             OnExit();
             WaitForListenThreadToComplete();
+            _listeningThread = null;
         }
     }
 }

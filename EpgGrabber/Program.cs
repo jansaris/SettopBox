@@ -13,6 +13,7 @@ namespace EpgGrabber
     public class Program : BaseModule
     {
         readonly ILog _logger;
+        readonly IThreadHelper _threadHelper;
         readonly Settings _settings;
         readonly Grabber _epgGrabber;
         readonly ChannelList _channelList;
@@ -23,9 +24,10 @@ namespace EpgGrabber
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
-        public Program(ILog logger, Settings settings, Grabber epgGrabber, IWebDownloader webDownloader, ChannelList channelList, LinuxSignal signal, ModuleCommunication communication, Clock clock) : base(signal, communication)
+        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, Grabber epgGrabber, IWebDownloader webDownloader, ChannelList channelList, LinuxSignal signal, ModuleCommunication communication, Clock clock) : base(signal, communication)
         {
             _logger = logger;
+            _threadHelper = threadHelper;
             _settings = settings;
             _epgGrabber = epgGrabber;
             _webDownloader = webDownloader as CachedWebDownloader;
@@ -61,31 +63,23 @@ namespace EpgGrabber
         {
             _logger.Info("Welcome to EPG Grabber");
             _settings.Load();
-            _runningEpgGrabTask = new Thread(DownloadEpgGrabberLoop) {Priority = ThreadPriority.Lowest};
-            _runningEpgGrabTask.Start();
+            _runningEpgGrabTask = _threadHelper.RunSafeInNewThread(DownloadEpgGrabberLoop, _logger, ThreadPriority.Lowest);
         }
 
         void DownloadEpgGrabberLoop()
         {
-            try
+            _nextRetrieval = _settings.InitialEpgGrab ? DateTime.Now : DetermineNextRetrieval();
+            while (!_cancelSource.IsCancellationRequested)
             {
-                _nextRetrieval = _settings.InitialEpgGrab ? DateTime.Now : DetermineNextRetrieval();
-                while (!_cancelSource.IsCancellationRequested)
+                var nextRunAt = _nextRetrieval ?? DateTime.Now;
+                try
                 {
-                    var nextRunAt = _nextRetrieval ?? DateTime.Now;
-                    try
-                    {
-                        WaitAndRun(nextRunAt);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        //Ignore
-                    }
+                    WaitAndRun(nextRunAt);
                 }
-            }
-            catch (ThreadAbortException)
-            {
-                _logger.Info("Stopped the EPG Thread");
+                catch (OperationCanceledException)
+                {
+                    //Ignore
+                }
             }
         }
 
@@ -131,13 +125,7 @@ namespace EpgGrabber
         protected override void StopModule()
         {
             _cancelSource.Cancel();
-            Task.Delay(100).Wait();
-            if (_runningEpgGrabTask != null && _runningEpgGrabTask.IsAlive)
-            {
-                _logger.Warn("Wait max 5 sec for EPG Grabber to stop");
-                Task.Delay(5000).Wait();
-                if(_runningEpgGrabTask.IsAlive) _runningEpgGrabTask.Abort();
-            }
+            _threadHelper.AbortThread(_runningEpgGrabTask, _logger, 5000);
             _webDownloader?.SaveCache();
         }
     }

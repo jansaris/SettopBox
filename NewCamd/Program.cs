@@ -13,6 +13,7 @@ namespace NewCamd
     public class Program : BaseModule
     {
         readonly ILog _logger;
+        readonly IThreadHelper _threadHelper;
         readonly Settings _settings;
         readonly Func<NewCamdApi> _clientFactory;
         readonly Keyblock _keyblock;
@@ -21,12 +22,13 @@ namespace NewCamd
         readonly List<NewCamdApi> _activeClients;
         TcpListener _listener;
         bool _listening;
-        Thread _listeningTask;
+        Thread _listeningThread;
         string _listeningAdress;
 
-        public Program(ILog logger, Settings settings, Func<NewCamdApi> clientFactory, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
+        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, Func<NewCamdApi> clientFactory, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
         {
             _logger = logger;
+            _threadHelper = threadHelper;
             _settings = settings;
             _clientFactory = clientFactory;
             _keyblock = keyblock;
@@ -68,8 +70,7 @@ namespace NewCamd
                 _settings.Load();
                 _keyblock.Prepare();
                 StartServer();
-                _listeningTask = new Thread(Listen);
-                _listeningTask.Start();
+                _listeningThread = _threadHelper.RunSafeInNewThread(Listen,_logger);
             }
             catch (Exception ex)
             {
@@ -89,11 +90,8 @@ namespace NewCamd
                     _logger.Info("Stopped listening");
                 }               
                 CloseClients();
-                if (_listeningTask == null || !_listeningTask.IsAlive) return;
-
-                _logger.Warn("Wait max 10 sec for the Listener to stop");
-                Thread.Sleep(10000);
-                if(_listeningTask.IsAlive) _listeningTask.Abort();
+                _threadHelper.AbortThread(_listeningThread,_logger,10000);
+                _listeningThread = null;
             }
             catch (Exception ex)
             {
@@ -134,7 +132,7 @@ namespace NewCamd
 
         void Listen()
         {
-            _logger.Debug("Start listening task");
+            _logger.Debug("Start listening thread");
             try
             {
                 while (_listening)
@@ -156,15 +154,7 @@ namespace NewCamd
                 }
                 //Ignore because this is expected to happen when we stopped listening    
             }
-            catch (ThreadAbortException)
-            {
-                if (_listening)
-                {
-                    throw;
-                }
-                //Ignore because this is expected to happen when we stopped listening    
-            }
-            _logger.Debug("Finished listening task");
+            _logger.Debug("Finished listening thread");
         }
 
         public override void ProcessDataFromOtherModule(string moduleName, CommunicationData data)

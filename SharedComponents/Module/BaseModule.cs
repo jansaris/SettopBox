@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
 using SharedComponents.Helpers;
 
 namespace SharedComponents.Module
@@ -18,8 +17,6 @@ namespace SharedComponents.Module
 
         public event EventHandler<ModuleState> StatusChanged;
         public event EventHandler<CommunicationData> NewDataAvailable;
-
-        protected const TaskStatus AsyncTaskIsRunning = TaskStatus.WaitingForActivation;
 
         protected BaseModule(LinuxSignal signal, ModuleCommunication moduleCommunication)
         {

@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using log4net;
 
 namespace SharedComponents.Module
 {
     public class ModuleCommunication
     {
+        readonly IThreadHelper _threadHelper;
         readonly ILog _logger = LogManager.GetLogger(typeof (ModuleCommunication));
         readonly List<IModule> _modules = new List<IModule>();
         public event EventHandler Update;
@@ -15,6 +15,11 @@ namespace SharedComponents.Module
         public IEnumerable<string> Modules => _modules
             .Select(m => m.Name)
             .ToList();
+
+        public ModuleCommunication(IThreadHelper threadHelper)
+        {
+            _threadHelper = threadHelper;
+        }
 
         public void Register(IModule module)
         {
@@ -37,10 +42,11 @@ namespace SharedComponents.Module
                 //Skip the sender
                 if(module.Name == senderName) continue;
                 //Inform all the modules, each in a own task
-                Task.Run(() =>
+
+                _threadHelper.RunSafeInNewThread(() =>
                 {
                     module.ProcessDataFromOtherModule(senderName, newData);
-                });
+                }, _logger);
             }
             OnUpdate();
         }
@@ -66,7 +72,7 @@ namespace SharedComponents.Module
         public IModuleInfo Info(string name)
         {
             var mod = Get(name);
-            return mod?.GetModuleInfo() ?? null;
+            return mod?.GetModuleInfo();
         }
 
         IModule Get(string name)
@@ -77,10 +83,10 @@ namespace SharedComponents.Module
         void OnUpdate()
         {
             //Inform the users in a new thread
-            Task.Run(() =>
+            _threadHelper.RunSafeInNewThread(() =>
             {
                 Update?.Invoke(this, EventArgs.Empty);
-            });
+            },_logger);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using log4net;
 using NewCamd.Encryption;
+using SharedComponents.Module;
 
 namespace NewCamd
 {
@@ -12,6 +13,7 @@ namespace NewCamd
     {
         //Constructor variables
         readonly ILog _logger;
+        readonly IThreadHelper _threadHelper;
         readonly Settings _settings;
         readonly NewCamdCommunication _communication;
         readonly Keyblock _keyblock;
@@ -24,9 +26,10 @@ namespace NewCamd
         public EventHandler Closed;
         public string Name => _communication?.Name;
 
-        public NewCamdApi(ILog logger, Settings settings, EncryptionHelpers crypto, NewCamdCommunication communication, Keyblock keyblock)
+        public NewCamdApi(ILog logger, IThreadHelper threadHelper, Settings settings, EncryptionHelpers crypto, NewCamdCommunication communication, Keyblock keyblock)
         {
             _logger = logger;
+            _threadHelper = threadHelper;
             _settings = settings;
             _crypto = crypto;
             _communication = communication;
@@ -39,8 +42,7 @@ namespace NewCamd
         {
             _logger.Debug("Start handling new client");
             _client = client;
-            _thread = new Thread(HandleClient);
-            _thread.Start();
+            _thread = _threadHelper.RunSafeInNewThread(HandleClient, _logger);
         }
 
         void HandleClient()
@@ -143,6 +145,8 @@ namespace NewCamd
             if (!disposing || _disposing) return;
             _disposing = true;
             _communication.Dispose();
+            _threadHelper.AbortThread(_thread,_logger);
+            _thread = null;
         }
 
         public void RefreshKeyblock(string keyblockFile)

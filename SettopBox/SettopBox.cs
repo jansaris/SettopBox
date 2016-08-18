@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using log4net;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
@@ -11,13 +10,15 @@ namespace SettopBox
     public class SettopBox
     {
         readonly ILog _logger;
+        readonly IThreadHelper _threadHelper;
         readonly Settings _settings;
         readonly IEnumerable<IModule> _modules;
         readonly LinuxSignal _signal;
 
-        public SettopBox(ILog logger, Settings settings, IEnumerable<IModule> modules, LinuxSignal signal)
+        public SettopBox(ILog logger, IThreadHelper threadHelper, Settings settings, IEnumerable<IModule> modules, LinuxSignal signal)
         {
             _logger = logger;
+            _threadHelper = threadHelper;
             _settings = settings;
             _modules = modules;
             _signal = signal;
@@ -50,8 +51,7 @@ namespace SettopBox
         void Start(IModule module)
         {
             _logger.Info($"Start {module.Name}");
-            var thread = new Thread(module.Start);
-            thread.Start();
+            _threadHelper.RunSafeInNewThread(module.Start, _logger);
         }
     }
 }

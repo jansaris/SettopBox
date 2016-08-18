@@ -20,6 +20,7 @@ namespace SharedComponents.DependencyInjection
             XmlConfigurator.ConfigureAndWatch(new FileInfo(log4NetConfig));
             Logger.Debug("Create container");
             var container = new Container();
+            container.Register<IThreadHelper, ThreadHelper>(Lifestyle.Singleton);
             container.RegisterLog4Net();
             return container;
         }

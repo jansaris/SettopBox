@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Threading;
 using log4net;
+using SharedComponents.Module;
 
 namespace SharedComponents.Helpers
 {
     public class Clock : IDisposable
     {
         readonly ILog _logger;
+        readonly IThreadHelper _threadHelper;
         Thread _thread;
         bool _disposed;
 
@@ -14,9 +16,10 @@ namespace SharedComponents.Helpers
         string _waitingFor;
         CancellationTokenSource _cancelSource;
 
-        public Clock(ILog logger)
+        public Clock(ILog logger, IThreadHelper threadHelper)
         {
             _logger = logger;
+            _threadHelper = threadHelper;
         }
 
         void TickTack()
@@ -41,14 +44,10 @@ namespace SharedComponents.Helpers
             if (cancelSource.IsCancellationRequested) return;
             if (time < DateTime.Now) return;
             _logger.Info($"WaitForTimestamp: {caller} - {time:yyyy-MM-dd hh:mm:ss}");
-            _thread = new Thread(TickTack);
-
             _time = time;
             _waitingFor = caller;
             _cancelSource = cancelSource;
-
-            _thread.Start();
-            while (!_thread.IsAlive) { } //Wait for thread to be up and running
+            _thread = _threadHelper.RunSafeInNewThread(TickTack, _logger);
             _thread.Join();
         }
 
@@ -61,7 +60,8 @@ namespace SharedComponents.Helpers
             }
             _logger.Info("Dispose the clock");
             _disposed = true;
-            _thread.Abort();
+            _threadHelper.AbortThread(_thread, _logger, 1100);
+            _thread = null;
         }
     }
 }

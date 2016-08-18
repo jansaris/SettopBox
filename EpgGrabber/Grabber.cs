@@ -52,7 +52,7 @@ namespace EpgGrabber
                 {
                     if (CancellationRequested) return null;
                     var epgData = DownloadPart(dayNr, dayPart, date);
-                    epg.AddRange(epgData);
+                    if(epgData!=null) epg.AddRange(epgData);
                 }
             }
 

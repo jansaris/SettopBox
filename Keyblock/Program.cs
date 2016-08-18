@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Helpers;
@@ -12,17 +11,19 @@ namespace Keyblock
     public class Program : BaseModule
     {
         readonly ILog _logger;
+        readonly IThreadHelper _threadHelper;
         readonly Settings _settings;
         readonly Keyblock _keyblock;
         readonly Clock _clock;
         readonly CancellationTokenSource _cancelSource = new CancellationTokenSource();
-        Thread _runningKeyblockTask;
+        Thread _runningKeyblockThread;
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
-        public Program(ILog logger, Settings settings, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication, Clock clock) : base(signal, communication)
+        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication, Clock clock) : base(signal, communication)
         {
             _logger = logger;
+            _threadHelper = threadHelper;
             _settings = settings;
             _keyblock = keyblock;
             _clock = clock;
@@ -106,7 +107,7 @@ namespace Keyblock
                 _keyblock.CleanUp();
                 _logger.Info($"Give the server '{_settings.WaitOnFailingBlockRetrievalInMilliseconds}ms' time");
                 if (_cancelSource.IsCancellationRequested) return;
-                Task.Delay(_settings.WaitOnFailingBlockRetrievalInMilliseconds).Wait();
+                Thread.Sleep(_settings.WaitOnFailingBlockRetrievalInMilliseconds);
             }
             _logger.Error($"Failed to retrieve the keyblock after {_settings.WaitOnFailingBlockRetrievalInMilliseconds} times, stop trying");
             Error();
@@ -116,19 +117,15 @@ namespace Keyblock
         {
             _logger.Info("Welcome to Keyblock");
             _settings.Load();
-            _runningKeyblockTask = new Thread(LoadKeyBlockLoop) {Priority = ThreadPriority.BelowNormal};
-            _runningKeyblockTask.Start();
+            _runningKeyblockThread = _threadHelper.RunSafeInNewThread(LoadKeyBlockLoop, _logger, ThreadPriority.BelowNormal);
         }
 
         protected override void StopModule()
         {
             _cancelSource.Cancel();
-            if (_runningKeyblockTask == null || _runningKeyblockTask.IsAlive) return;
-
-            _logger.Warn("Wait max 10 sec for Keyblock to stop");
-            Thread.Sleep(10000);
-            if(_runningKeyblockTask.IsAlive) _runningKeyblockTask.Abort();
+            _threadHelper.AbortThread(_runningKeyblockThread, _logger, 10000);
         }
+
         public override IModuleInfo GetModuleInfo()
         {
             return new KeyblockInfo
