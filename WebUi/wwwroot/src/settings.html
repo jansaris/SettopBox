@@ -1,0 +1,23 @@
+<template>
+    <require from='./custom/dd-dt.html'></require>
+    <div class="row">
+        <form role="form">
+            <div repeat.for="setting of settings">
+                <div if.bind="setting.InputType !== 'checkbox'">
+                    <div class="form-group">
+                        <label for="${setting.Name}">${setting.Name}</label>
+                        <input value.bind="setting.Value" type="${setting.InputType}" id="${setting.Name}" class="form-control">
+                    </div>
+                </div>
+                <div if.bind="setting.InputType === 'checkbox'">
+                    <div class="form-group-sm">
+                        <label>
+                            ${setting.Name}
+                            <input checked.bind="setting.Value" type="${setting.InputType}" id="${setting.Name}" class="form-control" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</template>

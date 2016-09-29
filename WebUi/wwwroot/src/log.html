@@ -1,0 +1,55 @@
+<template>
+    <require from="./helpers/DateFormatValueConverter"></require>
+    <div class="page-header">
+        <div class="clearfix">
+            <div class="pull-left">
+                <h1>Log</h1>
+            </div>
+            <div class="pull-right" style="margin-top: 30px">
+                <button class="btn btn-info" click.delegate="loadLog()"><span class="glyphicon glyphicon-refresh"></span></button>
+            </div>
+        </div>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownmenu1" aria-haspopup="true" aria-expanded="true">
+                            ${activeLevel}
+                            <span class="caret"></span>
+                        </button>
+                        <ul ref="levelSelect" class="dropdown-menu">
+                            <li click.delegate="changeLevel(all)"><a>${all}</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li repeat.for="level of levels" click.delegate="changeLevel(level)"><a>${level}</a></li>
+                        </ul>
+                    </div>
+                </th>
+                <th>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownmenu1" aria-haspopup="true" aria-expanded="true">
+                            ${activeModule}
+                            <span class="caret"></span>
+                        </button>
+                        <ul ref="levelSelect" class="dropdown-menu">
+                            <li click.delegate="changeModule(all)"><a>${all}</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li repeat.for="module of modules" click.delegate="changeModule(module)"><a>${module}</a></li>
+                        </ul>
+                    </div>
+                </th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr repeat.for="log of list">
+                <td class="text-nowrap">${log.Timestamp | dateFormat}</td>
+                <td>${log.Level}</td>
+                <td>${log.Module}</td>
+                <td>${log.Message}</td>
+            </tr>
+        </tbody>
+    </table>
+</template>
