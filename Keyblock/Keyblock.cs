@@ -231,7 +231,8 @@ namespace Keyblock
             var expected = DateTime.Now.AddHours(_settings.KeyblockValidationInHours);
             if (_block.NeedsRefreshAfter < expected)
             {
-                _logger.Error($"The keyblock data is only valid till {_block.NeedsRefreshAfter}, we expected at least till {expected}");
+                var channels = string.Join(";", _block.NeedsRefreshAfterChannelIds);
+                _logger.Error($"The keyblock data is only valid till {_block.NeedsRefreshAfter} for channel(s) {channels}, we expected at least till {expected}");
                 return false;
             }
             _logger.Info($"Keyblock is valid between {_block.ValidFrom:yyyy-MM-dd} and {_block.ValidTo:yyyy-MM-dd} and needs a refresh after {_block.NeedsRefreshAfter:yyyy-MM-dd}");

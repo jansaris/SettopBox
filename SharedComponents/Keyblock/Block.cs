@@ -12,6 +12,7 @@ namespace SharedComponents.Keyblock
 
         List<Channel> _blocks = new List<Channel>();
         DateTime _refreshDate;
+        private IEnumerable<int> _refreshDateChannelIds;
 
         public Block(ILog logger)
         {
@@ -26,11 +27,13 @@ namespace SharedComponents.Keyblock
                 return;
             }
 
+            if(channelsToIgnore == null) channelsToIgnore = new List<int>();
+
             _logger.Debug("Start splitting keyblocks");
             _blocks = SplitKeyBlock(data);
             _logger.Debug($"Parsed {_blocks.Count} channel blocks");
 
-            _logger.Debug($"Skip {channelsToIgnore?.Count} channels from timestamp validation: {string.Join(";",channelsToIgnore ?? new List<int>())}");
+            _logger.Debug($"Skip {channelsToIgnore.Count} channels from timestamp validation: {string.Join(";",channelsToIgnore)}");
                 //Group all the blocks by ChannelId and
             var grouped = _blocks.GroupBy(c => c.ChannelId)
                 //Remove old channels which corrupt our data
@@ -41,6 +44,10 @@ namespace SharedComponents.Keyblock
             //often we got 2 blocks per channel, 1 block per week
             //So take always the last block as reference point for refresh
             _refreshDate = grouped.Min(g => g.Value.Last().To);
+            //And save the ID's of the channels for logging purposes
+            _refreshDateChannelIds = grouped.Where(g => g.Value.Last().To == _refreshDate)
+                                            .Select(k => k.Key)
+                                            .ToList();
 
             foreach (var keyvalue in grouped)
             {
@@ -52,6 +59,8 @@ namespace SharedComponents.Keyblock
         public DateTime ValidFrom => _blocks.Count > 0 ? _blocks.Min(c => c.From) : DateTime.MinValue;
         public DateTime ValidTo => _blocks.Count > 0 ? _blocks.Max(c => c.To) : DateTime.MinValue;
         public DateTime NeedsRefreshAfter => _refreshDate;
+        public IEnumerable<int> NeedsRefreshAfterChannelIds => _refreshDateChannelIds;
+
         protected Channel GetChannelById(int channel)
         {
             return _blocks.FirstOrDefault(b => b.ChannelId == channel && b.From < DateTime.Now && b.To > DateTime.Now);
