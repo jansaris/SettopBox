@@ -57,12 +57,14 @@ namespace EpgGrabber
         void GenerateChannels(List<Channel> epgChannels)
         {
             var root = _xml.DocumentElement;
+            var names = epgChannels.Select(c => c.Name).Distinct().ToList();
+
             //Loop through the channels
-            foreach (var channel in epgChannels)
+            foreach (var channel in names)
             {
                 var channelNode = AppendNode(root, "channel");
-                AppendAttribute(channelNode, "id", channel.Name);
-                var displayNode = AppendNode(channelNode, "display-name", channel.Name);
+                AppendAttribute(channelNode, "id", channel);
+                var displayNode = AppendNode(channelNode, "display-name", channel);
                 AppendAttribute(displayNode, "lang", "nl"); //just setting everything to NL
                 //var icon = channel.Icons.FirstOrDefault(ico => File.Exists(Path.Combine(_settings.IconFolder, ico)));
                 //if (icon == null) continue;
