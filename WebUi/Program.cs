@@ -91,6 +91,7 @@ namespace WebUi
         HttpConfiguration GenerateHttpConfiguration()
         {
             var config = new HttpConfiguration();
+            config.EnableCors();
             config.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(_container);
             config.MapHttpAttributeRoutes();
             config.Routes.MapHttpRoute(

@@ -1,10 +1,12 @@
 using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using SharedComponents.Module;
 using WebUi.api.Models;
 
 namespace WebUi.api.Controllers
 {
+    [EnableCors(origins: "http://localhost:3000", headers: "*", methods: "*")]
     [RoutePrefix("api/module")]
     public class ModuleController : ApiController
     {
