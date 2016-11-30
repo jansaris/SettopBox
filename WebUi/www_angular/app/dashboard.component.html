@@ -1,0 +1,7 @@
+<div class="grid grid-pad">
+  <a *ngFor="let module of modules" [routerLink]="['', module.Name]" class="col-1-4">
+    <div class="module">
+      <h4>{{module.Name}}</h4>
+    </div>
+  </a>
+</div>
