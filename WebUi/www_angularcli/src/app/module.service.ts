@@ -1,39 +1,34 @@
 import { Injectable } from '@angular/core';
-import { Headers, Http, URLSearchParams } from '@angular/http'
+import { Http, URLSearchParams } from '@angular/http'
+import { ErrorService } from './error.service';
+import { UrlsService } from './urls.service';
+
+import {Module} from './models'
 
 import 'rxjs/add/operator/toPromise';
-import './models'
 
 @Injectable()
 export class ModuleService {
-    private moduleUrl = 'http://localhost:15051/api/module';  // URL to web api
-    private headers = new Headers([ {'Content-Type': 'application/json'}]);
-
-    constructor(private http: Http) { }
+    constructor(private http: Http, private error: ErrorService, private urls: UrlsService) { }
     
-    getModules(): Promise<IModule[]> {
-        return this.http.get(this.moduleUrl)
+    getModules(): Promise<Module[]> {
+        return this.http.get(this.urls.Module)
                .toPromise()
                .then(response => {
-                   return response.json() as IModule[];
+                   return response.json() as Module[];
                 })
-               .catch(this.handleError);
+               .catch(this.error.handleError);
     }
 
-    getModule(name: string): Promise<IModule> {
+    getModule(name: string): Promise<Module> {
         let params: URLSearchParams = new URLSearchParams();
         params.set('name', name);
 
-        return this.http.get(this.moduleUrl, {search: params})
+        return this.http.get(this.urls.Module, {search: params})
                         .toPromise()
                         .then(response => {
-                            return response.json() as IModule;
+                            return response.json() as Module;
                         })
-        .catch(this.handleError);
-    }
-
-    private handleError(error: any): Promise<any> {
-        console.error('An error occurred', error); // for demo purposes only
-        return Promise.reject(error.message || error);
+        .catch(this.error.handleError);
     }
 }

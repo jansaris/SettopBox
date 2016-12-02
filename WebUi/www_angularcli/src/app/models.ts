@@ -1,14 +1,14 @@
-interface IModule {
+export class Module {
     Name: string;
     Enabled: boolean;
     Status: string;
-    Info: IModuleInfo;
+    Info: ModuleInfo;
 }
-interface IModuleInfo {
+export class ModuleInfo {
 
 }
 
-interface INewcamdInfo extends IModuleInfo {
+export class NewcamdInfo extends ModuleInfo {
     NrOfClients: number;
     NrOfChannels: number;
     ValidFrom: Date;
@@ -19,7 +19,7 @@ interface INewcamdInfo extends IModuleInfo {
     DesKey: string;
 }
 
-interface IKeyblockInfo extends IModuleInfo {
+export class KeyblockInfo extends ModuleInfo {
     HasValidKeyblock: boolean;
     NextRetrieval: Date;
     LastRetrieval: Date;
@@ -28,7 +28,7 @@ interface IKeyblockInfo extends IModuleInfo {
     RefreshAfter: Date;
 }
 
-interface ILog {
+export class Log {
     Timestamp: Date;
     Module: string;
     Component: string;
@@ -36,7 +36,7 @@ interface ILog {
     Level: string;
 }
 
-interface ISetting {
+export class Setting {
     Name: string;
     Value: any;
     Type: string;
