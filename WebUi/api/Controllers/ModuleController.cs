@@ -6,7 +6,7 @@ using WebUi.api.Models;
 
 namespace WebUi.api.Controllers
 {
-    [EnableCors(origins: "http://localhost:3000", headers: "*", methods: "*")]
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     [RoutePrefix("api/module")]
     public class ModuleController : ApiController
     {
