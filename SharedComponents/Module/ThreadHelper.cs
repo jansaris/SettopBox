@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using log4net;
 
@@ -38,6 +39,28 @@ namespace SharedComponents.Module
             Thread.Sleep(msBeforeRealAbort);
             if (thread.IsAlive) thread.Abort();
             else logger.Info("Thread stopped by itself");
+        }
+
+        public double GetCpuUsage(Thread thread)
+        {
+            if (thread == null) return -1;
+            try
+            {
+                Process p = Process.GetCurrentProcess(); // getting current running process of the app
+                foreach (ProcessThread pt in p.Threads)
+                {
+                    if (pt.Id == thread.ManagedThreadId)
+                    {
+                        return pt.TotalProcessorTime.TotalMilliseconds;
+                    }
+                    // use pt.Id / pt.TotalProcessorTime / pt.UserProcessorTime / pt.PrivilegedProcessorTime
+                }
+            }
+            catch (Exception ex)
+            {
+                return -2;
+            }
+            return -3;
         }
     }
 }

@@ -54,7 +54,8 @@ namespace EpgGrabber
             {
                 LastRetrieval = _lastRetrieval,
                 NextRetrieval = _nextRetrieval,
-                Channels = _channelList.Channels.Select(kv => kv.Value).ToArray()
+                Channels = _channelList.Channels.Select(kv => kv.Value).ToArray(),
+                Cpu = _threadHelper.GetCpuUsage(_runningEpgGrabTask)
             };
         }
 

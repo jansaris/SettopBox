@@ -4,8 +4,9 @@ export class Module {
     Status: string;
     Info: ModuleInfo;
 }
-export class ModuleInfo {
 
+export class ModuleInfo {
+    Cpu: number;
 }
 
 export class NewcamdInfo extends ModuleInfo {

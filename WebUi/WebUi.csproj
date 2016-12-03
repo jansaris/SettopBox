@@ -141,6 +141,9 @@
     <None Include="Settings.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="www\styles.58e065928ed8ebd0b582.bundle.map">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
@@ -149,9 +152,57 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="www\89889688147bd7575d6327160d64e760.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www\favicon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="www\index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="www\inline.d41d8cd98f00b204e980.bundle.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="www\main.8c78af52e95b8d713fa8.bundle.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="www\scripts.25c3bcaa0cb5b5109fbb.bundle.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="www\styles.58e065928ed8ebd0b582.bundle.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="www\styles.e533ad9b1aadf85ac68cf4008882fade.bundle.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="www\448c34a56d699c29117adc64c43affeb.woff2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\e18bbf611f2a2e43afc071aa2f4e1512.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\f4769f9bdb7466be65088239c12046d1.eot">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\fa2772327f55d8198301fdb8bcfc8158.woff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\inline.d41d8cd98f00b204e980.bundle.map">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\main.8c78af52e95b8d713fa8.bundle.js.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\main.8c78af52e95b8d713fa8.bundle.map">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\scripts.25c3bcaa0cb5b5109fbb.bundle.js.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\scripts.25c3bcaa0cb5b5109fbb.bundle.map">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="www\src\settings.html" />
   </ItemGroup>
   <ItemGroup>

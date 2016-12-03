@@ -58,7 +58,8 @@ namespace NewCamd
                 DesKey = _settings.DesKey,
                 Username = _settings.Username,
                 Password = _settings.Password,
-                ListeningAt = _listeningAdress
+                ListeningAt = _listeningAdress,
+                Cpu = _threadHelper.GetCpuUsage(_listeningThread)
             };
         }
 

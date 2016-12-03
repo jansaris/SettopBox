@@ -8,5 +8,6 @@ namespace SharedComponents.Module
     {
         Thread RunSafeInNewThread(Action action, ILog logger, ThreadPriority priority = ThreadPriority.Normal);
         void AbortThread(Thread thread, ILog logger, int msBeforeRealAbort = 1000);
+        double GetCpuUsage(Thread thread);
     }
 }

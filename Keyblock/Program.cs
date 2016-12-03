@@ -136,7 +136,8 @@ namespace Keyblock
                 ValidTo = _keyblock.BlockValidTo,
                 RefreshAfter = _keyblock.BlockRefreshAfter,
                 LastRetrieval = _lastRetrieval,
-                NextRetrieval = _nextRetrieval
+                NextRetrieval = _nextRetrieval,
+                Cpu = _threadHelper.GetCpuUsage(_runningKeyblockThread)
             };
         }
     }
