@@ -20,15 +20,26 @@ export class ModuleService {
                .catch(this.error.handleError);
     }
 
+    getModuleNames(): Promise<string[]> {
+        let url = this.urls.Module + '/names';
+
+        return this.http.get(url)
+                .toPromise()
+                .then(response => {
+                    return response.json() as string[];
+                })
+                .catch(this.error.handleError);
+    }
+
     getModule(name: string): Promise<Module> {
         let params: URLSearchParams = new URLSearchParams();
         params.set('name', name);
 
         return this.http.get(this.urls.Module, {search: params})
-                        .toPromise()
-                        .then(response => {
-                            return response.json() as Module;
-                        })
-        .catch(this.error.handleError);
+                .toPromise()
+                .then(response => {
+                    return response.json() as Module;
+                })
+                .catch(this.error.handleError);
     }
 }

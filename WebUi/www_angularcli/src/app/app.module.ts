@@ -15,12 +15,22 @@ import { ErrorService } from './error.service'
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { WebUiComponent } from './webui/webui.component';
+import { KeyblockComponent } from './keyblock/keyblock.component';
+import { LogComponent } from './log/log.component';
+import { NewcamdComponent } from './newcamd/newcamd.component';
+import { EpgComponent } from './epg/epg.component';
+import { TvheadendComponent } from './tvheadend/tvheadend.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
-    WebUiComponent
+    WebUiComponent,
+    KeyblockComponent,
+    LogComponent,
+    NewcamdComponent,
+    EpgComponent,
+    TvheadendComponent
   ],
   imports: [
     BrowserModule,

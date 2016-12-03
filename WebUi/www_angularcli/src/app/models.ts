@@ -28,6 +28,17 @@ export class KeyblockInfo extends ModuleInfo {
     RefreshAfter: Date;
 }
 
+export class EpgInfo extends ModuleInfo {
+    LastRetrieval: Date;
+    NextRetrieval: Date;
+    Channels: string[];
+}
+
+export class TvheadendInfo extends ModuleInfo {
+    LastEpgUpdate: Date;
+    LastEpgUpdateSuccessfull: boolean;
+}
+
 export class Log {
     Timestamp: Date;
     Module: string;

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ModuleService } from '../module.service'
+import { ModuleBaseComponent } from '../module.base.component'
 
 import {Module} from '../models';
 
@@ -8,18 +9,13 @@ import {Module} from '../models';
   templateUrl: './webui.component.html',
   styleUrls: ['./webui.component.css']
 })
-export class WebUiComponent implements OnInit {
-module: Module;
+export class WebUiComponent extends ModuleBaseComponent {
 
     constructor(private moduleService: ModuleService) {
-        this.module = null;
+      super();
     }
 
-    ngOnInit(): void {
-        this.getModule();
-    };
-
-    getModule(): void {
+    loadInfo(): void {
         this.moduleService.getModule('WebUi').then(module => {
             this.module = module;
         });

@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using SharedComponents.Settings;
 
 namespace WebUi.api.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class SettingsController :ApiController
     {
         readonly IEnumerable<IniSettings> _allSettings;

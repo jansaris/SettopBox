@@ -1,9 +1,25 @@
-<div class="grid grid-pad">
-    <h1>Details for WebUi</h1>
-    <div class="module" *ngIf="module">
-      <h4>Name: {{module.Name}}</h4>
-      <h4>Enabled: {{module.Enabled}}</h4>
-      <h4>Status: {{module.Status}}</h4>
-      <h4>Info: {{module.Info}}</h4>
+<div class="page-header">
+    <div class="clearfix">
+        <div class="pull-left">
+            <h1>{{module?.Name}}</h1>
+        </div>
+        <div class="pull-right" style="margin-top: 30px">
+            <button class="btn btn-info" (click)="loadInfo()"><span class="glyphicon glyphicon-refresh"></span></button>
+        </div>    
     </div>
+</div>
+<div class="row">
+  <div class="col-md-4">
+      <div class="panel" [ngClass]="getStatusClass(module?.status)">
+          <div class="panel-heading">
+              <h3>Status</h3>
+          </div>
+          <div class="panel-body">
+              <dl>
+                  <dt>Status:</dt>
+                  <dd>{{module?.Status}}</dd>
+              </dl>
+          </div>
+      </div>
+  </div>
 </div>

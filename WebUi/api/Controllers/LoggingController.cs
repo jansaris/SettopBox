@@ -1,9 +1,11 @@
 ﻿using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using WebUi.api.Logging;
 
 namespace WebUi.api.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     [RoutePrefix("api/logging")]
     public class LoggingController : ApiController
     {
