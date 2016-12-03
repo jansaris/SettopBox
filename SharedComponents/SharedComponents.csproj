@@ -71,6 +71,7 @@
     <Compile Include="Module\IThreadHelper.cs" />
     <Compile Include="Module\KeyblockInfo.cs" />
     <Compile Include="Module\ModuleCommunication.cs" />
+    <Compile Include="Module\ModuleInfo.cs" />
     <Compile Include="Module\ModuleState.cs" />
     <Compile Include="Module\NewCamdInfo.cs" />
     <Compile Include="Module\RunAndMonitorInfo.cs" />

@@ -2,7 +2,7 @@
 
 namespace SharedComponents.Module
 {
-    public class TvHeadendIntegrationInfo : IModuleInfo, ICloneable
+    public class TvHeadendIntegrationInfo : ModuleInfo, ICloneable
     {
         public DateTime? LastEpgUpdate;
         public bool LastEpgUpdateSuccessfull;

@@ -2,7 +2,7 @@
 
 namespace SharedComponents.Module
 {
-    public class NewCamdInfo : IModuleInfo
+    public class NewCamdInfo : ModuleInfo
     {
         public int NrOfClients { get; set; }
         public int NrOfChannels { get; set; }

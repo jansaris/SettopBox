@@ -2,7 +2,7 @@
 
 namespace SharedComponents.Module
 {
-    public class EpgGrabberInfo : IModuleInfo
+    public class EpgGrabberInfo : ModuleInfo
     {
         public DateTime? LastRetrieval { get; set; }
         public DateTime? NextRetrieval { get; set; }

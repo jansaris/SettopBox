@@ -2,7 +2,7 @@
 
 namespace SharedComponents.Module
 {
-    public class KeyblockInfo : IModuleInfo
+    public class KeyblockInfo : ModuleInfo
     {
         public bool HasValidKeyblock { get; set; }
         public DateTime? LastRetrieval { get; set; }
