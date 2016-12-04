@@ -46,21 +46,12 @@ namespace SharedComponents.Module
             if (thread == null) return -1;
             try
             {
-                Process p = Process.GetCurrentProcess(); // getting current running process of the app
-                foreach (ProcessThread pt in p.Threads)
-                {
-                    if (pt.Id == thread.ManagedThreadId)
-                    {
-                        return pt.TotalProcessorTime.TotalMilliseconds;
-                    }
-                    // use pt.Id / pt.TotalProcessorTime / pt.UserProcessorTime / pt.PrivilegedProcessorTime
-                }
+                return 1;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return -2;
             }
-            return -3;
         }
     }
 }

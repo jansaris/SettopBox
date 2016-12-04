@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using log4net;
 using SharedComponents.Helpers;
+using WebUi.api;
 
 namespace SettopBox
 {
@@ -40,8 +41,9 @@ namespace SettopBox
             if (!PidFile.Exists) return true;
             var pid = File.ReadAllText(PidFile.FullName);
             _logger.Info($"Found pid file {PidFile.FullName}, check process with PID {pid}");
+            var splitted = pid.Split('|');
             int intPid;
-            if (!int.TryParse(pid, out intPid))
+            if (!int.TryParse(splitted[0], out intPid))
             {
                 _logger.Warn($"Failed to parse {pid} to a number, ignore existing pid file");
                 return true;
@@ -50,7 +52,11 @@ namespace SettopBox
             {
                 var process = Process.GetProcessById(intPid);
                 _logger.Info($"Got process {intPid} which is {(process.HasExited ? "not" : "still")} running");
-                return process.HasExited;
+                if (splitted.Length <= 0) return process.HasExited;
+                _logger.Info($"Check if processname {process.ProcessName} matches {splitted[1]}");
+                if (process.ProcessName.Equals(splitted[1])) return process.HasExited;
+                _logger.Info("Another process is running under this pid");
+                return true;
             }
             catch (Exception ex)
             {
@@ -64,7 +70,8 @@ namespace SettopBox
         {
             try
             {
-                File.WriteAllText(PidFile.FullName, $"{Process.GetCurrentProcess().Id}");
+                var process = Process.GetCurrentProcess();
+                File.WriteAllText(PidFile.FullName, $"{process.Id}|{process.ProcessName}");
                 _logger.Info($"Created pid file {PidFile}");
                 return true;
             }

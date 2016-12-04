@@ -3,7 +3,7 @@ import { Headers } from '@angular/http'
 
 @Injectable()
 export class UrlsService{
-    private base: string = "http://localhost:15051/api/";
+    private base: string = "api/";
     Home: string = this.base + "home";
     Log: string = this.base + "logging";
     Settings: string = this.base + "settings";

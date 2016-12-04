@@ -141,6 +141,12 @@
     <None Include="Settings.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="www\main.8e788e80dad71dcb3d91.bundle.js.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="www\main.8e788e80dad71dcb3d91.bundle.map">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="www\styles.58e065928ed8ebd0b582.bundle.map">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -164,7 +170,7 @@
     <Content Include="www\inline.d41d8cd98f00b204e980.bundle.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="www\main.8c78af52e95b8d713fa8.bundle.js">
+    <Content Include="www\main.8e788e80dad71dcb3d91.bundle.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="www\scripts.25c3bcaa0cb5b5109fbb.bundle.js">
@@ -189,12 +195,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="www\inline.d41d8cd98f00b204e980.bundle.map">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="www\main.8c78af52e95b8d713fa8.bundle.js.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="www\main.8c78af52e95b8d713fa8.bundle.map">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="www\scripts.25c3bcaa0cb5b5109fbb.bundle.js.gz">
