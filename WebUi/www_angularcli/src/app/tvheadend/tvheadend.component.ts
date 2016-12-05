@@ -10,17 +10,14 @@ import { Module, TvheadendInfo } from '../models';
   styleUrls: ['./tvheadend.component.css']
 })
 export class TvheadendComponent extends ModuleBaseComponent {
-
+  apiName: string = "TvHeadendIntegration";
   info: TvheadendInfo;
   
-  constructor(private moduleService: ModuleService) {
-    super();
+  constructor(moduleService: ModuleService) {
+    super(moduleService);
   }
 
-  loadInfo(): void {
-    this.moduleService.getModule("TvHeadendIntegration").then(m => {
-      this.module = m;
-      this.info = m.Info as TvheadendInfo;
-    });
+  updateInfo(m: Module): void {
+    this.info = m.Info as TvheadendInfo;
   }
 }

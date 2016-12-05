@@ -12,16 +12,19 @@
                 <span>{{title}}</span>
             </a>
         </div>
-        <div class="collapse navbar-collapse" id="navbar" aria-expanded="false">
-            <ul class="nav navbar-nav">
-                <li><a routerLink="/Log">Log</a></li>
-                <li><a routerLink="/Keyblock">Keyblock</a></li>
-                <li><a routerLink="/Newcamd">Newcamd</a></li>
-                <li><a routerLink="/Epg">Epg</a></li>
-                <li><a routerLink="/Tvheadend">Tvheadend</a></li>
-                <li><a routerLink="/WebUi">WebUi</a></li>
-            </ul>
-        </div>
+        <ul class="nav navbar-nav collapse navbar-collapse" id="navbar" aria-expanded="false">
+            <li><a routerLink="/Log">Log</a></li>
+            <li><a routerLink="/Keyblock">Keyblock</a></li>
+            <li><a routerLink="/Newcamd">Newcamd</a></li>
+            <li><a routerLink="/Epg">Epg</a></li>
+            <li><a routerLink="/Tvheadend">Tvheadend</a></li>
+            <li><a routerLink="/WebUi">WebUi</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right" *ngIf="loading">
+            <li class="loader" style="margin-top: 10px">
+                <i class="fa fa-spinner fa-spin fa-2x"></i>
+            </li>
+        </ul>
     </div>
 </nav>
 <div class="page-host container">

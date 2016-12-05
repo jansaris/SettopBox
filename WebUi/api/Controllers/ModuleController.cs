@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using SharedComponents.Module;
@@ -27,6 +28,24 @@ namespace WebUi.api.Controllers
         public IHttpActionResult Names()
         {
             return Ok(_info.Modules);
+        }
+
+        [Route("start/{name}")]
+        [HttpPost]
+        public IHttpActionResult Start(string name)
+        {
+            _info.Start(name);
+            Thread.Sleep(100);
+            return Ok(Map(name));
+        }
+
+        [HttpPost]
+        [Route("stop/{name}")]
+        public IHttpActionResult Stop(string name)
+        {
+            _info.Stop(name);
+            Thread.Sleep(100);
+            return Ok(Map(name));
         }
 
         public IHttpActionResult Get(string name)

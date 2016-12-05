@@ -35,7 +35,7 @@ export class LogComponent implements OnInit {
 
   loadModuleNames(): void { 
       this.moduleService
-          .getModuleNames()
+          .getNames()
           .then(list => {
             this.modules = list;
           });
@@ -43,7 +43,7 @@ export class LogComponent implements OnInit {
 
   loadLog(): void {
       this.logService
-          .getLog(this.activeModule, this.activeLevel)
+          .get(this.activeModule, this.activeLevel)
           .then(logs =>{
             this.list = logs;
           });
@@ -52,10 +52,10 @@ export class LogComponent implements OnInit {
   changeLevel(level: string): void {
         this.activeLevel = level;
         this.loadLog();
-    }
+  }
 
-    changeModule(module: string): void {
-        this.activeModule = module;
-        this.loadLog();
-    }
+  changeModule(module: string): void {
+      this.activeModule = module;
+      this.loadLog();
+  }
 }

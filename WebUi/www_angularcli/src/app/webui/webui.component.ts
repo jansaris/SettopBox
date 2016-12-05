@@ -10,14 +10,12 @@ import {Module} from '../models';
   styleUrls: ['./webui.component.css']
 })
 export class WebUiComponent extends ModuleBaseComponent {
-
-    constructor(private moduleService: ModuleService) {
-      super();
+    apiName: string = "WebUi";
+    constructor(moduleService: ModuleService) {
+      super(moduleService);
     }
 
-    loadInfo(): void {
-        this.moduleService.getModule('WebUi').then(module => {
-            this.module = module;
-        });
+    updateInfo(m: Module): void {
+    
     }
 }

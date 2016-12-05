@@ -23,7 +23,8 @@ namespace WebUi.api.Controllers
                 _logmodule.GetAll() : 
                 _logmodule.GetByModule(module);
             var levelsFilter = _logmodule.GetLevelsFilter(level);
-            log = log.Where(l => levelsFilter.Contains(l.Level));
+            log = log.Where(l => levelsFilter.Contains(l.Level))
+                     .OrderByDescending(l => l.Timestamp);
             return Ok(log);
         }
 

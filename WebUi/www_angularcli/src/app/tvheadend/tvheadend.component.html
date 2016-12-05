@@ -12,7 +12,12 @@
     <div class="col-md-4">
         <div class="panel" [ngClass]="getStatusClass(module?.status)">
             <div class="panel-heading">
-                <h3>Status</h3>
+                <h3>Status
+                    <span style="float: right; margin-top: -5px;">
+                        <button *ngIf="!running" class="btn btn-success" (click)="start()"><span class="glyphicon glyphicon-play"></span></button>
+                        <button *ngIf="running" class="btn btn-danger" (click)="stop()"><span class="glyphicon glyphicon-stop"></span></button>
+                    </span>
+                </h3>
             </div>
             <div class="panel-body">
                 <dl>

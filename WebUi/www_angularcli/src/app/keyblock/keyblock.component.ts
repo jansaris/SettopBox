@@ -10,17 +10,14 @@ import {Module, KeyblockInfo} from '../models';
   styleUrls: ['./keyblock.component.css']
 })
 export class KeyblockComponent extends ModuleBaseComponent {
+  apiName: string = "Keyblock";
   info: KeyblockInfo;
-  panelColor: string;
 
-  constructor(private moduleService: ModuleService) {
-    super();
+  constructor(moduleService: ModuleService) {
+    super(moduleService);
   }
 
-  loadInfo(): void {
-    this.moduleService.getModule("Keyblock").then(m => {
-      this.module = m;
-      this.info = m.Info as KeyblockInfo;
-    });
+  updateInfo(m: Module): void {
+    this.info = m.Info as KeyblockInfo;
   }
 }

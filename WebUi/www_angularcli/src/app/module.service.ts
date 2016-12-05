@@ -11,7 +11,7 @@ import 'rxjs/add/operator/toPromise';
 export class ModuleService {
     constructor(private http: Http, private error: ErrorService, private urls: UrlsService) { }
     
-    getModules(): Promise<Module[]> {
+    getAll(): Promise<Module[]> {
         return this.http.get(this.urls.Module)
                .toPromise()
                .then(response => {
@@ -20,7 +20,7 @@ export class ModuleService {
                .catch(this.error.handleError);
     }
 
-    getModuleNames(): Promise<string[]> {
+    getNames(): Promise<string[]> {
         let url = this.urls.Module + '/names';
 
         return this.http.get(url)
@@ -31,11 +31,33 @@ export class ModuleService {
                 .catch(this.error.handleError);
     }
 
-    getModule(name: string): Promise<Module> {
+    get(name: string): Promise<Module> {
         let params: URLSearchParams = new URLSearchParams();
         params.set('name', name);
 
         return this.http.get(this.urls.Module, {search: params})
+                .toPromise()
+                .then(response => {
+                    return response.json() as Module;
+                })
+                .catch(this.error.handleError);
+    }
+
+    start(name: string): Promise<Module>{
+        return this.http.post(this.urls.Module + '/start/' + name, null)
+                .toPromise()
+                .then(response => {
+                    return response.json() as Module;
+                })
+                .catch(this.error.handleError);
+    }
+
+    stop(name: string): Promise<Module>{
+         let params: URLSearchParams = new URLSearchParams();
+        params.set('name', name);
+
+        return this.http.post(this.urls.Module + '/stop/' + name, null)
+        //return this.http.get(this.urls.Module + '/stop', {search: params})
                 .toPromise()
                 .then(response => {
                     return response.json() as Module;

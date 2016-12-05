@@ -80,6 +80,18 @@ namespace SharedComponents.Module
             return _modules.FirstOrDefault(m => m.Name == name);
         }
 
+        public void Start(string name)
+        {
+            var mod = Get(name);
+            mod.Start();
+        }
+
+        public void Stop(string name)
+        {
+            var mod = Get(name);
+            mod.Stop();
+        }
+
         void OnUpdate()
         {
             //Inform the users in a new thread

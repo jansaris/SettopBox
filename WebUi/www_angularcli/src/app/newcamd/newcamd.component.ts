@@ -11,15 +11,13 @@ import { Module, NewcamdInfo } from '../models';
 })
 export class NewcamdComponent extends ModuleBaseComponent {
   info: NewcamdInfo;
+  apiName: string = "NewCamd";
   
-  constructor(private moduleService: ModuleService) {
-    super();
+  constructor(moduleService: ModuleService) {
+    super(moduleService);
   }
 
-  loadInfo(): void {
-    this.moduleService.getModule("NewCamd").then(m => {
-      this.module = m;
-      this.info = m.Info as NewcamdInfo;
-    });
+  updateInfo(module: Module) {
+      this.info = module.Info as NewcamdInfo;
   }
 }

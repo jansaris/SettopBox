@@ -25,7 +25,7 @@ export class DashboardComponent implements OnInit {
     }
 
     getModules(): void {
-        this.moduleService.getModules().then(modules => {
+        this.moduleService.getAll().then(modules => {
             this.modules = modules;
         });
     }

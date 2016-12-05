@@ -23,7 +23,7 @@ export class LogService {
                 .catch(this.error.handleError);
   }
 
-  getLog(module: string, level: string): Promise<Log[]>{
+  get(module: string, level: string): Promise<Log[]>{
     let params: URLSearchParams = new URLSearchParams();
         params.set('module', module);
         params.set('level', level);

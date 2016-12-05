@@ -10,16 +10,14 @@ import { Module, EpgInfo } from '../models';
   styleUrls: ['./epg.component.css']
 })
 export class EpgComponent extends ModuleBaseComponent {
+  apiName: string = "Keyblock";
   info: EpgInfo;
 
-  constructor(private moduleService: ModuleService) {
-    super();
+  constructor(moduleService: ModuleService) {
+    super(moduleService);
   }
 
-  loadInfo(): void{
-    this.moduleService.getModule("EpgGrabber").then(m => {
-      this.module = m;
-      this.info = m.Info as EpgInfo;
-    });
+  updateInfo(m: Module): void {
+    this.info = m.Info as EpgInfo;
   }
 }
