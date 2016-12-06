@@ -5,7 +5,6 @@ using SharedComponents.DependencyInjection;
 using SimpleInjector;
 using SimpleInjector.Extensions.ExecutionContextScoping;
 using WebUi.api;
-using WebUi.api.Controllers;
 using WebUi.api.Logging;
 
 namespace WebUi
@@ -19,6 +18,7 @@ namespace WebUi
         public override void RegisterComponents(Container container)
         {
             container.Register<InMemoryLogger>(Lifestyle.Singleton);
+            container.Register<PerformanceMeter>(Lifestyle.Singleton);
         }
 
         public override Type Module => typeof(Program);
