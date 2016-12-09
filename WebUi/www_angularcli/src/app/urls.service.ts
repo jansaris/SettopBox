@@ -9,5 +9,6 @@ export class UrlsService{
     Log: string = this.base + "logging";
     Settings: string = this.base + "settings";
     Module: string = this.base + "module";
+    Performance: string = this.base + "performance";
     Headers: Headers = new Headers([ {'Content-Type': 'application/json'}]);
 }

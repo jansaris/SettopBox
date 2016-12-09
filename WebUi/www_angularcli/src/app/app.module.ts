@@ -12,6 +12,7 @@ import { LogService } from './log.service'
 import { SettingsService } from './settings.service'
 import { UrlsService } from './urls.service'
 import { ErrorService } from './error.service'
+import { PerformanceService } from './performance.service'
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { WebUiComponent } from './webui/webui.component';
@@ -44,7 +45,8 @@ import { TvheadendComponent } from './tvheadend/tvheadend.component';
     LogService,
     SettingsService,
     UrlsService,
-    ErrorService
+    ErrorService,
+    PerformanceService
   ],
   bootstrap: [AppComponent]
 })

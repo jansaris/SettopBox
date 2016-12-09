@@ -54,3 +54,9 @@ export class Setting {
     Type: string;
     InputType: string;
 }
+
+export class Performance{
+    Total: number;
+    Process: number;
+    Cores: number;
+}

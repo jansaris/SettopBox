@@ -1,0 +1,13 @@
+.page-header{
+    display: block;
+}
+#title{
+    float:left;
+}
+#cpu{
+    float: right;
+    margin-top: 30px;
+}
+.clear{
+    clear: both;
+}
