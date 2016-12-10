@@ -4,7 +4,8 @@
             <h1>Log</h1>
         </div>
         <div class="pull-right" style="margin-top: 30px">
-            <button class="btn btn-info" (click)="loadLog()"><span class="glyphicon glyphicon-refresh"></span></button>
+            <span *ngIf="loading" class="fa fa-spinner fa-spin fa-2x"></span>
+            <button *ngIf="!loading" class="btn btn-info" (click)="loadLog()"><span class="glyphicon glyphicon-refresh"></span></button>
         </div>
     </div>
 </div>

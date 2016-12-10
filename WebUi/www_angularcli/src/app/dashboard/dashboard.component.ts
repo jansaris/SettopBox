@@ -46,6 +46,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     updatePerformance(): void{
         this.performanceService.get().then(perf => {
             this.performance = perf;
+            if(this.performance.Process <= 0) 
+                this.performance.Process = perf.Mono;
         });
     }
 

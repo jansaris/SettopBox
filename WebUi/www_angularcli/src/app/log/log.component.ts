@@ -13,10 +13,11 @@ export class LogComponent implements OnInit {
   list: Log[];
   levels: string[];
   modules: string[];
-  all = "ALL";
-  activeLevel = this.all;
-  activeModule = this.all;
-  
+  all: string = "ALL";
+  activeLevel: string = this.all;
+  activeModule: string = this.all;
+  loading: boolean = true;
+
   constructor(private moduleService: ModuleService, private logService: LogService) { }
 
   ngOnInit() {
@@ -27,35 +28,37 @@ export class LogComponent implements OnInit {
 
   loadLevels(): void {
     this.logService
-        .getLevels()
-        .then(list =>{
-          this.levels = list;
-        });
+      .getLevels()
+      .then(list => {
+        this.levels = list;
+      });
   }
 
-  loadModuleNames(): void { 
-      this.moduleService
-          .getNames()
-          .then(list => {
-            this.modules = list;
-          });
+  loadModuleNames(): void {
+    this.moduleService
+      .getNames()
+      .then(list => {
+        this.modules = list;
+      });
   }
 
   loadLog(): void {
-      this.logService
-          .get(this.activeModule, this.activeLevel)
-          .then(logs =>{
-            this.list = logs;
-          });
+    this.loading = true;
+    this.logService
+      .get(this.activeModule, this.activeLevel)
+      .then(logs => {
+        this.list = logs;
+        this.loading = false;
+      });
   }
 
   changeLevel(level: string): void {
-        this.activeLevel = level;
-        this.loadLog();
+    this.activeLevel = level;
+    this.loadLog();
   }
 
   changeModule(module: string): void {
-      this.activeModule = module;
-      this.loadLog();
+    this.activeModule = module;
+    this.loadLog();
   }
 }

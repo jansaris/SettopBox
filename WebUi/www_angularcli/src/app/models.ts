@@ -59,4 +59,5 @@ export class Performance{
     Total: number;
     Process: number;
     Cores: number;
+    Mono: number;
 }
