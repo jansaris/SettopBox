@@ -23,6 +23,11 @@ namespace SharedComponents.Module
 
         public void Register(IModule module)
         {
+            if (_modules.Contains(module))
+            {
+                _logger.Info($"Ignore registration of {module.Name} because it is already registered");
+                return;
+            }
             _logger.Info($"Start monitoring {module.Name}");
             module.NewDataAvailable += Module_NewDataAvailable;
             module.StatusChanged += Module_StatusChanged;
@@ -83,12 +88,14 @@ namespace SharedComponents.Module
         public void Start(string name)
         {
             var mod = Get(name);
-            mod.Start();
+            _logger.Info($"Start module {mod?.Name} ({name})");
+            mod?.Start();
         }
 
         public void Stop(string name)
         {
             var mod = Get(name);
+            _logger.Info($"Stop module {mod?.Name} ({name})");
             mod.Stop();
         }
 

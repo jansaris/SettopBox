@@ -55,7 +55,6 @@ namespace SharedComponents.Module
 
             ChangeState(ModuleState.Stopping);
             _signal.Exit -= StopModule;
-            _moduleCommunication.UnRegister(this);
             StopModule();
             ChangeState(ModuleState.Stopped);
         }
@@ -65,12 +64,14 @@ namespace SharedComponents.Module
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected abstract void StartModule();
         protected abstract void StopModule();
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing || _disposing) return;
             _disposing = true;
+            _moduleCommunication.UnRegister(this);
             Stop();
         }
 
