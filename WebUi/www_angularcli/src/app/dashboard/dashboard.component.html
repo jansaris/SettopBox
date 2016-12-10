@@ -2,8 +2,10 @@
     <div id="title">
         <h1>{{message}}</h1>
     </div>
-    <div id="cpu">
+    <div id="cpu" (click)="toggleMonitor()">
         <span *ngIf="performance">CPU: {{performance.Process | number : '1.0-0'}}% / {{performance.Total | number : '1.0-0'}}% (system)</span>
+        <span *ngIf="running" class="glyphicon glyphicon-stop"></span>
+        <span *ngIf="!running" class="glyphicon glyphicon-play"></span>
     </div>
     <div class="clear"></div>
 </div>

@@ -10,7 +10,7 @@ import { Module, EpgInfo } from '../models';
   styleUrls: ['./epg.component.css']
 })
 export class EpgComponent extends ModuleBaseComponent {
-  apiName: string = "Keyblock";
+  apiName: string = "EpgGrabber";
   info: EpgInfo;
 
   constructor(moduleService: ModuleService) {

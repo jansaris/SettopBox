@@ -6,6 +6,7 @@ using Microsoft.Owin.FileSystems;
 using SharedComponents.DependencyInjection;
 using Microsoft.Owin.Hosting;
 using Microsoft.Owin.StaticFiles;
+using Microsoft.Owin.StaticFiles.ContentTypes;
 using Owin;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
@@ -80,6 +81,7 @@ namespace WebUi
             };
             options.StaticFileOptions.FileSystem = physicalFileSystem;
             options.StaticFileOptions.ServeUnknownFileTypes = true;
+            options.StaticFileOptions.ContentTypeProvider = new FileExtensionContentTypeProvider();
             options.DefaultFilesOptions.DefaultFileNames = new[]
             {
                 "index.html"

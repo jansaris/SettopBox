@@ -167,7 +167,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>XCOPY $(ProjectDir)www\*  $(ProjectDir)$(OutDir)\www /Y</PostBuildEvent>
+    <PostBuildEvent>del $(ProjectDir)$(OutDir)\www\* /Q
+XCOPY $(ProjectDir)www\*  $(ProjectDir)$(OutDir)\www /Y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

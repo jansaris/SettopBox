@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ModuleService } from '../module.service';
 import { HomeService } from '../home.service';
 import { PerformanceService } from '../performance.service';
@@ -12,20 +12,24 @@ import { Subscription } from 'rxjs/Subscription';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
     modules: Module[];
     message: string;
     performance: Performance;
     monitor: Subscription;
+    running: boolean = false;
     
     constructor(private moduleService: ModuleService, private homeService: HomeService, private performanceService: PerformanceService ) {}
 
     ngOnInit(): void {
         this.getHome();
         this.getModules();
-        var monitor = IntervalObservable.create(1000).subscribe(n => this.updatePerformance());
-        //this.monitor = this.startPerformanceMonitor();
+        this.startMonitoring();
     };
+
+    ngOnDestroy(): void{
+        this.stopMonitoring();
+    }
 
     getHome(): void {
       this.homeService.get().then(response => {
@@ -54,5 +58,22 @@ export class DashboardComponent implements OnInit {
             default:
                 return "alert-info";
         }
+    }
+
+    toggleMonitor(): void {
+        if(this.running) this.stopMonitoring();
+        else this.startMonitoring();
+    }
+
+    startMonitoring(): void{
+        if(this.running) return;
+        this.monitor = IntervalObservable.create(1000).subscribe(n => this.updatePerformance());
+        this.running = true;
+    }
+
+    stopMonitoring(): void{
+        if(!this.running) return;
+        this.monitor.unsubscribe();
+        this.running = false;
     }
 }
