@@ -93,6 +93,11 @@ namespace WebUi
         HttpConfiguration GenerateHttpConfiguration()
         {
             var config = new HttpConfiguration();
+            if (Type.GetType("Mono.Runtime") != null)
+            {
+                _logger.Info("Register mono patch for CORS");
+                config.MessageHandlers.Add(new MonoPatchingDelegatingHandler());
+            }
             config.EnableCors();
             config.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(_container);
             config.MapHttpAttributeRoutes();
