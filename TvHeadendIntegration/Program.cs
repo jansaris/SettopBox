@@ -10,13 +10,11 @@ namespace TvHeadendIntegration
     class Program : BaseModule
     {
         readonly TvHeadendIntegrationInfo _info = new TvHeadendIntegrationInfo();
-        readonly ILog _logger;
         readonly Settings _settings;
         readonly UpdateEpg _epg;
 
-        public Program(ILog logger, Settings settings, UpdateEpg epg, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
+        public Program(ILog logger, Settings settings, UpdateEpg epg, LinuxSignal signal, ModuleCommunication communication) : base(logger, signal, communication)
         {
-            _logger = logger;
             _settings = settings;
             _epg = epg;
         }
@@ -39,7 +37,7 @@ namespace TvHeadendIntegration
 
         protected override void StartModule()
         {
-            _logger.Info("Welcome to TvHeadendIntegration");
+            Logger.Info("Welcome to TvHeadendIntegration");
             _settings.Load();
             if (!string.IsNullOrWhiteSpace(_settings.InitialEpgFile))
             {
@@ -61,9 +59,6 @@ namespace TvHeadendIntegration
             {
                 case DataType.Epg:
                     UpdateEpg(data.Data.ToString());
-                    break;
-                default:
-                    //Ignore other 
                     break;
             }
         }

@@ -12,7 +12,6 @@ namespace NewCamd
 {
     public class Program : BaseModule
     {
-        readonly ILog _logger;
         readonly IThreadHelper _threadHelper;
         readonly Settings _settings;
         readonly Func<NewCamdApi> _clientFactory;
@@ -25,9 +24,8 @@ namespace NewCamd
         Thread _listeningThread;
         string _listeningAdress;
 
-        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, Func<NewCamdApi> clientFactory, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
+        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, Func<NewCamdApi> clientFactory, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication) : base(logger, signal, communication)
         {
-            _logger = logger;
             _threadHelper = threadHelper;
             _settings = settings;
             _clientFactory = clientFactory;
@@ -67,15 +65,15 @@ namespace NewCamd
         {
             try
             {
-                _logger.Info("Welcome to NewCamd");
+                Logger.Info("Welcome to NewCamd");
                 _settings.Load();
                 _keyblock.Prepare();
                 StartServer();
-                _listeningThread = _threadHelper.RunSafeInNewThread(Listen,_logger);
+                _listeningThread = _threadHelper.RunSafeInNewThread(Listen,Logger);
             }
             catch (Exception ex)
             {
-                _logger.Fatal("An unhandled exception occured", ex);
+                Logger.Fatal("An unhandled exception occured", ex);
                 Error();
             }
         }
@@ -88,15 +86,15 @@ namespace NewCamd
                 if (_listener != null)
                 {
                     _listener.Stop();
-                    _logger.Info("Stopped listening");
+                    Logger.Info("Stopped listening");
                 }               
                 CloseClients();
-                _threadHelper.AbortThread(_listeningThread,_logger,10000);
+                _threadHelper.AbortThread(_listeningThread,Logger,10000);
                 _listeningThread = null;
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to stop the tcp listener", ex);
+                Logger.Error("Failed to stop the tcp listener", ex);
             }
         }
 
@@ -107,7 +105,7 @@ namespace NewCamd
             _listener.Start();
             _listening = true;
             _listeningAdress = $"{ip}:{_settings.Port}";
-            _logger.Info($"Start listening at {_listeningAdress}");
+            Logger.Info($"Start listening at {_listeningAdress}");
         }
 
         void ReInitializeListener()
@@ -126,20 +124,20 @@ namespace NewCamd
             }
             catch (Exception)
             {
-                _logger.Warn($"Failed to parse IpAdress to listen on: {_settings.IpAdress}, use Any");
+                Logger.Warn($"Failed to parse IpAdress to listen on: {_settings.IpAdress}, use Any");
                 return IPAddress.Any;
             }
         }
 
         void Listen()
         {
-            _logger.Debug("Start listening thread");
+            Logger.Debug("Start listening thread");
             try
             {
                 while (_listening)
                 {
                     var client = _listener.AcceptTcpClient();
-                    _logger.Debug("Try to accept new api");
+                    Logger.Debug("Try to accept new api");
                     var clientHandler = _clientFactory();
                     clientHandler.Closed += ClientClosed;
                     AddClientToWatchList(clientHandler);
@@ -155,13 +153,13 @@ namespace NewCamd
                 }
                 //Ignore because this is expected to happen when we stopped listening    
             }
-            _logger.Debug("Finished listening thread");
+            Logger.Debug("Finished listening thread");
         }
 
         public override void ProcessDataFromOtherModule(string moduleName, CommunicationData data)
         {
             if (!ShouldWeProcessNewData(moduleName, data.Type)) return;
-            _logger.Info($"Handle new {data.Type} from {moduleName} with value {data.Data}");
+            Logger.Info($"Handle new {data.Type} from {moduleName} with value {data.Data}");
             string keyblockFile = null;
             if (data.Data != null) keyblockFile = data.Data.ToString();
             _keyblock.Prepare(keyblockFile);
@@ -173,15 +171,15 @@ namespace NewCamd
 
         bool ShouldWeProcessNewData(string moduleName, DataType dataType)
         {
-            _logger.Debug($"Validate if we need to handle {dataType} from {moduleName}");
+            Logger.Debug($"Validate if we need to handle {dataType} from {moduleName}");
             if (State != ModuleState.Running)
             {
-                _logger.Debug($"Current state {State}, so we don't handle new data");
+                Logger.Debug($"Current state {State}, so we don't handle new data");
                 return false;
             }
             if (dataType != DataType.KeyBlock)
             {
-                _logger.Debug($"{dataType} is not relevant for us");
+                Logger.Debug($"{dataType} is not relevant for us");
                 return false;
             }
             return true;
@@ -190,13 +188,13 @@ namespace NewCamd
         void ClientClosed(object sender, EventArgs e)
         {
             var client = (NewCamdApi)sender;
-            _logger.Info($"Stop monitoring client {client.Name}");
+            Logger.Info($"Stop monitoring client {client.Name}");
             RemoveClientFromWatchList(client);
         }
 
         void CloseClients()
         {
-            _logger.Info($"Close {_activeClients.Count} clients");
+            Logger.Info($"Close {_activeClients.Count} clients");
             try
             {
                 NewCamdApi[] clients;
@@ -211,8 +209,8 @@ namespace NewCamd
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to close one of the clients");
-                _logger.Debug("CloseClients", ex);
+                Logger.Error("Failed to close one of the clients");
+                Logger.Debug("CloseClients", ex);
             }
         }
 
@@ -222,7 +220,7 @@ namespace NewCamd
             {
                 _activeClients.Add(api);
             }
-            _logger.Debug($"Added client {api.Name} to the watchlist");
+            Logger.Debug($"Added client {api.Name} to the watchlist");
         }
 
         void RemoveClientFromWatchList(NewCamdApi api)
@@ -231,7 +229,7 @@ namespace NewCamd
             {
                 _activeClients.Remove(api);
             }
-            _logger.Debug($"Removed client {api.Name} from the watchlist");
+            Logger.Debug($"Removed client {api.Name} from the watchlist");
         }
     }
 }

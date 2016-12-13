@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using EpgGrabber.IO;
 using EpgGrabber.Models;
 using log4net;
@@ -22,9 +21,8 @@ namespace EpgGrabber
         readonly GenreTranslator _genreTranslator;
         readonly ChannelList _channelList;
 
-        CancellationTokenSource _cancellation;
+        Func<bool> _stop;
 
-        bool CancellationRequested => _cancellation?.IsCancellationRequested ?? false;
 
         public Grabber(ILog logger, Settings settings, IDownloader downloader, Compression compression, XmlTv xmlTv, GenreTranslator genreTranslator, ChannelList channelList)
         {
@@ -37,10 +35,10 @@ namespace EpgGrabber
             _channelList = channelList;
         }
 
-        public string Download(CancellationTokenSource cancelSource)
+        public string Download(Func<bool> stopProcessing)
         {
             _logger.Info($"Start grabbing EPG for {_settings.NumberOfEpgDays} days");
-            _cancellation = cancelSource;
+            _stop = stopProcessing;
             var date = DateTime.Today;
             var epg = new List<Channel>();
 
@@ -50,7 +48,7 @@ namespace EpgGrabber
                 //EPG is downloaded in 8 parts per day
                 for (var dayPart = 0; dayPart < 8; dayPart++)
                 {
-                    if (CancellationRequested) return null;
+                    if (_stop()) return null;
                     var epgData = DownloadPart(dayNr, dayPart, date);
                     if(epgData!=null) epg.AddRange(epgData);
                 }
@@ -72,7 +70,7 @@ namespace EpgGrabber
             {
                 _logger.Info($"Download EPG data for day {dayNr} part {dayPart}");
                 var zip = DownloadEpgfile(now, dayNr, dayPart);
-                if (CancellationRequested) return null;
+                if (_stop()) return null;
                 var file = _compression.Decompress(zip);
                 var epgString = Encoding.Default.GetString(file);
                 var data = ParseEpgData(epgString);
@@ -138,7 +136,7 @@ namespace EpgGrabber
             int failed = 0;
             foreach (var program in list)
             {
-                if (CancellationRequested) return;
+                if (_stop()) return;
 
                 //Download string
                 _logger.DebugFormat("Try to download details for: {0}", program.Id);

@@ -11,13 +11,11 @@ namespace RunAndMonitor
     {
         static Process _process;
         readonly Settings _settings;
-        readonly ILog _logger;
         string _status = "Initial";
 
-        public Program(Settings settings, ILog logger, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
+        public Program(Settings settings, ILog logger, LinuxSignal signal, ModuleCommunication communication) : base(logger, signal, communication)
         {
             _settings = settings;
-            _logger = logger;
         }
 
         static void Main()
@@ -44,12 +42,12 @@ namespace RunAndMonitor
 
         protected override void StartModule()
         {
-            _logger.Info("Welcome to RunAndMonitor");
+            Logger.Info("Welcome to RunAndMonitor");
             _status = "Starting";
             _settings.Load();
             if (string.IsNullOrWhiteSpace(_settings.Executable))
             {
-                _logger.Info("No program to run and monitor");
+                Logger.Info("No program to run and monitor");
                 return;
             }
             try
@@ -58,7 +56,7 @@ namespace RunAndMonitor
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to start the process", ex);
+                Logger.Error("Failed to start the process", ex);
                 _status = "Error during start";
                 _process = null;
             }
@@ -67,16 +65,16 @@ namespace RunAndMonitor
         void StartProcess()
         {
             CreateProcess();
-            _logger.Info($"Start {_settings.Executable}");
+            Logger.Info($"Start {_settings.Executable}");
             //Register on output events
-            _process.OutputDataReceived += (sender, args) => Log(args.Data, _logger.Debug);
-            _process.ErrorDataReceived += (sender, args) => Log(args.Data, _logger.Error);
+            _process.OutputDataReceived += (sender, args) => Log(args.Data, Logger.Debug);
+            _process.ErrorDataReceived += (sender, args) => Log(args.Data, Logger.Error);
             _process.Exited += ProcessExited;
             //Start process
             var result = _process.Start();
             if (!result)
             {
-                _logger.Error($"Failed to start {_settings.Executable}");
+                Logger.Error($"Failed to start {_settings.Executable}");
                 _status = "Failed to start";
                 _process = null;
                 return;
@@ -85,13 +83,13 @@ namespace RunAndMonitor
             //Start listening on output 
             _process.BeginOutputReadLine();
             _process.BeginErrorReadLine();
-            _logger.Info($"Succesfully started {_process.ProcessName} with Id {_process.Id}");
+            Logger.Info($"Succesfully started {_process.ProcessName} with Id {_process.Id}");
             _status = "Running";
         }
 
         void CreateProcess()
         {
-            _logger.Debug($"Create process for {_settings.Executable}");
+            Logger.Debug($"Create process for {_settings.Executable}");
             var startInfo = new ProcessStartInfo(_settings.Executable)
             {
                 RedirectStandardError = true,
@@ -100,12 +98,12 @@ namespace RunAndMonitor
             };
             if (!string.IsNullOrWhiteSpace(_settings.Arguments))
             {
-                _logger.Debug($"Use command line argumens {_settings.Arguments}");
+                Logger.Debug($"Use command line argumens {_settings.Arguments}");
                 startInfo.Arguments = _settings.Arguments;
             }
             if (!string.IsNullOrWhiteSpace(_settings.WorkingDirectory))
             {
-                _logger.Debug($"Use working directory {_settings.WorkingDirectory}");
+                Logger.Debug($"Use working directory {_settings.WorkingDirectory}");
                 startInfo.WorkingDirectory = _settings.WorkingDirectory;
             }
             _process = new Process
@@ -117,7 +115,7 @@ namespace RunAndMonitor
 
         void ProcessExited(object sender, EventArgs e)
         {
-            _logger.Info($"{_process.ProcessName} exited with code {_process.ExitCode}");
+            Logger.Info($"{_process.ProcessName} exited with code {_process.ExitCode}");
             _status = "Program exited";
             _process = null;
         }
@@ -138,16 +136,16 @@ namespace RunAndMonitor
                 if (KillApplication(name)) return;
                 if (!_process.HasExited)
                 {
-                    _logger.Error($"Failed to stop process {name} with Id {id}");
+                    Logger.Error($"Failed to stop process {name} with Id {id}");
                 }
                 else
                 {
-                    _logger.Info($"Stopped process {name} with Id {id}");
+                    Logger.Info($"Stopped process {name} with Id {id}");
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to stop {name} with Id {id}", ex);
+                Logger.Error($"Failed to stop {name} with Id {id}", ex);
             }
         }
 
@@ -155,12 +153,12 @@ namespace RunAndMonitor
         {
             try
             {
-                _logger.Debug($"Close {name} by killing it");
+                Logger.Debug($"Close {name} by killing it");
                 _process.Kill();
             }
             catch (Exception ex)
             {
-                _logger.Warn($"Failed to kill {name}", ex);
+                Logger.Warn($"Failed to kill {name}", ex);
             }
             return _process.HasExited;
         }

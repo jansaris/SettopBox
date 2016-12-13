@@ -1,25 +1,49 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading;
+using log4net;
 using SharedComponents.Helpers;
 
 namespace SharedComponents.Module
 {
     public abstract class BaseModule : IModule
     {
+        protected ILog Logger { get; private set; }
         readonly LinuxSignal _signal;
         readonly ModuleCommunication _moduleCommunication;
         public string Name => GetType().Namespace;
 
-        public ModuleState State { get; private set; }
+        private readonly object _syncRoot = new object();
+        private ModuleState _state = ModuleState.Initial;
+
+        public ModuleState State
+        {
+            get
+            {
+                lock (_syncRoot)
+                {
+                    return _state;
+                }
+            }
+            set
+            {
+                lock (_syncRoot)
+                {
+                    Logger.Info($"Change module state from {State} to {value}");
+                    _state = value;
+                }
+            }
+        }
 
         public abstract IModuleInfo GetModuleInfo();
 
         public event EventHandler<ModuleState> StatusChanged;
         public event EventHandler<CommunicationData> NewDataAvailable;
 
-        protected BaseModule(LinuxSignal signal, ModuleCommunication moduleCommunication)
+        protected BaseModule(ILog logger, LinuxSignal signal, ModuleCommunication moduleCommunication)
         {
+            Logger = logger;
             _signal = signal;
             _moduleCommunication = moduleCommunication;
         }
@@ -58,6 +82,35 @@ namespace SharedComponents.Module
             StopModule();
             ChangeState(ModuleState.Stopped);
         }
+        public bool ModuleShouldStop()
+        {
+            switch (State)
+            {
+                case ModuleState.Initial:
+                case ModuleState.Starting:
+                case ModuleState.Idle:
+                case ModuleState.Running:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+        protected void WaitForSpecificState(ModuleState state)
+        {
+            var counter = 0;
+            while (State != state && !ModuleShouldStop())
+            {
+                if (counter > 60)
+                {
+                    counter = 0;
+                    Logger.Debug($"WaitForSpecificState: Still waiting for state {state}");
+                }
+                //Wait for 1 second, and re-evaluate
+                Thread.Sleep(1000);
+                counter++;
+            }
+        }
 
         public void Dispose()
         {
@@ -90,7 +143,7 @@ namespace SharedComponents.Module
             
         }
 
-        void ChangeState(ModuleState newState)
+        protected void ChangeState(ModuleState newState)
         {
             State = newState;
             StatusChanged?.Invoke(this, newState);

@@ -6,6 +6,7 @@
         Disabled,
         Starting,
         Running,
+        Idle,
         Stopping,
         Stopped,
         Error

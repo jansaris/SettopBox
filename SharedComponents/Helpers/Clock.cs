@@ -14,7 +14,9 @@ namespace SharedComponents.Helpers
 
         DateTime _time;
         string _waitingFor;
-        CancellationTokenSource _cancelSource;
+
+        private Func<bool> _stopWaiting;
+        private Action _callBackWhenTimestampPasses;
 
         public Clock(ILog logger, IThreadHelper threadHelper)
         {
@@ -25,7 +27,7 @@ namespace SharedComponents.Helpers
         void TickTack()
         {
             var counter = 0;
-            while (_time > DateTime.Now && !_cancelSource.IsCancellationRequested)
+            while (_time > DateTime.Now && !_stopWaiting())
             {
                 if (counter > 60)
                 {
@@ -36,19 +38,29 @@ namespace SharedComponents.Helpers
                 Thread.Sleep(1000);
                 counter++;
             }
+            
+            if (!_stopWaiting())
+            {
+                _logger.Info($"WaitForTimestamp: finished for {_waitingFor} at {_time:yyyy-MM-dd hh:mm:ss}, callback to {_waitingFor}");
+                _callBackWhenTimestampPasses();
+            }
+            else
+            {
+                _logger.Info($"WaitForTimestamp: finished for {_waitingFor} at {_time:yyyy-MM-dd hh:mm:ss}, because cancellation was requested");
+            }
         }
 
-        public void WaitForTimestamp(DateTime time, CancellationTokenSource cancelSource, string caller = null)
+        public void WaitForTimestamp(DateTime time, Func<bool> stopWaiting, Action callBackWhenTimestampPasses, string caller = null)
         {
             _logger.Debug($"WaitForTimestamp: {caller} - {time:yyyy-MM-dd hh:mm:ss}");
-            if (cancelSource.IsCancellationRequested) return;
+            if (stopWaiting()) return;
             if (time < DateTime.Now) return;
             _logger.Info($"WaitForTimestamp: {caller} - {time:yyyy-MM-dd hh:mm:ss}");
             _time = time;
             _waitingFor = caller;
-            _cancelSource = cancelSource;
+            _stopWaiting = stopWaiting;
+            _callBackWhenTimestampPasses = callBackWhenTimestampPasses;
             _thread = _threadHelper.RunSafeInNewThread(TickTack, _logger);
-            _thread.Join();
         }
 
         public void Dispose()

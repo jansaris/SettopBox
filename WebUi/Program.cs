@@ -19,12 +19,10 @@ namespace WebUi
     {
         readonly Settings _settings;
         readonly Container _container;
-        readonly ILog _logger;
         IDisposable _host;
 
-        public Program(ILog logger, Settings settings, Container container, LinuxSignal signal, ModuleCommunication communication) : base(signal, communication)
+        public Program(ILog logger, Settings settings, Container container, LinuxSignal signal, ModuleCommunication communication) : base(logger, signal, communication)
         {
-            _logger = logger;
             _settings = settings;
             _container = container;
         }
@@ -52,13 +50,13 @@ namespace WebUi
             {
                 _settings.Load();
                 var uri = $"http://{_settings.Host}:{_settings.Port}";
-                _logger.Info($"Start WebUi at {uri}");
+                Logger.Info($"Start WebUi at {uri}");
                 _host = WebApp.Start(uri, StartWeb);
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to start the Web interface");
-                _logger.Debug("Exception", ex);
+                Logger.Error("Failed to start the Web interface");
+                Logger.Debug("Exception", ex);
             }
         }
         
@@ -72,7 +70,7 @@ namespace WebUi
         FileServerOptions GenerateFileServerConfig()
         {
             var folder = new DirectoryInfo(_settings.WwwRootFolder);
-            _logger.Info($"Use public www root: {folder.FullName}");
+            Logger.Info($"Use public www root: {folder.FullName}");
             var physicalFileSystem = new PhysicalFileSystem(folder.FullName);
             var options = new FileServerOptions
             {
@@ -95,7 +93,7 @@ namespace WebUi
             var config = new HttpConfiguration();
             if (Type.GetType("Mono.Runtime") != null)
             {
-                _logger.Info("Register mono patch for CORS");
+                Logger.Info("Register mono patch for CORS");
                 config.MessageHandlers.Add(new MonoPatchingDelegatingHandler());
             }
             config.EnableCors();
@@ -114,13 +112,13 @@ namespace WebUi
         {
             try
             {
-                _logger.Info("Exit WebUi");
+                Logger.Info("Exit WebUi");
                 _host?.Dispose();
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to stop the Web interface");
-                _logger.Debug("Exception", ex);
+                Logger.Error("Failed to stop the Web interface");
+                Logger.Debug("Exception", ex);
             }
         }
     }

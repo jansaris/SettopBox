@@ -42,7 +42,7 @@ namespace WebUi.api
             {
                 return counter.NextValue();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Info($"Failed to retrieve counter '{counter.InstanceName}', Disable counter");
                 counter = null;
