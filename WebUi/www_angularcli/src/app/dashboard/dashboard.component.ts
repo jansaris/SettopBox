@@ -54,6 +54,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     getStatusClass(status: string): string {
         switch (status) {
             case "Running":
+            case "Idle":
                 return "alert-success";
             case "Disabled":
                 return "alert-warning";

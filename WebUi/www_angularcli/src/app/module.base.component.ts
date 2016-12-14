@@ -15,6 +15,7 @@ export abstract class ModuleBaseComponent implements OnInit {
     getStatusClass(status: string): string {
       switch (status) {
         case "Running":
+        case "Idle":
             return "panel-success";
         case "Disabled":
             return "panel-warning";
@@ -34,7 +35,12 @@ export abstract class ModuleBaseComponent implements OnInit {
 
   start(): void{
     this.loading = true;
-    this.moduleService.start(this.apiName).then(m => this.updateModule(m));
+    this.moduleService.start(this.apiName).then(m => {
+      this.updateModule(m);
+      setTimeout(()=>{
+        this.loadInfo();
+      }, 5000);
+    });
   }
 
   stop(): void{
@@ -43,7 +49,7 @@ export abstract class ModuleBaseComponent implements OnInit {
   }
 
   updateModule(module: Module){
-      this.running = module.Status == 'Running';
+      this.running = (module.Status == 'Running' || module.Status == 'Idle');
       this.module = module;
       this.loading = false;
       this.updateInfo(module);

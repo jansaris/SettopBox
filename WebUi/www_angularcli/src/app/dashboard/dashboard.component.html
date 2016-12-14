@@ -12,7 +12,7 @@
 <div class="jumbotron">
     <div class="row">
         <div *ngFor="let module of modules" [routerLink]="['', module.Name]" class="col-md-4">
-            <div class="alert" [ngClass]="getStatusClass(module.status)">
+            <div class="alert" [ngClass]="getStatusClass(module.Status)">
                 <div class="left">{{module.Name}}: {{module.Status}}</div>
             </div>
         </div>
