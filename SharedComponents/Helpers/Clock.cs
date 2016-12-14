@@ -55,6 +55,11 @@ namespace SharedComponents.Helpers
             _logger.Debug($"WaitForTimestamp: {caller} - {time:yyyy-MM-dd hh:mm:ss}");
             if (stopWaiting()) return;
             if (time < DateTime.Now) return;
+            if (_thread?.IsAlive ?? false)
+            {
+                _logger.Info("We are starting a new timer, so kill the previous one");
+                _threadHelper.AbortThread(_thread,_logger, 100);
+            }
             _logger.Info($"WaitForTimestamp: {caller} - {time:yyyy-MM-dd hh:mm:ss}");
             _time = time;
             _waitingFor = caller;

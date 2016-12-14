@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using log4net;
@@ -9,7 +11,19 @@ namespace SharedComponents.Module
 {
     public abstract class BaseModule : IModule
     {
-        protected ILog Logger { get; private set; }
+        static readonly Dictionary<ModuleState, ModuleState[]> AllowedStateChanges = new Dictionary<ModuleState, ModuleState[]>
+        {
+            { ModuleState.Starting, new [] { ModuleState.Error, ModuleState.Idle, ModuleState.Running, ModuleState.Stopping } },
+            { ModuleState.Initial, new [] { ModuleState.Error, ModuleState.Starting, ModuleState.Disabled } },
+            { ModuleState.Disabled, new ModuleState[0] },
+            { ModuleState.Running, new [] { ModuleState.Error, ModuleState.Idle, ModuleState.Stopping } },
+            { ModuleState.Idle, new [] { ModuleState.Error, ModuleState.Running, ModuleState.Stopping } },
+            { ModuleState.Stopping, new [] { ModuleState.Error, ModuleState.Stopped } },
+            { ModuleState.Stopped, new [] { ModuleState.Error, ModuleState.Starting } },
+            { ModuleState.Error, new [] { ModuleState.Error, ModuleState.Starting } }
+        }; 
+
+        protected ILog Logger { get; }
         readonly LinuxSignal _signal;
         readonly ModuleCommunication _moduleCommunication;
         public string Name => GetType().Namespace;
@@ -24,14 +38,6 @@ namespace SharedComponents.Module
                 lock (_syncRoot)
                 {
                     return _state;
-                }
-            }
-            set
-            {
-                lock (_syncRoot)
-                {
-                    Logger.Info($"Change module state from {State} to {value}");
-                    _state = value;
                 }
             }
         }
@@ -82,7 +88,8 @@ namespace SharedComponents.Module
             StopModule();
             ChangeState(ModuleState.Stopped);
         }
-        public bool ModuleShouldStop()
+
+        protected bool ModuleShouldStop()
         {
             switch (State)
             {
@@ -120,7 +127,7 @@ namespace SharedComponents.Module
 
         protected abstract void StartModule();
         protected abstract void StopModule();
-        protected virtual void Dispose(bool disposing)
+        void Dispose(bool disposing)
         {
             if (!disposing || _disposing) return;
             _disposing = true;
@@ -145,7 +152,21 @@ namespace SharedComponents.Module
 
         protected void ChangeState(ModuleState newState)
         {
-            State = newState;
+            lock (_syncRoot)
+            {
+                if (_state == newState)
+                {
+                    Logger.Warn($"State {newState} was already active, ignore new state");
+                    return;
+                }
+                if (!AllowedStateChanges[State].Contains(newState))
+                {
+                    Logger.Error($"Changing the module state from {State} to {newState} is not allowed, keep state {State}");
+                    return;
+                }
+                Logger.Debug($"Change module state from {State} to {newState}");
+                _state = newState;
+            }
             StatusChanged?.Invoke(this, newState);
         }
 

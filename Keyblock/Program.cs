@@ -57,6 +57,7 @@ namespace Keyblock
             {
                 LoadKeyBlock();
                 _nextRetrieval = DetermineNextRetrieval();
+                ChangeState(ModuleState.Idle);
             }
             catch (Exception ex)
             {
@@ -64,8 +65,6 @@ namespace Keyblock
                 Error();
             }
         }
-
-        
 
         DateTime DetermineNextRetrieval()
         {

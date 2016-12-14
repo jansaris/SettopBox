@@ -95,6 +95,7 @@ namespace EpgGrabber
                 }
                 _lastRetrieval = DateTime.Now;
                 _nextRetrieval = DetermineNextRetrieval();
+                ChangeState(ModuleState.Idle);
             }
             catch (Exception ex)
             {
