@@ -21,6 +21,7 @@ import { LogComponent } from './log/log.component';
 import { NewcamdComponent } from './newcamd/newcamd.component';
 import { EpgComponent } from './epg/epg.component';
 import { TvheadendComponent } from './tvheadend/tvheadend.component';
+import { SettingComponent } from './setting/setting.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { TvheadendComponent } from './tvheadend/tvheadend.component';
     LogComponent,
     NewcamdComponent,
     EpgComponent,
-    TvheadendComponent
+    TvheadendComponent,
+    SettingComponent
   ],
   imports: [
     BrowserModule,

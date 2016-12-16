@@ -1,14 +1,18 @@
 import { OnInit } from '@angular/core';
 import { ModuleService } from './module.service'
+import { SettingsService } from './settings.service'
 import { Module, KeyblockInfo } from './models';
+
+import { Setting } from './models'
 
 export abstract class ModuleBaseComponent implements OnInit {
     module: Module;
+    settings: Setting[];
     running: boolean = false;
     loading: boolean = false;
     abstract apiName: string;
 
-    constructor(private moduleService: ModuleService){
+    constructor(private moduleService: ModuleService, private settingsService: SettingsService){
 
     }
 
@@ -26,11 +30,20 @@ export abstract class ModuleBaseComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadInfo();
+    this.loadSettings();
   }
 
   loadInfo(): void{
     this.loading = true;
     this.moduleService.get(this.apiName).then(m => this.updateModule(m));
+  }
+
+  loadSettings(): void{
+    this.loading = true;
+    this.settingsService.get(this.apiName).then(s => {
+      this.settings = s;
+      this.loading = false;
+    });
   }
 
   start(): void{

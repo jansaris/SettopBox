@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { ModuleService } from '../module.service'
+import { SettingsService } from '../settings.service'
 import { ModuleBaseComponent } from '../module.base.component'
+import { SettingComponent } from '../setting/setting.component'
 
 import { Module, TvheadendInfo } from '../models';
 
@@ -13,8 +15,8 @@ export class TvheadendComponent extends ModuleBaseComponent {
   apiName: string = "TvHeadendIntegration";
   info: TvheadendInfo;
   
-  constructor(moduleService: ModuleService) {
-    super(moduleService);
+  constructor(moduleService: ModuleService, settingsService: SettingsService) {
+    super(moduleService, settingsService);
   }
 
   updateInfo(m: Module): void {

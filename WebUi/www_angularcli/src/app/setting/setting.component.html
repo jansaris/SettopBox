@@ -1,0 +1,13 @@
+<div *ngIf="setting">
+  <div *ngIf="setting.InputType !== 'checkbox'">
+    <div class="form-group">
+      <label [for]="setting.Name"> {{setting.Name}}</label>
+      <input [(ngModel)]="setting.Value" [type]="setting.InputType" class="form-control">
+    </div>
+  </div>
+  <div *ngIf="setting.InputType === 'checkbox'">
+    <div class="form-check">
+      <label class="form-check-label"><input [(ngModel)]="setting.Value" type="checkbox" class="form-check-input">{{setting.Name}}</label>
+    </div>
+  </div>
+</div>

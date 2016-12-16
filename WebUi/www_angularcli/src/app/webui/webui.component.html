@@ -23,3 +23,9 @@
       </div>
   </div>
 </div>
+<div class="row" *ngIf="settings">
+    <h3>Settings</h3>
+    <div class="col-md-4" *ngFor="let setting of settings">
+        <app-setting [setting]="setting" ></app-setting>
+    </div>
+</div>
