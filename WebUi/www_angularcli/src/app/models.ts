@@ -51,6 +51,7 @@ export class Log {
 export class Setting {
     Name: string;
     Value: any;
+    ServerValue: any;
     Type: string;
     InputType: string;
 }

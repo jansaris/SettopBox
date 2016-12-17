@@ -2,11 +2,11 @@
   <div *ngIf="setting.InputType !== 'checkbox'">
     <div class="form-group">
       <label [for]="setting.Name"> {{setting.Name}}</label>
-      <input [(ngModel)]="setting.Value" [type]="setting.InputType" class="form-control">
+      <input [(ngModel)]="setting.Value" [type]="setting.InputType" class="form-control" [ngClass]="{changed: setting.Value != setting.ServerValue}">
     </div>
   </div>
   <div *ngIf="setting.InputType === 'checkbox'">
-    <div class="form-check">
+    <div class="form-check" [ngClass]="{changed: setting.Value != setting.ServerValue}">
       <label class="form-check-label"><input [(ngModel)]="setting.Value" type="checkbox" class="form-check-input">{{setting.Name}}</label>
     </div>
   </div>

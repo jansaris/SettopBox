@@ -22,6 +22,7 @@ export class SettingsService {
         return response.json() as Setting[];
       })
       .then(this.addSettingType)
+      .then(this.saveServerValue)
       .catch(this.error.handleError);
   }
 
@@ -40,6 +41,13 @@ export class SettingsService {
                   set.InputType = "text";
                   break;
           }
+      }
+      return settings;
+  }
+
+  saveServerValue(settings: Setting[]) : Setting[]{
+      for (var index in settings) {
+          settings[index].ServerValue = settings[index].Value;
       }
       return settings;
   }
