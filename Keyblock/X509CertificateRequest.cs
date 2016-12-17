@@ -8,6 +8,7 @@ using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Operators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.OpenSsl;
@@ -81,7 +82,8 @@ namespace Keyblock
                 }
 
                 var subject = LoadSubject();
-                _pkcs10CertificationRequest = new Pkcs10CertificationRequest(PkcsObjectIdentifiers.Sha1WithRsaEncryption.Id, subject, KeyPair.Public, null, KeyPair.Private);
+                var signatureFactory = new Asn1SignatureFactory(PkcsObjectIdentifiers.Sha1WithRsaEncryption.Id, KeyPair.Private);
+                _pkcs10CertificationRequest = new Pkcs10CertificationRequest(signatureFactory, subject, KeyPair.Public, null, KeyPair.Private);
             }
             catch (Exception ex)
             {
