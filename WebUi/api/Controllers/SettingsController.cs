@@ -28,5 +28,27 @@ namespace WebUi.api.Controllers
             if(ini == null) return BadRequest($"Unknown module {module}");
             return Ok(ini.GetAll());
         }
+
+        [Route("api/settings/{module}")]
+        public IHttpActionResult Put(string module, Setting[] settings)
+        {
+            var ini = _allSettings.FirstOrDefault(n => n.GetType().Namespace == module);
+            if (ini == null) return BadRequest($"Unknown module {module}");
+            var changedCount = 0;
+            foreach (var setting in settings)
+            {
+                var original = ini.GetValue(setting.Name);
+                if (original?.ToString() == setting.Value?.ToString()) continue;
+
+                ini.SetValue(setting.Name, setting.Value?.ToString());
+                changedCount++;
+            }
+            if (changedCount > 0)
+            {
+                ini.Save();
+            }
+
+            return Ok(changedCount);
+        }
     }
 }

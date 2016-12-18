@@ -47,9 +47,20 @@
         </div>
     </div>
 </div>
-<div class="row" *ngIf="settings">
+<div class="row">
     <h3>Settings</h3>
-    <div class="col-md-4" *ngFor="let setting of settings">
-        <app-setting [setting]="setting" ></app-setting>
+    <div>
+        <div class="row" *ngIf="settings">
+            <div class="col-md-4" *ngFor="let setting of settings">
+                <app-setting [setting]="setting"></app-setting>
+            </div>
+        </div>
+        <div class="row" *ngIf="settings">
+            <div class="col-md-4">
+                <button class="btn btn-default" [ngClass]="{'btn-danger': (getNrOfChangedSettings() > 0)}" (click)="resetSettings()"><span class="glyphicon glyphicon-step-backward"></span> Reset</button>
+                <button class="btn btn-default" [ngClass]="{'btn-success': (getNrOfChangedSettings() > 0)}" (click)="saveSettings()"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                <span> ({{getNrOfChangedSettings()}} changes)</span>
+            </div>
+        </div>
     </div>
 </div>

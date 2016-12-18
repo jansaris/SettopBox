@@ -57,7 +57,7 @@ namespace SharedComponents.Settings
                                 _decoder = _decode;
                                 continue;
                             }
-                            Logger.DebugFormat("Process line {0}", line);
+                            Logger.Debug($"Process line {line}");
                             atLeastOneLineOfTheBlockFound = true;
                             ReadConfigItem(line);
                         }
@@ -152,10 +152,30 @@ namespace SharedComponents.Settings
             var keyvalue = line.Split('|');
             if (keyvalue.Length < 2)
             {
-                Logger.WarnFormat("Failed to read configuration line: {0}", line);
+                Logger.Warn($"Failed to read configuration line: {line}");
                 return;
             }
             SetValue(keyvalue[0], _decoder(keyvalue[1]));
+        }
+
+        public object GetValue(string key)
+        {
+            var propertyInfo = GetType().GetProperty(key, PropertyFlags);
+            if (propertyInfo == null)
+            {
+                Logger.Warn($"Unknown configuration key: {key}");
+                return null;
+            }
+            try
+            {
+                Logger.Debug($"Read configuration item {key}");
+                return propertyInfo.GetValue(this);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Failed to read {key}", ex);
+                return null;
+            }
         }
 
         public void SetValue(string key, string value)
@@ -163,17 +183,17 @@ namespace SharedComponents.Settings
             var propertyInfo = GetType().GetProperty(key, PropertyFlags);
             if (propertyInfo == null)
             {
-                Logger.WarnFormat("Unknown configuration key: {0}", key);
+                Logger.Warn($"Unknown configuration key: {key}");
                 return;
             }
             try
             {
-                Logger.DebugFormat("Read configuration item {0} with value {1}", key, value);
+                Logger.Info($"Set configuration item {key} with value {value}");
                 propertyInfo.SetValue(this, Convert.ChangeType(value, propertyInfo.PropertyType), null);
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to read {key} into {value} as {propertyInfo.PropertyType}", ex);
+                Logger.Error($"Failed to set {key} into {value} as {propertyInfo.PropertyType}", ex);
             }
         }
     }

@@ -26,6 +26,13 @@ export class SettingsService {
       .catch(this.error.handleError);
   }
 
+  put(name: string, settings: Setting[]): Promise<number> {
+      return this.http.put(this.urls.Settings + '/' + name, settings)
+        .toPromise()
+        .then(resp => resp)
+        .catch(this.error.handleError);
+  }
+
   addSettingType(settings: Setting[]) : Setting[] {
     for (var index in settings) {
           var set = settings[index];

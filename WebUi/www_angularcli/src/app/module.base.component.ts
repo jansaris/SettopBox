@@ -46,6 +46,36 @@ export abstract class ModuleBaseComponent implements OnInit {
     });
   }
 
+  getNrOfChangedSettings(): number {
+    var count = 0;
+    for (var index in this.settings) {
+      var set = this.settings[index];
+      if(set.Value != set.ServerValue){
+        count++;
+      }
+    }
+    return count;
+  }
+
+  saveSettings(): void{
+    this.loading = true;
+    this.settingsService.put(this.apiName, this.settings).then(changes => {
+      if(changes){
+        this.loadSettings();  
+      }
+      else{
+        this.loading = false;
+      }
+    });
+  }
+
+  resetSettings(): void{
+    for (var index in this.settings) {
+      var set = this.settings[index];
+      set.Value = set.ServerValue;
+    }
+  }
+
   start(): void{
     this.loading = true;
     this.moduleService.start(this.apiName).then(m => {
