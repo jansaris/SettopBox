@@ -153,13 +153,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="www\src\settings.html" />
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="www\src\settings.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="www\favicon.ico">
