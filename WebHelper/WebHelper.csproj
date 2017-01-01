@@ -4,18 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{22E85E47-B5F5-46DB-85C5-1D24D69A330D}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{3486F8AF-E532-4D50-B6DF-FC172B310450}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EpgGrabber</RootNamespace>
-    <AssemblyName>EpgGrabber</AssemblyName>
+    <RootNamespace>WebHelper</RootNamespace>
+    <AssemblyName>WebHelper</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -42,14 +38,6 @@
       <HintPath>..\packages\log4net.2.0.6\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="SimpleInjector, Version=3.3.2.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\packages\SimpleInjector.3.3.2\lib\net45\SimpleInjector.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -60,49 +48,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChannelList.cs" />
-    <Compile Include="DependencyConfig.cs" />
-    <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="Grabber.cs" />
-    <Compile Include="IO\CachedWebDownloader.cs" />
-    <Compile Include="IO\CacheObject.cs" />
-    <Compile Include="Models\Channel.cs" />
-    <Compile Include="Models\Details.cs" />
-    <Compile Include="Models\Genre.cs" />
-    <Compile Include="Models\Program.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Compression.cs" />
+    <Compile Include="Downloader.cs" />
+    <Compile Include="EpgWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FileDownloader.cs" />
+    <Compile Include="FileHelper.cs" />
+    <Compile Include="HttpWebDownloader.cs" />
+    <Compile Include="IDownloader.cs" />
+    <Compile Include="IFileDownloader.cs" />
+    <Compile Include="IWebDownloader.cs" />
+    <Compile Include="NullWebDownloader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="GenreTranslator.cs" />
-    <Compile Include="XmlTv.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="Log4net.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
-    <None Include="Settings.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
-      <Project>{17e72fdd-c439-4955-8fa6-125f08702a79}</Project>
-      <Name>SharedComponents</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WebHelper\WebHelper.csproj">
-      <Project>{3486f8af-e532-4d50-b6df-fc172b310450}</Project>
-      <Name>WebHelper</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Data\Channels.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\TvhEpgGenres.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

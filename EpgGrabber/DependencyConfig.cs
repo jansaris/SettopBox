@@ -3,6 +3,7 @@ using EpgGrabber.IO;
 using log4net;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
+using WebHelper;
 
 namespace EpgGrabber
 {

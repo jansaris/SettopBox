@@ -2,24 +2,27 @@
 using System.Net;
 using log4net;
 
-namespace EpgGrabber.IO
+namespace WebHelper
 {
     public class EpgWebClient : WebClient
     {
         readonly ILog _logger;
         readonly int _timeout;
 
-        public EpgWebClient(ILog logger, Settings settings)
+        public EpgWebClient(ILog logger)
         {
             _logger = logger;
-            _timeout = settings.WebRequestTimeoutInMs;
+            _timeout = 5000;
         }
 
         protected override WebRequest GetWebRequest(Uri uri)
         {
             _logger.Debug($"Generate request for {uri} with {_timeout}ms timeout");
             var w = base.GetWebRequest(uri);
-            w.Timeout = _timeout; 
+            if (w != null)
+            {
+                w.Timeout = _timeout; 
+            }
             return w;
         }
     }

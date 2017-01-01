@@ -1,7 +1,7 @@
 using System.IO;
 using log4net;
 
-namespace EpgGrabber.IO
+namespace WebHelper
 {
     public class FileDownloader : IFileDownloader
     {

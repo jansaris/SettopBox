@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
-namespace EpgGrabber.IO
+namespace WebHelper
 {
     public sealed class FileHelper
     {
@@ -19,8 +14,8 @@ namespace EpgGrabber.IO
 
             if (recursive)
             {
-                foreach (string subfolder in Directory.GetDirectories(folder))
-                    DeleteFolderContent(subfolder, recursive, true);
+                foreach (var subfolder in Directory.GetDirectories(folder))
+                    DeleteFolderContent(subfolder, true, true);
             }
 
             if (includeThisFolder)

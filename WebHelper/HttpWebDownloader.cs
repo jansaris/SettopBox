@@ -1,16 +1,17 @@
 ﻿using System;
 using log4net;
 
-namespace EpgGrabber.IO
+namespace WebHelper
 {
     public class HttpWebDownloader : IWebDownloader
     {
         readonly Func<EpgWebClient> _webClientFactory;
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(CachedWebDownloader));
+        readonly ILog _logger;
 
-        public HttpWebDownloader(Func<EpgWebClient> webClientFactory)
+        public HttpWebDownloader(Func<EpgWebClient> webClientFactory, ILog logger)
         {
             _webClientFactory = webClientFactory;
+            _logger = logger;
         }
 
         public byte[] DownloadBinary(string url)
@@ -22,7 +23,7 @@ namespace EpgGrabber.IO
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to download the data from {url}", ex);
+                _logger.Error($"Failed to download the data from {url}", ex);
                 return null;
             }
         }
@@ -36,7 +37,7 @@ namespace EpgGrabber.IO
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to download the string from {url}", ex);
+                _logger.Error($"Failed to download the string from {url}", ex);
                 return null;
             }
         }

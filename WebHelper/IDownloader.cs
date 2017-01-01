@@ -1,4 +1,4 @@
-﻿namespace EpgGrabber.IO
+﻿namespace WebHelper
 {
     public interface IDownloader : IWebDownloader, IFileDownloader
     {

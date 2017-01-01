@@ -9,10 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewCamd", "NewCamd\NewCamd.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedComponents", "SharedComponents\SharedComponents.csproj", "{17E72FDD-C439-4955-8FA6-125F08702A79}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{67CDA5C0-0219-4037-8D15-56B4A00F013F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.NewCamdClient", "Test.NewCamdClient\Test.NewCamdClient.csproj", "{7F248A75-E6BC-4A70-8998-31618167A610}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettopBox", "SettopBox\SettopBox.csproj", "{2BC70BDC-4906-4682-A061-9743BD3DB822}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Synology", "Synology", "{48142585-0429-4B24-9A61-12FAAEC4261D}"
@@ -76,6 +72,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TvHeadendIntegration", "TvH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChannelList", "ChannelList\ChannelList.csproj", "{7B44A2BE-7885-43A8-B34D-C8397BA9588D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHelper", "WebHelper\WebHelper.csproj", "{3486F8AF-E532-4D50-B6DF-FC172B310450}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,10 +92,6 @@ Global
 		{17E72FDD-C439-4955-8FA6-125F08702A79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17E72FDD-C439-4955-8FA6-125F08702A79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17E72FDD-C439-4955-8FA6-125F08702A79}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F248A75-E6BC-4A70-8998-31618167A610}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F248A75-E6BC-4A70-8998-31618167A610}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F248A75-E6BC-4A70-8998-31618167A610}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F248A75-E6BC-4A70-8998-31618167A610}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2BC70BDC-4906-4682-A061-9743BD3DB822}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2BC70BDC-4906-4682-A061-9743BD3DB822}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BC70BDC-4906-4682-A061-9743BD3DB822}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -122,12 +116,15 @@ Global
 		{7B44A2BE-7885-43A8-B34D-C8397BA9588D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B44A2BE-7885-43A8-B34D-C8397BA9588D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B44A2BE-7885-43A8-B34D-C8397BA9588D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3486F8AF-E532-4D50-B6DF-FC172B310450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3486F8AF-E532-4D50-B6DF-FC172B310450}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3486F8AF-E532-4D50-B6DF-FC172B310450}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3486F8AF-E532-4D50-B6DF-FC172B310450}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{7F248A75-E6BC-4A70-8998-31618167A610} = {67CDA5C0-0219-4037-8D15-56B4A00F013F}
 		{D4710B83-9607-42A0-8FD8-FFE355028225} = {48142585-0429-4B24-9A61-12FAAEC4261D}
 		{EB9921AF-ABD9-4C17-9EF7-D573A1DCCB01} = {48142585-0429-4B24-9A61-12FAAEC4261D}
 		{B81348BC-0138-46B2-A157-AEE0600E406D} = {D4710B83-9607-42A0-8FD8-FFE355028225}

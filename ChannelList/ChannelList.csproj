@@ -4,16 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{17E72FDD-C439-4955-8FA6-125F08702A79}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{7B44A2BE-7885-43A8-B34D-C8397BA9588D}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharedComponents</RootNamespace>
-    <AssemblyName>SharedComponents</AssemblyName>
+    <RootNamespace>ChannelList</RootNamespace>
+    <AssemblyName>ChannelList</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -33,10 +35,6 @@
   <ItemGroup>
     <Reference Include="log4net, Version=2.0.6.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.6\lib\net45-full\log4net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Posix, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Posix.4.0.0.0\lib\net40\Mono.Posix.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SimpleInjector, Version=3.3.2.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
@@ -53,40 +51,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DependencyInjection\BaseDependencyConfigurator.cs" />
-    <Compile Include="DependencyInjection\ContainerExtensions.cs" />
-    <Compile Include="DependencyInjection\TypedLogger.cs" />
-    <Compile Include="DependencyInjection\SharedContainer.cs" />
-    <Compile Include="DependencyInjection\DependecyContext.cs" />
-    <Compile Include="Helpers\LinuxSignal.cs" />
-    <Compile Include="Helpers\Clock.cs" />
-    <Compile Include="Keyblock\Block.cs" />
-    <Compile Include="Keyblock\Channel.cs" />
-    <Compile Include="Module\BaseModule.cs" />
-    <Compile Include="Module\ChannelListInfo.cs" />
-    <Compile Include="Module\CommunicationData.cs" />
-    <Compile Include="Module\DataType.cs" />
-    <Compile Include="Module\IModule.cs" />
-    <Compile Include="Module\IModuleInfo.cs" />
-    <Compile Include="Module\EpgGrabberInfo.cs" />
-    <Compile Include="Module\IThreadHelper.cs" />
-    <Compile Include="Module\KeyblockInfo.cs" />
-    <Compile Include="Module\ModuleCommunication.cs" />
-    <Compile Include="Module\ModuleInfo.cs" />
-    <Compile Include="Module\ModuleState.cs" />
-    <Compile Include="Module\NewCamdInfo.cs" />
-    <Compile Include="Module\RunAndMonitorInfo.cs" />
-    <Compile Include="Module\ThreadHelper.cs" />
-    <Compile Include="Module\TvHeadendIntegrationInfo.cs" />
+    <Compile Include="ChannelList.cs" />
+    <Compile Include="DependencyConfig.cs" />
+    <Compile Include="JavascriptParser.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings\IniSettings.cs" />
-    <Compile Include="Settings\Setting.cs" />
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="log4net.xsd">
-      <SubType>Designer</SubType>
+    <None Include="App.config" />
+    <None Include="Log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="Settings.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
+      <Project>{17e72fdd-c439-4955-8fa6-125f08702a79}</Project>
+      <Name>SharedComponents</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebHelper\WebHelper.csproj">
+      <Project>{3486f8af-e532-4d50-b6df-fc172b310450}</Project>
+      <Name>WebHelper</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

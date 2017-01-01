@@ -1,4 +1,4 @@
-﻿namespace EpgGrabber.IO
+﻿namespace WebHelper
 {
     public class NullWebDownloader : IWebDownloader
     {

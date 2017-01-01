@@ -4,7 +4,7 @@ using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.GZip;
 using log4net;
 
-namespace EpgGrabber.IO
+namespace WebHelper
 {
     public sealed class Compression
     {
