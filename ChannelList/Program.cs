@@ -38,6 +38,14 @@ namespace ChannelList
         {
             return new ChannelListInfo
             {
+                LastRetrieval = _lastRetrieval
+            };
+        }
+
+        public override IModuleInfo GetData()
+        {
+            return new ChannelListInfo
+            {
                 Channels = _channels,
                 LastRetrieval = _lastRetrieval
             };

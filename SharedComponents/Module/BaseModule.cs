@@ -43,6 +43,10 @@ namespace SharedComponents.Module
         }
 
         public abstract IModuleInfo GetModuleInfo();
+        public virtual IModuleInfo GetData()
+        {
+            return GetModuleInfo();
+        }
 
         public event EventHandler<ModuleState> StatusChanged;
         public event EventHandler<CommunicationData> NewDataAvailable;

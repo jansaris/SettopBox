@@ -53,6 +53,16 @@ namespace WebUi.api.Controllers
             return Ok(Map(name));
         }
 
+        [Route("data/{name}")]
+        [HttpGet]
+        public IHttpActionResult Data(string name)
+        {
+            _logger.Debug($"Get module {name} data");
+            var module = Map(name);
+            module.Info = _info.Data(name);
+            return Ok(module);
+        }
+
         public IHttpActionResult Get(string name)
         {
             return Ok(Map(name));

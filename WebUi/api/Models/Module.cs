@@ -1,7 +1,9 @@
-﻿using SharedComponents.Module;
+﻿using System.Runtime.Serialization;
+using SharedComponents.Module;
 
 namespace WebUi.api.Models
 {
+    [KnownType(typeof(ChannelListInfo))]
     public class Module
     {
         public string Name { get; set; } 

@@ -80,6 +80,12 @@ namespace SharedComponents.Module
             return mod?.GetModuleInfo();
         }
 
+        public IModuleInfo Data(string name)
+        {
+            var mod = Get(name);
+            return mod?.GetData();
+        }
+
         IModule Get(string name)
         {
             return _modules.FirstOrDefault(m => m.Name == name);
@@ -96,7 +102,7 @@ namespace SharedComponents.Module
         {
             var mod = Get(name);
             _logger.Info($"Stop module {mod?.Name} ({name})");
-            mod.Stop();
+            mod?.Stop();
         }
 
         void OnUpdate()
