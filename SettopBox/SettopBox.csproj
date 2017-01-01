@@ -78,6 +78,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ChannelList\ChannelList.csproj">
+      <Project>{7b44a2be-7885-43a8-b34d-c8397ba9588d}</Project>
+      <Name>ChannelList</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EpgGrabber\EpgGrabber.csproj">
       <Project>{22e85e47-b5f5-46db-85c5-1d24d69a330d}</Project>
       <Name>EpgGrabber</Name>
@@ -101,6 +105,10 @@
     <ProjectReference Include="..\TvHeadendIntegration\TvHeadendIntegration.csproj">
       <Project>{7f602308-99f7-4516-934d-3dcc28dc6782}</Project>
       <Name>TvHeadendIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebHelper\WebHelper.csproj">
+      <Project>{3486f8af-e532-4d50-b6df-fc172b310450}</Project>
+      <Name>WebHelper</Name>
     </ProjectReference>
     <ProjectReference Include="..\WebUi\WebUi.csproj">
       <Project>{61aca837-0874-4bcc-8815-b3e64207480d}</Project>

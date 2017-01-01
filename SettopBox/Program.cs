@@ -18,6 +18,7 @@ namespace SettopBox
                                                           NewCamd.DependencyConfig,
                                                           Keyblock.DependencyConfig,
                                                           RunAndMonitor.DependencyConfig,
+                                                          ChannelList.DependencyConfig,
                                                           EpgGrabber.DependencyConfig,
                                                           TvHeadendIntegration.DependencyConfig,
                                                           WebUi.DependencyConfig>("Log4net.config");

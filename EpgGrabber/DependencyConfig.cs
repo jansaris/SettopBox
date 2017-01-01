@@ -15,11 +15,8 @@ namespace EpgGrabber
 
         public override void RegisterComponents(Container container)
         {
-            container.Register<IWebDownloader, HttpWebDownloader>(Lifestyle.Singleton);
+            WebHelper.DependencyConfig.RegisterComponents(container);
             container.RegisterDecorator<IWebDownloader, CachedWebDownloader>(Lifestyle.Singleton);
-            container.Register<IFileDownloader, FileDownloader>(Lifestyle.Singleton);
-            container.Register<IDownloader, Downloader>();
-            container.RegisterSingleton<Func<EpgWebClient>>(() => container.GetInstance<EpgWebClient>());
             container.RegisterInitializer<GenreTranslator>(c => c.Load());
             container.RegisterInitializer<ChannelList>(c => c.LoadChannelsFromDisk());
             container.RegisterInitializer<CachedWebDownloader>(c => c.LoadCache());

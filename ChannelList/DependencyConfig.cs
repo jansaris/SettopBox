@@ -2,7 +2,6 @@
 using log4net;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
-using WebHelper;
 
 namespace ChannelList
 {
@@ -16,9 +15,7 @@ namespace ChannelList
         {
             container.Register<ChannelList>();
             container.Register<JavascriptParser>();
-            container.RegisterSingleton<Func<EpgWebClient>>(() => container.GetInstance<EpgWebClient>());
-            container.Register<IWebDownloader, HttpWebDownloader>(Lifestyle.Singleton);
-            container.Register<Compression>();
+            WebHelper.DependencyConfig.RegisterComponents(container);
         }
 
         public override Type Module => typeof(Program);

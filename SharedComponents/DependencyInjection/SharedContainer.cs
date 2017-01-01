@@ -31,7 +31,7 @@ namespace SharedComponents.DependencyInjection
             return CreateAndFill(log4Netconfig, typeof(T));
         }
 
-        public static Container CreateAndFill<T1, T2, T3, T4, T5, T6, T7>(string log4Netconfig) 
+        public static Container CreateAndFill<T1, T2, T3, T4, T5, T6, T7, T8>(string log4Netconfig) 
             where T1 : BaseDependencyConfigurator
             where T2 : BaseDependencyConfigurator
             where T3 : BaseDependencyConfigurator
@@ -39,8 +39,9 @@ namespace SharedComponents.DependencyInjection
             where T5 : BaseDependencyConfigurator
             where T6 : BaseDependencyConfigurator
             where T7 : BaseDependencyConfigurator
+            where T8 : BaseDependencyConfigurator
         {
-            return CreateAndFill(log4Netconfig, typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7));
+            return CreateAndFill(log4Netconfig, typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8));
         }
 
         static Container CreateAndFill(string log4Netconfig, params Type[] configurators)

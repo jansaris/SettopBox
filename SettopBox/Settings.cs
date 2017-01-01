@@ -44,6 +44,12 @@ namespace SettopBox
             set { UpdateModule(nameof(TvHeadendIntegration), value); }
         }
 
+        public bool ChannelList
+        {
+            get { return GetModule(nameof(ChannelList)); }
+            set { UpdateModule(nameof(ChannelList), value); }
+        }
+
         public bool EpgGrabber
         {
             get { return GetModule(nameof(EpgGrabber)); }
