@@ -95,7 +95,7 @@
     </None>
     <None Include="packages.config" />
     <None Include="Settings.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
