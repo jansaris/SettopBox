@@ -32,7 +32,7 @@ export class ChannellistComponent extends ModuleBaseComponent {
 
   showDetails(channel: ChannelInfo): void{
     if(channel.DetailsTimer) return;
-    if(channel.Locations.length == 0) return; 
+    if(channel.Locations.length <= 1) return; 
     channel.DetailsVisible = true;
   }
 
