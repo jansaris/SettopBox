@@ -12,7 +12,7 @@ export abstract class ModuleBaseComponent implements OnInit {
     loading: boolean = false;
     abstract apiName: string;
 
-    constructor(private moduleService: ModuleService, private settingsService: SettingsService){
+    constructor(protected moduleService: ModuleService, private settingsService: SettingsService){
 
     }
 
@@ -31,6 +31,7 @@ export abstract class ModuleBaseComponent implements OnInit {
   ngOnInit(): void {
     this.loadInfo();
     this.loadSettings();
+    this.loadData();
   }
 
   loadInfo(): void{
@@ -98,6 +99,10 @@ export abstract class ModuleBaseComponent implements OnInit {
       this.updateInfo(module);
   }
 
+  loadData(): void {
+
+  };
 
   abstract updateInfo(module: Module): void;
+  
 }

@@ -43,6 +43,15 @@ export class ModuleService {
                 .catch(this.error.handleError);
     }
 
+    data(name: string): Promise<Module> {
+        return this.http.get(this.urls.Module + '/data/' + name, null)
+                .toPromise()
+                .then(response => {
+                    return response.json() as Module;
+                })
+                .catch(this.error.handleError);
+    }
+
     start(name: string): Promise<Module>{
         return this.http.post(this.urls.Module + '/start/' + name, null)
                 .toPromise()

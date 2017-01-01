@@ -22,6 +22,7 @@ import { NewcamdComponent } from './newcamd/newcamd.component';
 import { EpgComponent } from './epg/epg.component';
 import { TvheadendComponent } from './tvheadend/tvheadend.component';
 import { SettingComponent } from './setting/setting.component';
+import { ChannellistComponent } from './channellist/channellist.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +34,8 @@ import { SettingComponent } from './setting/setting.component';
     NewcamdComponent,
     EpgComponent,
     TvheadendComponent,
-    SettingComponent
+    SettingComponent,
+    ChannellistComponent
   ],
   imports: [
     BrowserModule,

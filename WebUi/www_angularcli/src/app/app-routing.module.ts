@@ -6,6 +6,7 @@ import { KeyblockComponent }   from './keyblock/keyblock.component';
 import { LogComponent }   from './log/log.component';
 import { NewcamdComponent }   from './newcamd/newcamd.component';
 import { EpgComponent }   from './epg/epg.component';
+import { ChannellistComponent }   from './channellist/channellist.component';
 import { TvheadendComponent }   from './tvheadend/tvheadend.component';
 
 const routes: Routes = [
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'Log',  component: LogComponent },
   { path: 'Newcamd',  component: NewcamdComponent },
   { path: 'Epg',  component: EpgComponent },
+  { path: 'ChannelList',  component: ChannellistComponent },
   { path: 'Tvheadend',  component: TvheadendComponent },
   //{ path: 'detail/:id', component: HeroDetailComponent },
 ];
