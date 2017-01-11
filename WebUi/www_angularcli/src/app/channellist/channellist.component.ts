@@ -18,10 +18,13 @@ export class ChannellistComponent extends ModuleBaseComponent {
 
   constructor(moduleService: ModuleService, settingsService: SettingsService) {
     super(moduleService, settingsService);
+    this.info = new ChannelListInfo();
   }
 
   updateInfo(m: Module): void {
-    this.info = m.Info as ChannelListInfo;
+    var typedInfo = m.Info as ChannelListInfo;
+    if(typedInfo.LastRetrieval) this.info.LastRetrieval = typedInfo.LastRetrieval;
+    if(typedInfo.Channels) this.info.Channels = typedInfo.Channels;
   }
 
   loadData(): void {
