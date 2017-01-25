@@ -138,10 +138,18 @@ XCOPY $(SolutionDir)Synology\package.tgz\package.tgz  $(SolutionDir)Synology\spk
 IF EXIST $(SolutionDir)Synology\spk\SettopBox.tar del $(SolutionDir)Synology\spk\SettopBox.tar
 IF EXIST $(SolutionDir)Synology\spk\SettopBox.spk del $(SolutionDir)Synology\spk\SettopBox.spk
 $(SolutionDir)Synology\7za\7za.exe a -ttar $(SolutionDir)Synology\spk\SettopBox.tar $(SolutionDir)Synology\spk\*
-$(SolutionDir)Synology\7za\7za.exe a -tgzip $(SolutionDir)Synology\spk\SettopBox.spk $(SolutionDir)Synology\spk\SettopBox.tar</PostBuildEvent>
+$(SolutionDir)Synology\7za\7za.exe a -tgzip $(SolutionDir)Synology\spk\SettopBox.spk $(SolutionDir)Synology\spk\SettopBox.tar
+
+rmdir /s /q "$(SolutionDir)deploy"
+mkdir "$(SolutionDir)deploy"
+XCOPY "$(SolutionDir)Synology\package.tgz\share\SettopBox\*" "$(SolutionDir)deploy" /EY</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>IF EXIST deltree $(TargetDir)Logs</PreBuildEvent>
+    <PreBuildEvent>rmdir /s /q "$(TargetDir)Logs"
+rmdir /s /q "$(TargetDir)Data"
+rmdir /s /q "$(TargetDir)www"
+mkdir $(TargetDir)www
+copy $(SolutionDir)WebUi\www\* $(TargetDir)www</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
