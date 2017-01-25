@@ -8,6 +8,7 @@ namespace SharedComponents.Module
     {
         public List<ChannelInfo> Channels { get; set; }
         public DateTime? LastRetrieval { get; set; }
+        public string State { get; set; }
     }
 
     public class ChannelInfo

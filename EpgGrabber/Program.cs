@@ -17,19 +17,17 @@ namespace EpgGrabber
         readonly Grabber _epgGrabber;
         readonly ChannelList _channelList;
         readonly CachedWebDownloader _webDownloader;
-        readonly Clock _clock;
         Thread _runningEpgGrabTask;
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
-        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, Grabber epgGrabber, IWebDownloader webDownloader, ChannelList channelList, LinuxSignal signal, ModuleCommunication communication, Clock clock) : base(logger, signal, communication)
+        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, Grabber epgGrabber, IWebDownloader webDownloader, ChannelList channelList, LinuxSignal signal, ModuleCommunication communication) : base(logger, signal, communication)
         {
             _threadHelper = threadHelper;
             _settings = settings;
             _epgGrabber = epgGrabber;
             _webDownloader = webDownloader as CachedWebDownloader;
             _channelList = channelList;
-            _clock = clock;
         }
 
         static void Main()
@@ -52,8 +50,7 @@ namespace EpgGrabber
             {
                 LastRetrieval = _lastRetrieval,
                 NextRetrieval = _nextRetrieval,
-                Channels = _channelList.Channels.Select(kv => kv.Value).ToArray(),
-                Cpu = _threadHelper.GetCpuUsage(_runningEpgGrabTask)
+                Channels = _channelList.Channels.Select(kv => kv.Value).ToArray()
             };
         }
 
@@ -69,10 +66,9 @@ namespace EpgGrabber
             _nextRetrieval = _settings.InitialEpgGrab ? DateTime.Now : DetermineNextRetrieval();
             while (!ModuleShouldStop())
             {
-                var nextRunAt = _nextRetrieval ?? DateTime.Now;
                 try
                 {
-                    WaitAndRun(nextRunAt);
+                    WaitAndRun();
                 }
                 catch (OperationCanceledException)
                 {
@@ -81,11 +77,10 @@ namespace EpgGrabber
             }
         }
 
-        void WaitAndRun(DateTime executionTime)
+        void WaitAndRun()
         {
-            Logger.Info($"Next EPG will be fetched at {executionTime:yyyy-MM-dd HH:mm:ss}");
-            _clock.WaitForTimestamp(executionTime, ModuleShouldStop, () => ChangeState(ModuleState.Running), "EpgGrabber");
-            WaitForSpecificState(ModuleState.Running);
+            Logger.Info($"Next EPG will be fetched at {_nextRetrieval:yyyy-MM-dd HH:mm:ss}");
+            WaitForSpecificState(ModuleState.Running, UpdateStateAfterNextRetrievalTimestamp);
             if (ModuleShouldStop()) return;
             try
             {
@@ -95,15 +90,25 @@ namespace EpgGrabber
                     SignalNewData(DataType.Epg, epgFile);
                 }
                 _lastRetrieval = DateTime.Now;
-                _nextRetrieval = DetermineNextRetrieval();
-                ChangeState(ModuleState.Idle);
+            }
+            catch (ThreadAbortException)
+            {
+                Logger.Warn("Load EPG has been aborted");
             }
             catch (Exception ex)
             {
-                Logger.Fatal("An unhandled exception occured", ex);
+                Logger.Fatal($"An unhandled exception occured: {ex.Message}", ex);
                 Error();
-                _nextRetrieval = DateTime.Now.AddHours(1);
             }
+            _nextRetrieval = DetermineNextRetrieval();
+            if (!ModuleShouldStop()) ChangeState(ModuleState.Idle);
+        }
+
+        void UpdateStateAfterNextRetrievalTimestamp()
+        {
+            if (DateTime.Now < (_nextRetrieval ?? DateTime.MinValue)) return;
+            Logger.Info($"Next retrieval window passed ({_nextRetrieval:yyyy-MM-dd HH:mm:ss}), switch state");
+            if (!ModuleShouldStop()) ChangeState(ModuleState.Running);
         }
 
         DateTime DetermineNextRetrieval()

@@ -6,7 +6,6 @@ export class Module {
 }
 
 export class ModuleInfo {
-    Cpu: number;
 }
 
 export class NewcamdInfo extends ModuleInfo {
@@ -42,6 +41,7 @@ export class TvheadendInfo extends ModuleInfo {
 
 export class ChannelListInfo extends ModuleInfo {
     LastRetrieval: Date;
+    State: string;
     Channels: ChannelInfo[];
 }
 

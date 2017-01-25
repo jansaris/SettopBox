@@ -129,6 +129,7 @@
     <Compile Include="api\Models\Module.cs" />
     <Compile Include="api\Models\PerformanceModel.cs" />
     <Compile Include="api\PerformanceMeter.cs" />
+    <Compile Include="DefaultFileRewriterMiddleware.cs" />
     <Compile Include="DependencyConfig.cs" />
     <Compile Include="MonoPatchingDelegatingHandler.cs" />
     <Compile Include="Program.cs" />

@@ -15,6 +15,7 @@ namespace ChannelList
         readonly ChannelList _channelList;
         DateTime? _lastRetrieval;
         List<ChannelInfo> _channels;
+        string _lastRetrievalState;
 
         static void Main()
         {
@@ -38,30 +39,42 @@ namespace ChannelList
         {
             return new ChannelListInfo
             {
-                LastRetrieval = _lastRetrieval
+                LastRetrieval = _lastRetrieval,
+                State = _lastRetrievalState
             };
         }
 
         public override IModuleInfo GetData()
         {
-            return new ChannelListInfo
-            {
-                Channels = _channels,
-                LastRetrieval = _lastRetrieval
-            };
+            var info = (ChannelListInfo)GetModuleInfo();
+            info.Channels = _channels;
+            return info;
         }
 
         protected override void StartModule()
         {
             Logger.Info("Welcome to Keyblock");
+            _lastRetrievalState = string.Empty;
             _settings.Load();
-            _threadHelper.RunSafeInNewThread(LoadChannelList, Logger, ThreadPriority.BelowNormal);
+            _threadHelper.RunSafeInNewThread(LoadChannelListLoop, Logger, ThreadPriority.BelowNormal);
+        }
+
+        private void LoadChannelListLoop()
+        {
+            while (!ModuleShouldStop())
+            {
+                WaitForSpecificState(ModuleState.Running, () => {});
+                LoadChannelList();
+            }
         }
 
         private void LoadChannelList()
         {
             _channels = _channelList.Load();
             _lastRetrieval = DateTime.Now;
+            _lastRetrievalState = _channels == null
+                ? "Something went wrong, look in the log"
+                : $"Downloaded {_channels.Count} channels";
             ChangeState(ModuleState.Idle);
         }
 

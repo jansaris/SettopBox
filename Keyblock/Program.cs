@@ -13,17 +13,15 @@ namespace Keyblock
         readonly IThreadHelper _threadHelper;
         readonly Settings _settings;
         readonly Keyblock _keyblock;
-        readonly Clock _clock;
         Thread _runningKeyblockThread;
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
-        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication, Clock clock) : base(logger, signal, communication)
+        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, Keyblock keyblock, LinuxSignal signal, ModuleCommunication communication) : base(logger, signal, communication)
         {
             _threadHelper = threadHelper;
             _settings = settings;
             _keyblock = keyblock;
-            _clock = clock;
         }
 
         static void Main()
@@ -42,28 +40,37 @@ namespace Keyblock
             _nextRetrieval = _settings.InitialLoadKeyblock ? DateTime.Now : DetermineNextRetrieval();
             while (!ModuleShouldStop())
             {
-                var nextRunAt = _nextRetrieval ?? DateTime.Now;
-                WaitAndRun(nextRunAt);
+                WaitAndRun();
             }
         }
 
-        void WaitAndRun(DateTime executionTime)
+        void WaitAndRun()
         {
-            Logger.Info($"Next keyblock will be fetched at {executionTime:yyyy-MM-dd HH:mm:ss}");
-            _clock.WaitForTimestamp(executionTime, ModuleShouldStop, () => ChangeState(ModuleState.Running),  "Keyblock");
-            WaitForSpecificState(ModuleState.Running);
+            Logger.Info($"Next keyblock will be fetched at {_nextRetrieval:yyyy-MM-dd HH:mm:ss}");
+            WaitForSpecificState(ModuleState.Running, UpdateStateAfterNextRetrievalTimestamp);
             if (ModuleShouldStop()) return;
             try
             {
                 LoadKeyBlock();
-                _nextRetrieval = DetermineNextRetrieval();
-                ChangeState(ModuleState.Idle);
+            }
+            catch (ThreadAbortException)
+            {
+                Logger.Warn("Load keyblock has been aborted");
             }
             catch (Exception ex)
             {
-                Logger.Fatal("An unhandled exception occured", ex);
+                Logger.Fatal($"An unhandled exception occured: {ex.Message}", ex);
                 Error();
             }
+            _nextRetrieval = DetermineNextRetrieval();
+            if (!ModuleShouldStop()) ChangeState(ModuleState.Idle);
+        }
+
+        void UpdateStateAfterNextRetrievalTimestamp()
+        {
+            if (DateTime.Now < (_nextRetrieval ?? DateTime.MinValue)) return;
+            Logger.Info($"Next retrieval window passed ({_nextRetrieval:yyyy-MM-dd HH:mm:ss}), switch state");
+            if (!ModuleShouldStop()) ChangeState(ModuleState.Running);
         }
 
         DateTime DetermineNextRetrieval()
@@ -135,7 +142,6 @@ namespace Keyblock
                 RefreshAfter = _keyblock.BlockRefreshAfter,
                 LastRetrieval = _lastRetrieval,
                 NextRetrieval = _nextRetrieval,
-                Cpu = _threadHelper.GetCpuUsage(_runningKeyblockThread)
             };
         }
     }

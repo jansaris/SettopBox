@@ -39,18 +39,5 @@ namespace SharedComponents.Module
             if (thread.IsAlive) thread.Abort();
             else logger.Info("Thread stopped by itself");
         }
-
-        public double GetCpuUsage(Thread thread)
-        {
-            if (thread == null) return -1;
-            try
-            {
-                return 1;
-            }
-            catch (Exception)
-            {
-                return -2;
-            }
-        }
     }
 }

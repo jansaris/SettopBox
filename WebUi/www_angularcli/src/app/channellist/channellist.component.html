@@ -4,7 +4,7 @@
             <h1>{{module?.Name}}</h1>
         </div>
         <div class="pull-right" style="margin-top: 30px">
-<button class="btn btn-info" (click)="loadInfo()"><span class="glyphicon glyphicon-refresh"></span></button>
+<button class="btn btn-info" (click)="loadData()"><span class="glyphicon glyphicon-refresh"></span></button>
 </div>
 </div>
 </div>
@@ -16,7 +16,7 @@
                     <div style="float: right; margin-top: -5px;">
 <span *ngIf="loading" class="fa fa-spinner fa-spin"></span>
 <div *ngIf="!loading">
-    <button *ngIf="!running" class="btn btn-success" (click)="start()"><span class="glyphicon glyphicon-play"></span></button>
+    <button *ngIf="!running || idle" class="btn btn-success" (click)="start()"><span class="glyphicon glyphicon-play"></span></button>
     <button *ngIf="running" class="btn btn-danger" (click)="stop()"><span class="glyphicon glyphicon-stop"></span></button>
 </div>
 </div>
@@ -28,6 +28,8 @@
         <dd>{{module?.Status}}</dd>
         <dt>Retrieval at:</dt>
         <dd>{{info?.LastRetrieval | date: 'yyyy-MM-dd HH:mm:ss'}}</dd>
+        <dt>Retrieval message:</dt>
+        <dd>{{info?.State}}</dd>
     </dl>
 </div>
 </div>

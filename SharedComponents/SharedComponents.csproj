@@ -59,7 +59,6 @@
     <Compile Include="DependencyInjection\SharedContainer.cs" />
     <Compile Include="DependencyInjection\DependecyContext.cs" />
     <Compile Include="Helpers\LinuxSignal.cs" />
-    <Compile Include="Helpers\Clock.cs" />
     <Compile Include="Keyblock\Block.cs" />
     <Compile Include="Keyblock\Channel.cs" />
     <Compile Include="Module\BaseModule.cs" />

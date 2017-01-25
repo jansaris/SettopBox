@@ -9,6 +9,7 @@ export abstract class ModuleBaseComponent implements OnInit {
     module: Module;
     settings: Setting[];
     running: boolean = false;
+    idle: boolean = false;
     loading: boolean = false;
     abstract apiName: string;
 
@@ -94,6 +95,7 @@ export abstract class ModuleBaseComponent implements OnInit {
 
   updateModule(module: Module){
       this.running = (module.Status == 'Running' || module.Status == 'Idle');
+      this.idle = (module.Status == 'Idle');
       this.module = module;
       this.loading = false;
       this.updateInfo(module);

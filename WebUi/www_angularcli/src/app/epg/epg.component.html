@@ -16,7 +16,7 @@
                     <div style="float: right; margin-top: -5px;">
                         <span *ngIf="loading" class="fa fa-spinner fa-spin"></span>
                         <div *ngIf="!loading">
-                            <button *ngIf="!running" class="btn btn-success" (click)="start()"><span class="glyphicon glyphicon-play"></span></button>
+                            <button *ngIf="!running || idle" class="btn btn-success" (click)="start()"><span class="glyphicon glyphicon-play"></span></button>
                             <button *ngIf="running" class="btn btn-danger" (click)="stop()"><span class="glyphicon glyphicon-stop"></span></button>
                         </div>
                     </div>

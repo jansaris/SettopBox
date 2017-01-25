@@ -64,6 +64,11 @@ namespace SharedComponents.Module
         {
             Directory.SetCurrentDirectory(AssemblyDirectory);
             if (State == ModuleState.Disabled) return;
+            if (State == ModuleState.Idle)
+            {
+                ChangeState(ModuleState.Running);
+                return;
+            }
             ChangeState(ModuleState.Starting);
             StartModule();
             _moduleCommunication.Register(this);
@@ -107,7 +112,7 @@ namespace SharedComponents.Module
             }
         }
 
-        protected void WaitForSpecificState(ModuleState state)
+        protected void WaitForSpecificState(ModuleState state, Action executeOnTick)
         {
             var counter = 0;
             while (State != state && !ModuleShouldStop())
@@ -120,6 +125,7 @@ namespace SharedComponents.Module
                 //Wait for 1 second, and re-evaluate
                 Thread.Sleep(1000);
                 counter++;
+                executeOnTick();
             }
         }
 

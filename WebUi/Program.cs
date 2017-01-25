@@ -62,9 +62,11 @@ namespace WebUi
         
         void StartWeb(IAppBuilder app)
         {
+            var fileServerConfig = GenerateFileServerConfig();
             app.UseOwinContextInjector(_container);
             app.UseWebApi(GenerateHttpConfiguration());
-            app.UseFileServer(GenerateFileServerConfig());
+            app.Use(typeof (DefaultFileRewriterMiddleware), fileServerConfig);
+            app.UseFileServer(fileServerConfig);
         }
 
         FileServerOptions GenerateFileServerConfig()
@@ -84,6 +86,7 @@ namespace WebUi
             {
                 "index.html"
             };
+            
 
             return options;
         }

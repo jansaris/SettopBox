@@ -57,7 +57,6 @@ namespace NewCamd
                 Username = _settings.Username,
                 Password = _settings.Password,
                 ListeningAt = _listeningAdress,
-                Cpu = _threadHelper.GetCpuUsage(_listeningThread)
             };
         }
 
@@ -73,7 +72,7 @@ namespace NewCamd
             }
             catch (Exception ex)
             {
-                Logger.Fatal("An unhandled exception occured", ex);
+                Logger.Fatal($"An unhandled exception occured: {ex.Message}", ex);
                 Error();
             }
         }

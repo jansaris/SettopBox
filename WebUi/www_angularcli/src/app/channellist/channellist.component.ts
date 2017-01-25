@@ -24,6 +24,7 @@ export class ChannellistComponent extends ModuleBaseComponent {
   updateInfo(m: Module): void {
     var typedInfo = m.Info as ChannelListInfo;
     if(typedInfo.LastRetrieval) this.info.LastRetrieval = typedInfo.LastRetrieval;
+    if(typedInfo.State) this.info.State = typedInfo.State;
     if(typedInfo.Channels) this.info.Channels = typedInfo.Channels;
   }
 
