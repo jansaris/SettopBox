@@ -207,13 +207,13 @@ namespace Keyblock
             return true;
         }
 
-        public bool ValidateKeyBlock()
+        public bool ValidateKeyBlock(bool afterDownload = false)
         {
-            IsValid = LoadAndValidate();
+            IsValid = LoadAndValidate(afterDownload);
             return IsValid;
         }
 
-        private bool LoadAndValidate()
+        private bool LoadAndValidate(bool afterDownload)
         {
             _logger.Debug("Start validating the keyblock data");
             if (!File.Exists(KeyblockFile))
@@ -233,7 +233,7 @@ namespace Keyblock
             {
                 var channels = string.Join(";", _block.NeedsRefreshAfterChannelIds);
                 _logger.Error($"The keyblock data is only valid till {_block.NeedsRefreshAfter} for channel(s) {channels}, we expected at least till {expected}");
-                return false;
+                return afterDownload && _settings.KeepBlockIfChannelsAreOutdated;
             }
             _logger.Info($"Keyblock is valid between {_block.ValidFrom:yyyy-MM-dd} and {_block.ValidTo:yyyy-MM-dd} and needs a refresh after {_block.NeedsRefreshAfter:yyyy-MM-dd}");
             return true;
@@ -259,7 +259,7 @@ namespace Keyblock
                 retValue = retValue && SaveEncryptedPassword();
             }
             retValue = retValue && LoadKeyBlock();
-            retValue = retValue && ValidateKeyBlock();
+            retValue = retValue && ValidateKeyBlock(true);
             return retValue;
         }
 
@@ -290,6 +290,13 @@ namespace Keyblock
         static string BytesAsHex(byte[] bytes)
         {
             return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+        }
+
+        public DateTime FirstRefreshDateInFuture()
+        {
+            var nextRetrieval = DateTime.Now.AddHours(_settings.KeyblockValidationInHours);
+            var blockDate = _block.FirstFutureExpirationDate(_settings.GetChannelsToIgnore());
+            return blockDate ?? nextRetrieval;
         }
     }
 }

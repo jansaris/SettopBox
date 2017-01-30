@@ -55,6 +55,7 @@ namespace Keyblock
         public bool ForceInitialKeyblockDownload { get; set; } = false;
         public bool InitialLoadKeyblock { get; set; } = true;
         public string KeyblockChannelsToIgnore { get; set; }
+        public bool KeepBlockIfChannelsAreOutdated { get; set; }
 
         public IList<int> GetChannelsToIgnore()
         {

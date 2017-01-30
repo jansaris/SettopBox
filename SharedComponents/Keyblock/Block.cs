@@ -27,20 +27,12 @@ namespace SharedComponents.Keyblock
                 return;
             }
 
-            if(channelsToIgnore == null) channelsToIgnore = new List<int>();
-
             _logger.Debug("Start splitting keyblocks");
             _blocks = SplitKeyBlock(data);
             _logger.Debug($"Parsed {_blocks.Count} channel blocks");
-
-            _logger.Debug($"Skip {channelsToIgnore.Count} channels from timestamp validation: {string.Join(";",channelsToIgnore)}");
-                //Group all the blocks by ChannelId and
-            var grouped = _blocks.GroupBy(c => c.ChannelId)
-                //Remove old channels which corrupt our data
-                .Where(c => !channelsToIgnore.Contains(c.Key))
-                //And order the blocks within the channel by date
-                .ToDictionary(c => c.Key, c => c.OrderBy(ch => ch.From).ToList());
-            //Then take the minimal last date per block 
+                
+            var grouped = GetChannelDictionary(channelsToIgnore);
+            //Take the minimal last date per block 
             //often we got 2 blocks per channel, 1 block per week
             //So take always the last block as reference point for refresh
             _refreshDate = grouped.Min(g => g.Value.Last().To);
@@ -53,6 +45,18 @@ namespace SharedComponents.Keyblock
             {
                 _logger.Debug($"Channel {keyvalue.Key}: {keyvalue.Value.Count} blocks, valid between: {keyvalue.Value.First().From} - {keyvalue.Value.Last().To}");
             }
+        }
+
+        private Dictionary<int, List<Channel>> GetChannelDictionary(IList<int> channelsToIgnore)
+        {
+            if (channelsToIgnore == null) channelsToIgnore = new List<int>();
+            _logger.Debug($"Skip {channelsToIgnore.Count} channels from timestamp validation: {string.Join(";", channelsToIgnore)}");
+            //Group all the blocks by ChannelId and
+            return _blocks.GroupBy(c => c.ChannelId)
+                //Remove old channels which corrupt our data
+                .Where(c => !channelsToIgnore.Contains(c.Key))
+                //And order the blocks within the channel by date
+                .ToDictionary(c => c.Key, c => c.OrderBy(ch => ch.From).ToList());
         }
 
         public int NrOfChannels => _blocks.Count;
@@ -93,6 +97,26 @@ namespace SharedComponents.Keyblock
             }
             var block = keyblock.Skip(index).Take(Blocksize).ToArray();
             return block;
+        }
+
+        public DateTime? FirstFutureExpirationDate(IList<int> channelsToIgnore)
+        {
+            var grouped = GetChannelDictionary(channelsToIgnore);
+            //Take the minimal last date per block 
+            //often we got 2 blocks per channel, 1 block per week
+            //So take always the last block as reference point for refresh
+            var filteredDates = grouped.Where(g => g.Value.Last().To > DateTime.Now)
+                                       .Select(g => g.Value.Last().To)
+                                       .ToList();
+
+            if (filteredDates.Any())
+            {
+                var date = filteredDates.Min();
+                _logger.Info($"Found first valid block in the future which is valid till {date}");
+                return date;
+            }
+            _logger.Warn("Found NO valid expiration date between in blocks in the future");
+            return null;
         }
     }
 }

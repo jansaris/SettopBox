@@ -87,8 +87,15 @@ namespace Keyblock
                 Logger.Warn("Can't calculate next retrieval because the loaded keyblock has no valid data");
                 return nextRetrieval;
             }
-            Logger.Debug($"Keyblock needs to be valid for at least {_settings.KeyblockValidationInHours} hours");
-            return _keyblock.BlockRefreshAfter.Value.AddHours(-1*_settings.KeyblockValidationInHours);
+            nextRetrieval = _keyblock.BlockRefreshAfter.Value.AddHours(-1*_settings.KeyblockValidationInHours);
+            if (nextRetrieval >= DateTime.Now)
+            {
+                Logger.Debug($"Keyblock is valid for at least {_settings.KeyblockValidationInHours} hours");
+                return nextRetrieval;
+            }
+
+            Logger.Warn("Keyblock contains possible old channels which are not blacklisted. Look at log!");
+            return _keyblock.FirstRefreshDateInFuture();
         }
 
         void LoadKeyBlock()
