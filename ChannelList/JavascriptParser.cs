@@ -107,6 +107,10 @@ namespace ChannelList
 
         private List<ChannelLocation> ExtractLocations(string scriptPart, string key)
         {
+            if (key == "discovery")
+            {
+                
+            }
             var channels = new List<ChannelLocation>();
             var previousUrlIndex = 0;
             var urlIndex = scriptPart.IndexOf(ChannelLocationUrlStart, StringComparison.InvariantCulture);
@@ -126,7 +130,7 @@ namespace ChannelList
 
                 }
                 var nameIndex = scriptPart.IndexOf(ChannelLocationStart, previousUrlIndex, StringComparison.InvariantCulture);
-                if (nameIndex != -1)
+                if (nameIndex != -1 && nameIndex < urlIndex)
                 {
                     nameIndex += ChannelLocationStart.Length;
                     var nameEnd = scriptPart.IndexOf('"', nameIndex);
