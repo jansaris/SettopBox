@@ -35,7 +35,7 @@ namespace ChannelList
                 var uncompressed = _compression.Decompress(compressed);
                 var javascript = System.Text.Encoding.UTF8.GetString(uncompressed);
                 _logger.Info($"Received {javascript.Length} characters of javascript");
-                var channels = _javascriptParser.ParseChannnels(javascript);
+                var channels = _javascriptParser.ParseChannels(javascript);
                 return channels.Where(c => c.Number != -1).OrderBy(c => c.Number).ToList();
             }
             catch (Exception ex)
