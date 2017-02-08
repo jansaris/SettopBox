@@ -28,6 +28,7 @@ namespace ChannelList
 
         public List<ChannelInfo> ParseChannels(string script)
         {
+            script = Clean(script);
             var first = script.IndexOf(ChannelSeparator, StringComparison.InvariantCulture);
             if (first == -1)
             {
@@ -39,6 +40,11 @@ namespace ChannelList
             var channelParts = Regex.Split(script, ChannelSeparatorRegex, RegexOptions.IgnoreCase).ToList();
             channelParts.RemoveAt(0); // first item does not count
             return channelParts.Select(ConvertToChannel).Where(ci => ci != null).ToList();
+        }
+
+        private string Clean(string script)
+        {
+            return script.Replace("\r", "").Replace("\n", "");
         }
 
         private ChannelInfo ConvertToChannel(string scriptPart)

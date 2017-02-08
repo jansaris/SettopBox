@@ -134,6 +134,18 @@ namespace ChannelListTest
             channel.Radio.Should().BeTrue();
         }
 
+        [Test]
+        public void ItShouldTagChannelsAsRadio()
+        {
+            var result = ParseFullScript();
+
+            var leoRadio = result.First(c => c.Name == "LEO FM");
+            leoRadio.Radio.Should().BeTrue();
+
+            var hoornRadio = result.First(c => c.Name == "Radio Hoorn");
+            hoornRadio.Radio.Should().BeTrue();
+        }
+
         private List<ChannelInfo> ParseFullScript()
         {
             return _fullScriptParseResult ?? (_fullScriptParseResult = _module.ParseChannels(_script));
