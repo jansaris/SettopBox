@@ -31,7 +31,7 @@ namespace ChannelListTest
             appender.ActivateOptions();
             hierarchy.Root.AddAppender(appender);
 
-            hierarchy.Root.Level = Level.Debug;
+            hierarchy.Root.Level = Level.Info;
             hierarchy.Configured = true;
         }
     }
