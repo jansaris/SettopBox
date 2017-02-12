@@ -10,7 +10,12 @@ namespace SharedComponents.Module
         {
             var t = new Thread(() => RunSafe(action, logger)) {Priority = priority};
             t.Start();
-            while (!t.IsAlive) { } //Wait for thread to be up and running
+            var count = 0;
+            while (!t.IsAlive && count < 10) //Wait for thread to be up and running for max 10ms
+            {
+                Thread.Sleep(1);
+                count++;
+            } 
             return t;
         }
 
