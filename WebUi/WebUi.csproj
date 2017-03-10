@@ -147,6 +147,8 @@
     <None Include="Settings.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="www_angularcli\src\assets\.gitkeep" />
+    <None Include="www_angularcli\src\tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
@@ -161,6 +163,75 @@
     <Content Include="www\favicon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="www_angularcli\src\app\app.component.css" />
+    <Content Include="www_angularcli\src\app\app.component.html" />
+    <Content Include="www_angularcli\src\app\channellist\channellist.component.css" />
+    <Content Include="www_angularcli\src\app\channellist\channellist.component.html" />
+    <Content Include="www_angularcli\src\app\dashboard\dashboard.component.css" />
+    <Content Include="www_angularcli\src\app\dashboard\dashboard.component.html" />
+    <Content Include="www_angularcli\src\app\epg\epg.component.css" />
+    <Content Include="www_angularcli\src\app\epg\epg.component.html" />
+    <Content Include="www_angularcli\src\app\keyblock\keyblock.component.css" />
+    <Content Include="www_angularcli\src\app\keyblock\keyblock.component.html" />
+    <Content Include="www_angularcli\src\app\log\log.component.css" />
+    <Content Include="www_angularcli\src\app\log\log.component.html" />
+    <Content Include="www_angularcli\src\app\newcamd\newcamd.component.css" />
+    <Content Include="www_angularcli\src\app\newcamd\newcamd.component.html" />
+    <Content Include="www_angularcli\src\app\setting\setting.component.css" />
+    <Content Include="www_angularcli\src\app\setting\setting.component.html" />
+    <Content Include="www_angularcli\src\app\tvheadend\tvheadend.component.css" />
+    <Content Include="www_angularcli\src\app\tvheadend\tvheadend.component.html" />
+    <Content Include="www_angularcli\src\app\webui\webui.component.css" />
+    <Content Include="www_angularcli\src\app\webui\webui.component.html" />
+    <Content Include="www_angularcli\src\favicon.ico" />
+    <Content Include="www_angularcli\src\index.html" />
+    <Content Include="www_angularcli\src\styles.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="www_angularcli\src\app\app-routing.module.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\app.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\app.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\app.module.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\channellist\channellist.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\channellist\channellist.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\dashboard\dashboard.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\dashboard\dashboard.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\epg\epg.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\epg\epg.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\error.service.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\error.service.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\home.service.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\home.service.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\index.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\keyblock\keyblock.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\keyblock\keyblock.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\log.service.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\log.service.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\log\log.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\log\log.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\models.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\module.base.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\module.service.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\module.service.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\newcamd\newcamd.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\newcamd\newcamd.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\performance.service.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\performance.service.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\settings.service.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\settings.service.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\setting\setting.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\setting\setting.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\tvheadend\tvheadend.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\tvheadend\tvheadend.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\urls.service.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\webui\webui.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\webui\webui.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\environments\environment.prod.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\environments\environment.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\main.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\polyfills.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\test.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\typings.d.ts" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
