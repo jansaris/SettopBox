@@ -1,6 +1,6 @@
 import { browser, element, by } from 'protractor';
 
-export class WwwAngularcliPage {
+export class WwwNewPage {
   navigateTo() {
     return browser.get('/');
   }

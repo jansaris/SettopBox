@@ -15,9 +15,12 @@ export class AppComponent {
     loading: boolean = true;
     
     constructor(private errorService : ErrorService) {
-        if(environment.name){
-          this.title = this.title + ' - ' + environment.name;
+        if(environment.production){
+          this.title = this.title + ' - ' + 'Production';
         }
+		else{
+			this.title = this.title + ' - ' + 'Development';
+		}	
     }
     
     ngOnInit(): void {

@@ -1,10 +1,10 @@
-import { WwwAngularcliPage } from './app.po';
+import { WwwNewPage } from './app.po';
 
-describe('www-angularcli App', function() {
-  let page: WwwAngularcliPage;
+describe('www-new App', () => {
+  let page: WwwNewPage;
 
   beforeEach(() => {
-    page = new WwwAngularcliPage();
+    page = new WwwNewPage();
   });
 
   it('should display message saying app works', () => {
