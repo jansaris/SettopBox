@@ -146,7 +146,7 @@ XCOPY "$(SolutionDir)Synology\package.tgz\share\SettopBox\*" "$(SolutionDir)depl
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>rmdir /s /q "$(TargetDir)Logs"
-rmdir /s /q "$(TargetDir)Data"
+REM rmdir /s /q "$(TargetDir)Data"
 rmdir /s /q "$(TargetDir)www"
 mkdir $(TargetDir)www
 copy $(SolutionDir)WebUi\www\* $(TargetDir)www</PreBuildEvent>

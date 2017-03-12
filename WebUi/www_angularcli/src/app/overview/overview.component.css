@@ -1,0 +1,6 @@
+﻿.row:nth-child(even){
+  background-color: #dddddd;
+}
+.row{
+  border-radius: 10px;
+}

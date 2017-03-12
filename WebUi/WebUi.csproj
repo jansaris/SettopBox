@@ -122,9 +122,11 @@
     <Compile Include="api\Controllers\ModuleController.cs" />
     <Compile Include="api\Controllers\PerformanceController.cs" />
     <Compile Include="api\Controllers\SettingsController.cs" />
+    <Compile Include="api\Controllers\SettopBoxController.cs" />
     <Compile Include="api\Extensions.cs" />
     <Compile Include="api\Logging\InMemoryLogger.cs" />
     <Compile Include="api\Logging\LimitedList.cs" />
+    <Compile Include="api\Models\Channel.cs" />
     <Compile Include="api\Models\LogModel.cs" />
     <Compile Include="api\Models\Module.cs" />
     <Compile Include="api\Models\PerformanceModel.cs" />
@@ -167,6 +169,8 @@
     <Content Include="www_angularcli\src\app\app.component.html" />
     <Content Include="www_angularcli\src\app\channellist\channellist.component.css" />
     <Content Include="www_angularcli\src\app\channellist\channellist.component.html" />
+    <Content Include="www_angularcli\src\app\channel\channel.component.css" />
+    <Content Include="www_angularcli\src\app\channel\channel.component.html" />
     <Content Include="www_angularcli\src\app\dashboard\dashboard.component.css" />
     <Content Include="www_angularcli\src\app\dashboard\dashboard.component.html" />
     <Content Include="www_angularcli\src\app\epg\epg.component.css" />
@@ -177,6 +181,8 @@
     <Content Include="www_angularcli\src\app\log\log.component.html" />
     <Content Include="www_angularcli\src\app\newcamd\newcamd.component.css" />
     <Content Include="www_angularcli\src\app\newcamd\newcamd.component.html" />
+    <Content Include="www_angularcli\src\app\overview\overview.component.css" />
+    <Content Include="www_angularcli\src\app\overview\overview.component.html" />
     <Content Include="www_angularcli\src\app\setting\setting.component.css" />
     <Content Include="www_angularcli\src\app\setting\setting.component.html" />
     <Content Include="www_angularcli\src\app\tvheadend\tvheadend.component.css" />
@@ -194,6 +200,8 @@
     <TypeScriptCompile Include="www_angularcli\src\app\app.module.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\channellist\channellist.component.spec.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\channellist\channellist.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\channel\channel.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\channel\channel.component.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\dashboard\dashboard.component.spec.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\dashboard\dashboard.component.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\epg\epg.component.spec.ts" />
@@ -215,12 +223,16 @@
     <TypeScriptCompile Include="www_angularcli\src\app\module.service.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\newcamd\newcamd.component.spec.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\newcamd\newcamd.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\overview\overview.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\overview\overview.component.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\performance.service.spec.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\performance.service.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\settings.service.spec.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\settings.service.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\setting\setting.component.spec.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\setting\setting.component.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\settopbox.service.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\settopbox.service.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\tvheadend\tvheadend.component.spec.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\tvheadend\tvheadend.component.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\urls.service.ts" />

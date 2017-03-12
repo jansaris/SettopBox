@@ -1,0 +1,13 @@
+﻿<div class="col-md-12 channel">
+  <div class="channel-header">
+    <h3 class="left">{{info.Number}}: {{info.Name}}</h3>
+    <div class="right tags">
+      <div class="glyphicon glyphicon-chevron-up right" ></div>
+      <div *ngIf="info.EpgGrabber" class="tag">EPG</div>
+      <div *ngIf="info.Keyblock" class="tag">Keyblock</div>
+      <div *ngIf="info.TvHeadend" class="tag">TvHeadend</div>
+    </div>
+  </div>
+  <div class="channel-details">
+  </div>
+</div>

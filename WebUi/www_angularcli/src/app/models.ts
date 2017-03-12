@@ -1,4 +1,4 @@
-export class Module {
+﻿export class Module {
     Name: string;
     Enabled: boolean;
     Status: string;
@@ -84,4 +84,16 @@ export class ChannelInfo {
 export class ChannelLocations {
     Name: string;
     Url: string;
+}
+
+export class Channel {
+    Number: number;
+    Id: string;
+    Name: string;
+    Channels: ChannelLocations[];
+    TvHeadendChannel: string;
+    KeyblockId: number;
+    Keyblock: boolean;
+    EpgGrabber: boolean;
+    TvHeadend: boolean;
 }

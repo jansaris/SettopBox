@@ -1,0 +1,25 @@
+﻿.channel{
+  padding: 10px;
+}
+.left {
+  float: left;
+}
+.right{
+  float: right;
+}
+.tags{
+  margin: 10px;
+}
+h3{
+  margin: 10px;
+}
+.tag {
+  float: right;
+  border: solid 4px black;
+  border-radius: 10px 10px;
+  background-color: lightgreen;
+  color: #222222;
+  font-weight: bold;
+  margin-right: 10px;
+  padding: 4px;
+}

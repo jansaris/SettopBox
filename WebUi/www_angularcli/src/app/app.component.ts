@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { ErrorService } from './error.service';
 import { Module } from './models';
 import { environment } from '../environments/environment';
@@ -15,12 +15,9 @@ export class AppComponent {
     loading: boolean = true;
     
     constructor(private errorService : ErrorService) {
-        if(environment.production){
-          this.title = this.title + ' - ' + 'Production';
+        if(environment.name){
+            this.title = this.title + ' - ' + environment.name;
         }
-		else{
-			this.title = this.title + ' - ' + 'Development';
-		}	
     }
     
     ngOnInit(): void {

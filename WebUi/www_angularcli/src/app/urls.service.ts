@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { Headers } from '@angular/http'
 import { environment } from '../environments/environment';
 
@@ -10,5 +10,6 @@ export class UrlsService{
     Settings: string = this.base + "settings";
     Module: string = this.base + "module";
     Performance: string = this.base + "performance";
+    SettopBox: string = this.base + "settopbox";
     Headers: Headers = new Headers([ {'Content-Type': 'application/json'}]);
 }
