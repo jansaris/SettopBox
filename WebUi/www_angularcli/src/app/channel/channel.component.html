@@ -1,13 +1,22 @@
 ﻿<div class="col-md-12 channel">
   <div class="channel-header">
     <h3 class="left">{{info.Number}}: {{info.Name}}</h3>
-    <div class="right tags">
-      <div class="glyphicon glyphicon-chevron-up right" ></div>
+    <div class="right tags" data-toggle="collapse">
+      <div class="right">
+        <a class="glyphicon glyphicon-chevron-up"
+           [class.glyphicon-chevron-up]="isCollapsed"
+           [class.glyphicon-chevron-down]="!isCollapsed"
+           data-toggle="collapse" 
+           [attr.data-target]="'#' + info.Number" 
+           aria-expanded="false" (click)="isCollapsed = !isCollapsed">
+        </a>
+      </div>
       <div *ngIf="info.EpgGrabber" class="tag">EPG</div>
       <div *ngIf="info.Keyblock" class="tag">Keyblock</div>
       <div *ngIf="info.TvHeadend" class="tag">TvHeadend</div>
     </div>
   </div>
-  <div class="channel-details">
+  <div class="col-md-12 channel-details collapse" [id]="info.Number">
+    A lot of details
   </div>
 </div>

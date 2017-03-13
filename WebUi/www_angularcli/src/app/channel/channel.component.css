@@ -23,3 +23,13 @@ h3{
   margin-right: 10px;
   padding: 4px;
 }
+.channel-details {
+  border-radius: 10px;
+}
+.channel-details:nth-child(even) {
+  background-color: white;
+}
+
+.channel-details:nth-child(odd) {
+  background-color: #dddddd;
+}
