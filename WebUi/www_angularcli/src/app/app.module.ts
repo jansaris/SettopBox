@@ -26,6 +26,7 @@ import { SettingComponent } from './setting/setting.component';
 import { ChannellistComponent } from './channellist/channellist.component';
 import { ChannelComponent } from './channel/channel.component';
 import { OverviewComponent } from './overview/overview.component';
+import { ToggleButtonComponent } from './toggle-button/toggle-button.component';
 
 @NgModule({
     declarations: [
@@ -40,7 +41,8 @@ import { OverviewComponent } from './overview/overview.component';
         SettingComponent,
         ChannellistComponent,
         ChannelComponent,
-        OverviewComponent
+        OverviewComponent,
+        ToggleButtonComponent
     ],
     imports: [
         BrowserModule,

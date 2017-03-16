@@ -185,6 +185,8 @@
     <Content Include="www_angularcli\src\app\overview\overview.component.html" />
     <Content Include="www_angularcli\src\app\setting\setting.component.css" />
     <Content Include="www_angularcli\src\app\setting\setting.component.html" />
+    <Content Include="www_angularcli\src\app\toggle-button\toggle-button.component.css" />
+    <Content Include="www_angularcli\src\app\toggle-button\toggle-button.component.html" />
     <Content Include="www_angularcli\src\app\tvheadend\tvheadend.component.css" />
     <Content Include="www_angularcli\src\app\tvheadend\tvheadend.component.html" />
     <Content Include="www_angularcli\src\app\webui\webui.component.css" />
@@ -233,6 +235,8 @@
     <TypeScriptCompile Include="www_angularcli\src\app\setting\setting.component.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\settopbox.service.spec.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\settopbox.service.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\toggle-button\toggle-button.component.spec.ts" />
+    <TypeScriptCompile Include="www_angularcli\src\app\toggle-button\toggle-button.component.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\tvheadend\tvheadend.component.spec.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\tvheadend\tvheadend.component.ts" />
     <TypeScriptCompile Include="www_angularcli\src\app\urls.service.ts" />

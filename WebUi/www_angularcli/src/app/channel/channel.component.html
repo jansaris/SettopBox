@@ -1,5 +1,5 @@
-﻿<div class="col-md-12 channel">
-  <div class="channel-header">
+﻿<div class="channel">
+  <div class="row channel-header">
     <h3 class="left">{{info.Number}}: {{info.Name}}</h3>
     <div class="right tags" data-toggle="collapse">
       <div class="right">
@@ -16,7 +16,16 @@
       <div *ngIf="info.TvHeadend" class="tag">TvHeadend</div>
     </div>
   </div>
-  <div class="col-md-12 channel-details collapse" [id]="info.Number">
-    A lot of details
+  <div class="row channel-details collapse" [id]="info.Number">
+    <div class="row">
+      <app-toggle-button class="col-md-2" [text]="'EPG'" [value]="info.EpgGrabber" (onChanged)="onToggleButtonChange('EPG', $event)"></app-toggle-button>
+      <app-toggle-button class="col-md-3" [text]="'Keyblock'" [value]="info.Keyblock" (onChanged)="onToggleButtonChange('Keyblock', $event)"></app-toggle-button>
+      <app-toggle-button class="col-md-3" [text]="'TvHeadend'" [value]="info.TvHeadend" (onChanged)="onToggleButtonChange('TvHeadend', $event)"></app-toggle-button>
+    </div>
+    <div class="row">
+      <button class="btn btn-default" [ngClass]="{'btn-danger': (getNrOfChangedSettings() > 0)}" (click)="resetSettings()"><span class="glyphicon glyphicon-step-backward"></span> Reset</button>
+      <button class="btn btn-default" [ngClass]="{'btn-success': (getNrOfChangedSettings() > 0)}" (click)="saveSettings()"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+      <span> ({{getNrOfChangedSettings()}} changes)</span>
+    </div>
   </div>
 </div>

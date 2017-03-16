@@ -1,18 +1,23 @@
-﻿.channel{
+﻿.channel {
   padding: 10px;
 }
+
 .left {
   float: left;
 }
-.right{
+
+.right {
   float: right;
 }
-.tags{
+
+.tags {
   margin: 10px;
 }
-h3{
+
+h3 {
   margin: 10px;
 }
+
 .tag {
   float: right;
   border: solid 4px black;
@@ -23,13 +28,11 @@ h3{
   margin-right: 10px;
   padding: 4px;
 }
+
 .channel-details {
-  border-radius: 10px;
-}
-.channel-details:nth-child(even) {
-  background-color: white;
+  margin: 10px 20px;
 }
 
-.channel-details:nth-child(odd) {
-  background-color: #dddddd;
+button{
+  margin-bottom: 10px;
 }
