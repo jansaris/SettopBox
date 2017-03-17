@@ -127,6 +127,7 @@
     <Compile Include="api\Logging\InMemoryLogger.cs" />
     <Compile Include="api\Logging\LimitedList.cs" />
     <Compile Include="api\Models\Channel.cs" />
+    <Compile Include="api\Models\ChannelLocation.cs" />
     <Compile Include="api\Models\LogModel.cs" />
     <Compile Include="api\Models\Module.cs" />
     <Compile Include="api\Models\PerformanceModel.cs" />

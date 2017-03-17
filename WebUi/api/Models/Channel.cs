@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace WebUi.api.Models
 {
@@ -10,7 +6,7 @@ namespace WebUi.api.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public List<Tuple<string, string>> AvailableChannels { get; set; }
+        public List<ChannelLocation> AvailableChannels { get; set; }
         public string TvHeadendChannel { get; set; }
         public int KeyblockId { get; set; }
 

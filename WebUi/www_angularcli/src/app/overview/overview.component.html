@@ -1,6 +1,6 @@
 ﻿<div>
-  <div class="right">Refresh</div>
+  <div class="row search"><input [(ngModel)]="search" type="text" placeholder="Filter the channel list" /><button (click)="clear()" class="btn btn-danger">X</button></div>
   <div class="row" *ngFor="let channel of channels">
-    <channel [info]="channel"></channel>
+    <channel [info]="channel" [ngClass]="visible(channel)" ></channel>
   </div>
 </div>

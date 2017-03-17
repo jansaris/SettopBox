@@ -1,9 +1,30 @@
-﻿.row:nth-child(even){
-  background-color: #dddddd;
-}
-.row{
+﻿.row {
   border-radius: 10px;
+  border: solid 1px #dddddd;
+}
+
+.row:nth-child(even){
+  background-color: #dddddd;
+  border-color: white;
 }
 a .glyphicon {
   text-decoration: none;
+}
+.search {
+  padding: 5px;
+}
+.search input {
+  width: calc(100% - 45px);
+  float: left;
+  border-radius: 5px;
+  margin-top: 4px;
+  padding-left: 10px;
+}
+.search input:focus {
+  outline: none;
+}
+
+.search button{
+  float:right;
+  
 }

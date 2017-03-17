@@ -30,11 +30,11 @@ namespace WebUi.api.Controllers
                     Id = "ned1",
                     Number = 1,
                     Name = "NPO 1",
-                   AvailableChannels = new List<Tuple<string,string>>
+                   AvailableChannels = new List<ChannelLocation>
                    {
-                       new Tuple<string,string>("HD+", "igmp://224.124.25.128:8426"),
-                       new Tuple<string,string>("SD","igmp://239.115.38.221:5689"),
-                       new Tuple<string,string>("","igmp://224.24.125.12:3421"),
+                       new ChannelLocation{ Name= "HD+", Url="igmp://224.124.25.128:8426" },
+                       new ChannelLocation{ Name= "SD",Url="igmp://239.115.38.221:5689" },
+                       new ChannelLocation{ Name= "",Url="igmp://224.24.125.12:3421" },
                    },
                    EpgGrabber = true,
                    Keyblock = false,
@@ -48,11 +48,11 @@ namespace WebUi.api.Controllers
                     Id = "ned2",
                     Number = 2,
                     Name = "NPO 2",
-                   AvailableChannels = new List<Tuple<string,string>>
+                   AvailableChannels = new List<ChannelLocation>
                    {
-                       new Tuple<string,string>("HD+","igmp://224.124.25.128:8426"),
-                       new Tuple<string,string>("HD","igmp://239.115.38.221:5689"),
-                       new Tuple<string,string>("SD","igmp://224.24.125.12:3421"),
+                       new ChannelLocation{ Name= "HD+", Url="gmp://224.124.25.128:8426" },
+                       new ChannelLocation{ Name= "HD", Url="gmp://239.115.38.221:5689" },
+                       new ChannelLocation{ Name= "SD", Url="igmp://224.24.125.12:3421" },
                    },
                    EpgGrabber = true,
                    Keyblock = true,
@@ -66,11 +66,11 @@ namespace WebUi.api.Controllers
                     Id = "ned3",
                     Number = 3,
                     Name = "NPO 3",
-                   AvailableChannels = new List<Tuple<string,string>>
+                   AvailableChannels = new List<ChannelLocation>
                    {
-                       new Tuple<string,string>("HD+","igmp://224.124.25.128:8426"),
-                       new Tuple<string,string>("","igmp://239.115.38.221:5689"),
-                       new Tuple<string,string>("","igmp://224.24.125.12:3421"),
+                       new ChannelLocation{ Name= "HD+", Url="igmp://224.124.25.128:8426" },
+                       new ChannelLocation{ Name= "", Url="igmp://239.115.38.221:5689" },
+                       new ChannelLocation{ Name= "", Url="igmp://224.24.125.12:3421" },
                    },
                    EpgGrabber = false,
                    Keyblock = false,
@@ -81,11 +81,13 @@ namespace WebUi.api.Controllers
 
         public IHttpActionResult Get()
         {
+            _logger.Info("get all channels");
             return Ok(_channels);
         }
 
         public IHttpActionResult Get(string id)
         {
+            _logger.Info($"get channel: {id}");
             var index = _channels.FindIndex(c => c.Id == id);
             if (index == -1) return NotFound();
             return Ok(_channels[index]);
@@ -93,6 +95,7 @@ namespace WebUi.api.Controllers
 
         public async Task<IHttpActionResult> Put(Channel channel)
         {
+            _logger.Info($"Update channel: {channel?.Id}");
             var index = _channels.FindIndex(c => c.Id == channel.Id);
             if (index == -1) return NotFound();
             await UpdateChannel(channel, _channels[index]);

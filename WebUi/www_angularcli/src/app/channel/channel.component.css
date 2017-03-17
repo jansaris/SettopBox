@@ -15,7 +15,11 @@
 }
 
 h3 {
-  margin: 10px;
+  margin: 10px 20px;
+}
+
+h3 .fa-spin {
+  margin-left: 20px;
 }
 
 .tag {
@@ -29,10 +33,44 @@ h3 {
   padding: 4px;
 }
 
-.channel-details {
-  margin: 10px 20px;
+.channel-details .row {
+  margin: 0px 20px;
 }
 
 button{
+  margin-bottom: 10px;
+}
+
+/*Select dropdown*/
+select {
+  margin-top: 12px;
+  border: 0;
+  background: transparent;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 2px 10px;
+  width: 378px;
+  *width: 350px;
+  -webkit-appearance: none;
+}
+
+select {
+  overflow: hidden;
+  width: 350px;
+  border-radius: 9px 9px 9px 9px;
+  box-shadow: 1px 1px 11px #330033;
+}
+
+.select-icon{
+  margin-left: -25px;
+}
+
+select:focus {
+  outline: none;
+}
+
+.changes {
+  margin-top: -38px;
+  margin-left: 170px;
   margin-bottom: 10px;
 }

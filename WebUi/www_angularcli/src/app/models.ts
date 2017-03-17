@@ -90,7 +90,7 @@ export class Channel {
     Number: number;
     Id: string;
     Name: string;
-    Channels: ChannelLocations[];
+    AvailableChannels: ChannelLocations[];
     TvHeadendChannel: string;
     KeyblockId: number;
     Keyblock: boolean;

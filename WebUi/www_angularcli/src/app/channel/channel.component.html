@@ -1,14 +1,11 @@
 ﻿<div class="channel">
-  <div class="row channel-header">
-    <h3 class="left">{{info.Number}}: {{info.Name}}</h3>
-    <div class="right tags" data-toggle="collapse">
+  <div class="row channel-header" data-toggle="collapse" [attr.data-target]="'#' + info.Number" aria-expanded="false" (click)="isCollapsed = !isCollapsed">
+    <h3 class="left">{{info.Number}}: {{info.Name}}<span *ngIf="loading" class="fa fa-spinner fa-spin"></span></h3>
+    <div class="right tags">
       <div class="right">
         <a class="glyphicon glyphicon-chevron-up"
            [class.glyphicon-chevron-up]="isCollapsed"
-           [class.glyphicon-chevron-down]="!isCollapsed"
-           data-toggle="collapse" 
-           [attr.data-target]="'#' + info.Number" 
-           aria-expanded="false" (click)="isCollapsed = !isCollapsed">
+           [class.glyphicon-chevron-down]="!isCollapsed">
         </a>
       </div>
       <div *ngIf="info.EpgGrabber" class="tag">EPG</div>
@@ -21,11 +18,19 @@
       <app-toggle-button class="col-md-2" [text]="'EPG'" [value]="info.EpgGrabber" (onChanged)="onToggleButtonChange('EPG', $event)"></app-toggle-button>
       <app-toggle-button class="col-md-3" [text]="'Keyblock'" [value]="info.Keyblock" (onChanged)="onToggleButtonChange('Keyblock', $event)"></app-toggle-button>
       <app-toggle-button class="col-md-3" [text]="'TvHeadend'" [value]="info.TvHeadend" (onChanged)="onToggleButtonChange('TvHeadend', $event)"></app-toggle-button>
+      <div *ngIf="info.TvHeadend">
+        <select [(ngModel)]="info.TvHeadendChannel">
+          <option *ngFor="let ch of info.AvailableChannels" [value]="ch.Url">
+            <span *ngIf="ch.Name">{{ch.Name}}: </span><span>{{ch.Url}}</span>
+          </option>
+        </select>
+        <div class="select-icon glyphicon glyphicon-chevron-down"></div>
+      </div>
     </div>
     <div class="row">
-      <button class="btn btn-default" [ngClass]="{'btn-danger': (getNrOfChangedSettings() > 0)}" (click)="resetSettings()"><span class="glyphicon glyphicon-step-backward"></span> Reset</button>
-      <button class="btn btn-default" [ngClass]="{'btn-success': (getNrOfChangedSettings() > 0)}" (click)="saveSettings()"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
-      <span> ({{getNrOfChangedSettings()}} changes)</span>
+      <button class="btn btn-default" [ngClass]="{'btn-danger': (getNrOfChangedSettings() > 0)}" (click)="resetSettings()" [disabled]="loading"><span class="glyphicon glyphicon-step-backward"></span> Reset</button>
+      <button class="btn btn-default" [ngClass]="{'btn-success': (getNrOfChangedSettings() > 0)}" (click)="saveSettings()" [disabled]="loading"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+      <div class="changes"><span>({{getNrOfChangedSettings()}} changes)</span></div>
     </div>
   </div>
 </div>

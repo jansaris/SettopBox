@@ -11,6 +11,7 @@ import { Channel, ChannelLocations } from '../models';
 export class OverviewComponent implements OnInit {
 
     channels: Channel[];
+    search: string;
 
     constructor(private settopboxService: SettopboxService) { }
 
@@ -18,5 +19,15 @@ export class OverviewComponent implements OnInit {
         this.settopboxService.get().then(response => {
             this.channels = response;
         });
+    }
+
+    visible(channel: Channel) {
+        if (!this.search) return '';
+        if (channel.Name.indexOf(this.search) == -1) return 'hide';
+        return '';
+    }
+
+    clear() {
+        this.search = '';
     }
 }

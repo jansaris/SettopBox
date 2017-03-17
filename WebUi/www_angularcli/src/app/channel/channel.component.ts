@@ -1,5 +1,6 @@
 ﻿import { Component, OnInit, Input  } from '@angular/core';
 import { Channel, ChannelLocations } from '../models';
+import { SettopboxService } from '../settopbox.service';
 
 @Component({
     selector: 'channel',
@@ -11,21 +12,24 @@ export class ChannelComponent implements OnInit {
     info: Channel;
     orgEpg: boolean;
     orgTvh: boolean;
+    orgChannel: string;
     orgKeyblock: boolean;
     changes: number;
+    loading: boolean;
 
-    constructor() {
+    constructor(private settopboxService: SettopboxService) {
         
     }
 
     ngOnInit() {
-        this.orgEpg = this.info.EpgGrabber;
-        this.orgTvh = this.info.TvHeadend;
-        this.orgKeyblock = this.info.Keyblock;
+        this.updateOriginals(this.info);
     }
 
-    calculate() {
-      
+    updateOriginals(channel: Channel) {
+        this.orgEpg = channel.EpgGrabber;
+        this.orgTvh = channel.TvHeadend;
+        this.orgKeyblock = channel.Keyblock;
+        this.orgChannel = channel.TvHeadendChannel;
     }
 
     getNrOfChangedSettings(): number {
@@ -33,6 +37,7 @@ export class ChannelComponent implements OnInit {
         if (this.orgEpg != this.info.EpgGrabber) count = count + 1;
         if (this.orgTvh != this.info.TvHeadend) count = count + 1;
         if (this.orgKeyblock != this.info.Keyblock) count = count + 1;
+        if (this.orgChannel != this.info.TvHeadendChannel) count = count + 1;
         return count;
     }
 
@@ -45,12 +50,21 @@ export class ChannelComponent implements OnInit {
     }
 
     saveSettings() {
-
+        this.loading = true;
+        this.settopboxService
+            .set(this.info)
+            .then(r => {
+                this.updateOriginals(this.info);
+                this.loading = false;
+            }).catch(r => {
+                this.loading = false;
+            });
     }
 
     resetSettings() {
         this.info.EpgGrabber = this.orgEpg;
         this.info.TvHeadend = this.orgTvh;
         this.info.Keyblock = this.orgKeyblock;
+        this.info.TvHeadendChannel = this.orgChannel;
     }
 }
