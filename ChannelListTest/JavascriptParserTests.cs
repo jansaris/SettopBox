@@ -4,7 +4,7 @@ using System.Linq;
 using ChannelList;
 using FluentAssertions;
 using NUnit.Framework;
-using SharedComponents.Module;
+using SharedComponents.Models;
 
 namespace ChannelListTest
 {

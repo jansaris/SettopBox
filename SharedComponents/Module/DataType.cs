@@ -3,6 +3,7 @@
     public enum DataType
     {
         KeyBlock,
-        Epg
+        Epg,
+        EpgChannelUpdate
     }
 }

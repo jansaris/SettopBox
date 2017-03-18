@@ -41,6 +41,7 @@ namespace EpgGrabber
             _stop = stopProcessing;
             var date = DateTime.Today;
             var epg = new List<Channel>();
+            _channelList.LoadChannelsFromDisk();
 
             //Download EPG for a couple of days
             for (var dayNr = 0; dayNr < _settings.NumberOfEpgDays; dayNr++)
@@ -68,7 +69,7 @@ namespace EpgGrabber
             var epgData = new List<Channel>();
             try
             {
-                _logger.Info($"Download EPG data for day {dayNr} part {dayPart}");
+                _logger.Debug($"Download EPG data for day {dayNr+1} part {dayPart+1}");
                 var zip = DownloadEpgfile(now, dayNr, dayPart);
                 if (_stop()) return null;
                 var file = _compression.Decompress(zip);
@@ -76,7 +77,7 @@ namespace EpgGrabber
                 var data = ParseEpgData(epgString);
                 epgData = _channelList.FilterOnSelectedChannels(data);
                 DownloadDetails(epgData);
-                _logger.Info($"Downloaded EPG data for {epgData.SelectMany(channel => channel.Programs).Count()} programs");
+                _logger.Info($"Downloaded EPG data for {epgData.SelectMany(channel => channel.Programs).Count()} programs for day {dayNr+1} (part {dayPart+1})");
             }
             catch (Exception ex)
             {

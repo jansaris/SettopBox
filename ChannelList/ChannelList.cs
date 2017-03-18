@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using log4net;
-using log4net.Layout;
-using SharedComponents.Module;
 using WebHelper;
+using SharedComponents.Models;
 
 namespace ChannelList
 {

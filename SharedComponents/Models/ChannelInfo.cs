@@ -2,15 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SharedComponents.Module
+namespace SharedComponents.Models
 {
-    public class ChannelListInfo : ModuleInfo
-    {
-        public List<ChannelInfo> Channels { get; set; }
-        public DateTime? LastRetrieval { get; set; }
-        public string State { get; set; }
-    }
-
     public class ChannelInfo
     {
         public ChannelInfo()
@@ -64,15 +57,5 @@ namespace SharedComponents.Module
             return $"{Name} ({Key}). {Locations?.Count ?? 0} locations";
         }
     }
-    public class ChannelLocation
-    {
-        public string Name { get; set; }
-        public string Url { get; set; }
-        public bool RtpSkip { get; set; }
 
-        public override string ToString()
-        {
-            return $"{Name}:{Url}";
-        }
-    }
 }

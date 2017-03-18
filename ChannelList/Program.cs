@@ -5,6 +5,7 @@ using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
+using SharedComponents.Models;
 
 namespace ChannelList
 {

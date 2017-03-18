@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using log4net;
+using System.Threading;
 
 namespace SharedComponents.Module
 {
@@ -59,6 +60,21 @@ namespace SharedComponents.Module
         public void UnRegister(IModule module)
         {
             _modules.Remove(module);
+        }
+
+        public Thread SendData(string sender, string module, CommunicationData data)
+        {
+            var mod = Get(module);
+            if (mod == null)
+            {
+                _logger.Warn($"Failed to send data to {module} because the module isn't loaded");
+                return null;
+            }
+            _logger.Info($"Send {data.Type} from {sender} to {module}");
+            return _threadHelper.RunSafeInNewThread(() =>
+            {
+                mod.ProcessDataFromOtherModule(sender, data);
+            }, _logger);
         }
 
         public bool Enabled(string name)

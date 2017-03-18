@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { Http, URLSearchParams } from '@angular/http'
 import { ErrorService } from './error.service';
 import { UrlsService } from './urls.service';
@@ -31,7 +31,7 @@ export class LogService {
     return this.http.get(this.urls.Log, {search: params})
                 .toPromise()
                 .then(response => {
-                    return response.json() as string[];
+                    return response.json() as Log[];
                 })
                 .catch(this.error.handleError);
   }

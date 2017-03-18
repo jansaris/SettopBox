@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SharedComponents.Models;
+using System.Collections.Generic;
 
 namespace WebUi.api.Models
 {

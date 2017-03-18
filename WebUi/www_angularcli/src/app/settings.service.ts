@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { Headers, Http, URLSearchParams } from '@angular/http'
 import { ErrorService } from './error.service';
 import { UrlsService } from './urls.service';
@@ -28,8 +28,8 @@ export class SettingsService {
 
   put(name: string, settings: Setting[]): Promise<number> {
       return this.http.put(this.urls.Settings + '/' + name, settings)
-        .toPromise()
-        .then(resp => resp)
+          .toPromise()
+          .then(resp => Number(resp.text))
         .catch(this.error.handleError);
   }
 

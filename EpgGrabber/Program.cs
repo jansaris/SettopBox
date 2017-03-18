@@ -7,6 +7,7 @@ using SharedComponents.DependencyInjection;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
 using WebHelper;
+using SharedComponents.Models;
 
 namespace EpgGrabber
 {
@@ -125,6 +126,20 @@ namespace EpgGrabber
             nextRun = new DateTime(tomorrow.Year, tomorrow.Month, tomorrow.Day, _settings.Hour, _settings.Minute, 0);
             Logger.Debug($"Next retrival calculated tomorrow at {nextRun:HH:mm:ss}");
             return nextRun;
+        }
+
+        public override void ProcessDataFromOtherModule(string moduleName, CommunicationData data)
+        {
+            base.ProcessDataFromOtherModule(moduleName, data);
+            switch (data.Type)
+            {
+                case DataType.EpgChannelUpdate:
+                    Logger.Info($"Received EpgChannelUpdate from {moduleName}");
+                    _channelList.ToggleChannel(data.Data as EpgChannelUpdate);
+                    _nextRetrieval = DateTime.Now;
+                    break;
+            }
+
         }
 
         protected override void StopModule()

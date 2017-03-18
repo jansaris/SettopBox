@@ -127,7 +127,6 @@
     <Compile Include="api\Logging\InMemoryLogger.cs" />
     <Compile Include="api\Logging\LimitedList.cs" />
     <Compile Include="api\Models\Channel.cs" />
-    <Compile Include="api\Models\ChannelLocation.cs" />
     <Compile Include="api\Models\LogModel.cs" />
     <Compile Include="api\Models\Module.cs" />
     <Compile Include="api\Models\PerformanceModel.cs" />
@@ -154,9 +153,25 @@
     <None Include="www_angularcli\src\tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ChannelList\ChannelList.csproj">
+      <Project>{7B44A2BE-7885-43A8-B34D-C8397BA9588D}</Project>
+      <Name>ChannelList</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EpgGrabber\EpgGrabber.csproj">
+      <Project>{22e85e47-b5f5-46db-85c5-1d24d69a330d}</Project>
+      <Name>EpgGrabber</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Keyblock\Keyblock.csproj">
+      <Project>{e62c2573-7885-4eb6-92c1-a708e7736f34}</Project>
+      <Name>Keyblock</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
       <Project>{17e72fdd-c439-4955-8fa6-125f08702a79}</Project>
       <Name>SharedComponents</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TvHeadendIntegration\TvHeadendIntegration.csproj">
+      <Project>{7f602308-99f7-4516-934d-3dcc28dc6782}</Project>
+      <Name>TvHeadendIntegration</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

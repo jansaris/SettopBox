@@ -1,5 +1,6 @@
 ﻿using System.Runtime.Serialization;
 using SharedComponents.Module;
+using SharedComponents.Models;
 
 namespace WebUi.api.Models
 {

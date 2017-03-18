@@ -61,8 +61,11 @@
     <Compile Include="Helpers\LinuxSignal.cs" />
     <Compile Include="Keyblock\Block.cs" />
     <Compile Include="Keyblock\Channel.cs" />
+    <Compile Include="Models\ChannelInfo.cs" />
+    <Compile Include="Models\ChannelListInfo.cs" />
+    <Compile Include="Models\ChannelLocation.cs" />
+    <Compile Include="Models\EpgChannelUpdate.cs" />
     <Compile Include="Module\BaseModule.cs" />
-    <Compile Include="Module\ChannelListInfo.cs" />
     <Compile Include="Module\CommunicationData.cs" />
     <Compile Include="Module\DataType.cs" />
     <Compile Include="Module\IModule.cs" />
