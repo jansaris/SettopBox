@@ -8,6 +8,7 @@ using SharedComponents.Module;
 using System.Linq;
 using SharedComponents.Models;
 using System;
+using WebUi.api.Rtp;
 
 namespace WebUi.api.Controllers
 {
@@ -17,12 +18,14 @@ namespace WebUi.api.Controllers
     {
         readonly ILog _logger;
         readonly ModuleCommunication _info;
+        readonly ChannelTester _channelTester;
         static List<Channel> _channels;
 
-        public SettopBoxController(ILog logger, ModuleCommunication info)
+        public SettopBoxController(ILog logger, ModuleCommunication info, ChannelTester channelTester)
         {
             _logger = logger;
             _info = info;
+            _channelTester = channelTester;
         }
 
         public IHttpActionResult Get()
@@ -95,6 +98,10 @@ namespace WebUi.api.Controllers
 
         private async Task UpdateTvHeadend(Channel newChannel, Channel oldChannel)
         {
+            if (newChannel.TvHeadend)
+            {
+                _channelTester.ReadInfo(newChannel.TvHeadendChannel);
+            }
             if(newChannel.TvHeadend != oldChannel.TvHeadend)
             {
                 await Task.Delay(1000);

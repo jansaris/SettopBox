@@ -3,4 +3,5 @@
   <div class="row" *ngFor="let channel of channels">
     <channel [info]="channel" [ngClass]="visible(channel)" ></channel>
   </div>
+  <span *ngIf="loading" class="fa fa-spinner fa-spin"></span>
 </div>

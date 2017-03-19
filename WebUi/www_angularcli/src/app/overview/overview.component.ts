@@ -12,12 +12,17 @@ export class OverviewComponent implements OnInit {
 
     channels: Channel[];
     search: string;
+    loading: boolean;
 
     constructor(private settopboxService: SettopboxService) { }
 
     ngOnInit() {
+        this.loading = true;
         this.settopboxService.get().then(response => {
             this.channels = response;
+            this.loading = false;
+        }).catch(r => {
+            this.loading = false;
         });
     }
 
