@@ -1,6 +1,5 @@
 ﻿using log4net;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -9,51 +8,40 @@ using WebUi.api.Models;
 
 namespace WebUi.api.Rtp
 {
-    public class ChannelTester
+    public class IptvChannel
     {
         ILog _log;
         const int MaxCycles = 2048;
 
-        public ChannelTester(ILog logger)
+        public IptvChannel(ILog logger)
         {
             _log = logger;
         }
 
-        public RtpInfo ReadInfo(string url)
+        public IptvInfo ReadInfo(string url)
         {
             if (string.IsNullOrWhiteSpace(url)) return null;
             var data = ReadData(url);
             return data;
         }
 
-        public RtpInfo ReadData(string url)
+        IptvInfo ReadData(string url)
         {
+            var buffer = new byte[2048];
             var previous = new byte[0];
             var current = new byte[0];
-            var info = new RtpInfo();
+            var info = new IptvInfo();
 
             try
             {
                 _log.Info($"Try to read data from {url}");
-                using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+                using (var s = OpenIptvStream(url))
                 {
-                    s.ReceiveTimeout = 100;
-
-                    var port = ExtractPort(url);
-                    var strippedUrl = StripUrl(url);
-
-                    var ipep = new IPEndPoint(IPAddress.Any, port);
-                    var ip = IPAddress.Parse(strippedUrl);
-
-                    s.Bind(ipep);
-                    s.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(ip, IPAddress.Any));
-
-                    for(var count = 0; count < MaxCycles; count++)
+                    for (var count = 0; count < MaxCycles; count++)
                     {
-                        var buffer = new byte[2048];
                         var length = s.Receive(buffer);
                         current = buffer.Take(length).ToArray();
-                        UpdateRtpInfo(info, previous, current);
+                        UpdateInfo(info, previous, current);
                         if (info.Complete())
                         {
                             _log.Debug($"Found IPTV Info after {count} blocks");
@@ -71,7 +59,24 @@ namespace WebUi.api.Rtp
             return info;
         }
 
-        private void UpdateRtpInfo(RtpInfo info, byte[] previous, byte[] current)
+        Socket OpenIptvStream(string url)
+        {
+            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
+            {
+                ReceiveTimeout = 100
+            };
+            var port = ExtractPort(url);
+            var strippedUrl = StripUrl(url);
+
+            var ipep = new IPEndPoint(IPAddress.Any, port);
+            var ip = IPAddress.Parse(strippedUrl);
+
+            socket.Bind(ipep);
+            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(ip, IPAddress.Any));
+            return socket;
+        }
+
+        private void UpdateInfo(IptvInfo info, byte[] previous, byte[] current)
         {
             var data = new byte[previous.Length + current.Length];
             previous.CopyTo(data, 0);
@@ -83,13 +88,13 @@ namespace WebUi.api.Rtp
                 info.Name = name;
             }
 
-            if(FindChannelNumber(data, out int channel))
+            if(!info.Number.HasValue && FindChannelNumber(data, out int channel))
             {
                 info.Number = channel;
             }
         }
 
-        private bool FindChannelNumber(byte[] data, out int channel)
+        bool FindChannelNumber(byte[] data, out int channel)
         {
             channel = -1;
             //Find VMECM
@@ -111,7 +116,7 @@ namespace WebUi.api.Rtp
             return true;
         }
 
-        private bool FindChannelInfo(byte[] data, out string provider, out string name)
+        bool FindChannelInfo(byte[] data, out string provider, out string name)
         {
             name = null;
             provider = null;
@@ -138,7 +143,7 @@ namespace WebUi.api.Rtp
             return true;
         }
 
-        public int SearchBytes(byte[] haystack, byte[] needle, int start_index)
+        int SearchBytes(byte[] haystack, byte[] needle, int start_index)
         {
             int len = needle.Length;
             int limit = haystack.Length - len;
@@ -162,7 +167,7 @@ namespace WebUi.api.Rtp
         /// <param name="index">starting index of the message</param>
         /// <param name="message">The message if reading is successfull</param>
         /// <returns>The new index, or -1 if failed</returns>
-        private int ReadStringFromData(byte[] data, int index, out string message)
+        int ReadStringFromData(byte[] data, int index, out string message)
         {
             message = null;
             if (data.Length <= index)
@@ -185,7 +190,7 @@ namespace WebUi.api.Rtp
             return index + length;
         }
 
-        private int ExtractPort(string url)
+        int ExtractPort(string url)
         {
             var index = url.LastIndexOf(":");
             if (index > 0)
@@ -197,17 +202,17 @@ namespace WebUi.api.Rtp
             return 0;
         }
 
-        private void ParseData(byte[] b, int length)
+        void ParseData(byte[] b, int length)
         {
             _log.Info($"Start reading {length} bytes of data");
         }
 
-        private string StripUrl(string url)
+        string StripUrl(string url)
         {
             return StripPort(StripProtocol(url));
         }
 
-        private string StripPort(string url)
+        string StripPort(string url)
         {
             var index = url.IndexOf(":");
             if (index > 0)
@@ -218,7 +223,7 @@ namespace WebUi.api.Rtp
             return url;
         }
 
-        private string StripProtocol(string url)
+        string StripProtocol(string url)
         {
             var index = url.IndexOf("://");
             if(index > 0)

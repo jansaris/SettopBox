@@ -56,7 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseTestWithLogging.cs" />
-    <Compile Include="FindChannelNumberTest.cs" />
+    <Compile Include="IptvChannelTester.cs" />
     <Compile Include="JavascriptParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

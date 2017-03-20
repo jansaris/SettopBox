@@ -116,37 +116,24 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>deltree $(SolutionDir)Synology\package.tgz\share\SettopBox /y
-mkdir $(SolutionDir)Synology\package.tgz\share\SettopBox
-XCOPY $(TargetDir)*.exe $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
-XCOPY $(TargetDir)*.dll $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
-XCOPY $(TargetDir)*.config $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
-COPY $(SolutionDir)Synology\package.tgz\share\SettopBox\SettopBox.exe.config $(SolutionDir)Synology\package.tgz\share\SettopBox\WebUi.exe.config /y
-XCOPY $(TargetDir)*.ini $(SolutionDir)Synology\package.tgz\share\SettopBox\ /y
-mkdir $(SolutionDir)Synology\package.tgz\share\SettopBox\Data
-mkdir $(SolutionDir)Synology\package.tgz\share\SettopBox\www
-XCOPY $(TargetDir)Data $(SolutionDir)Synology\package.tgz\share\SettopBox\Data /sy
-XCOPY $(TargetDir)www $(SolutionDir)Synology\package.tgz\share\SettopBox\www /sy
-del $(SolutionDir)Synology\package.tgz\share\SettopBox\*vshost*
-del $(SolutionDir)Synology\package.tgz\share\SettopBox\packages.config
-IF EXIST $(SolutionDir)Synology\package.tgz\package.tar del $(SolutionDir)Synology\package.tgz\package.tar
-IF EXIST $(SolutionDir)Synology\package.tgz\package.tgz del $(SolutionDir)Synology\package.tgz\package.tgz
-$(SolutionDir)Synology\7za\7za.exe a -ttar $(SolutionDir)Synology\package.tgz\package.tar $(SolutionDir)Synology\package.tgz\*
-$(SolutionDir)Synology\7za\7za.exe a -tgzip $(SolutionDir)Synology\package.tgz\package.tgz $(SolutionDir)Synology\package.tgz\package.tar
-XCOPY $(SolutionDir)Synology\package.tgz\package.tgz  $(SolutionDir)Synology\spk\package.tgz /y
-IF EXIST $(SolutionDir)Synology\spk\SettopBox.tar del $(SolutionDir)Synology\spk\SettopBox.tar
-IF EXIST $(SolutionDir)Synology\spk\SettopBox.spk del $(SolutionDir)Synology\spk\SettopBox.spk
-$(SolutionDir)Synology\7za\7za.exe a -ttar $(SolutionDir)Synology\spk\SettopBox.tar $(SolutionDir)Synology\spk\*
-$(SolutionDir)Synology\7za\7za.exe a -tgzip $(SolutionDir)Synology\spk\SettopBox.spk $(SolutionDir)Synology\spk\SettopBox.tar
-
-rmdir /s /q "$(SolutionDir)deploy"
+    <PostBuildEvent>rmdir /s /q "$(SolutionDir)deploy"
 mkdir "$(SolutionDir)deploy"
-XCOPY "$(SolutionDir)Synology\package.tgz\share\SettopBox\*" "$(SolutionDir)deploy" /EY</PostBuildEvent>
+mkdir $(SolutionDir)deploy\Data
+mkdir $(SolutionDir)deploy\www
+
+XCOPY $(TargetDir)*.exe $(SolutionDir)deploy /y
+XCOPY $(TargetDir)*.dll $(SolutionDir)deploy /y
+XCOPY $(TargetDir)*.config $(SolutionDir)deploy /y
+XCOPY $(TargetDir)*.ini $(SolutionDir)deploy /y
+
+COPY $(TargetDir)Data\Channels.txt $(SolutionDir)deploy\Data\Channels.txt
+COPY $(TargetDir)Data\TvhEpgGenres.txt $(SolutionDir)deploy\Data\TvhEpgGenres.txt
+XCOPY $(TargetDir)www $(SolutionDir)deploy\www /sy
+del $(SolutionDir)deploy\*vshost*
+del $(SolutionDir)deploy\packages.config</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>rmdir /s /q "$(TargetDir)Logs"
-REM rmdir /s /q "$(TargetDir)Data"
-rmdir /s /q "$(TargetDir)www"
+    <PreBuildEvent>rmdir /s /q "$(TargetDir)www"
 mkdir $(TargetDir)www
 copy $(SolutionDir)WebUi\www\* $(TargetDir)www</PreBuildEvent>
   </PropertyGroup>

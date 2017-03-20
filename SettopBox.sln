@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Keyblock", "Keyblock\Keyblock.csproj", "{E62C2573-7885-4EB6-92C1-A708E7736F34}"
 EndProject
@@ -75,6 +75,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHelper", "WebHelper\WebHelper.csproj", "{3486F8AF-E532-4D50-B6DF-FC172B310450}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChannelListTest", "ChannelListTest\ChannelListTest.csproj", "{8A34F8EC-EDE0-4B48-B708-12E1DE89B425}"
+	ProjectSection(ProjectDependencies) = postProject
+		{61ACA837-0874-4BCC-8815-B3E64207480D} = {61ACA837-0874-4BCC-8815-B3E64207480D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

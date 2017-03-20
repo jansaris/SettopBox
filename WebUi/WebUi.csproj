@@ -116,8 +116,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="api\Models\RtpInfoModel.cs" />
-    <Compile Include="api\Rtp\ChannelTester.cs" />
     <Compile Include="api\Controllers\HomeController.cs" />
     <Compile Include="api\Controllers\LoggingController.cs" />
     <Compile Include="api\Controllers\ModuleController.cs" />
@@ -128,10 +126,12 @@
     <Compile Include="api\Logging\InMemoryLogger.cs" />
     <Compile Include="api\Logging\LimitedList.cs" />
     <Compile Include="api\Models\Channel.cs" />
+    <Compile Include="api\Models\IptvInfo.cs" />
     <Compile Include="api\Models\LogModel.cs" />
     <Compile Include="api\Models\Module.cs" />
     <Compile Include="api\Models\PerformanceModel.cs" />
     <Compile Include="api\PerformanceMeter.cs" />
+    <Compile Include="api\Rtp\IptvChannel.cs" />
     <Compile Include="DefaultFileRewriterMiddleware.cs" />
     <Compile Include="DependencyConfig.cs" />
     <Compile Include="MonoPatchingDelegatingHandler.cs" />

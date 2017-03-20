@@ -2,9 +2,9 @@
 
 namespace WebUi.api.Models
 {
-    public class RtpInfo
+    public class IptvInfo
     {
-        public int Number { get; set; }
+        public int? Number { get; set; }
         public string Provider { get; set; }
         public string Name { get; set; }
 

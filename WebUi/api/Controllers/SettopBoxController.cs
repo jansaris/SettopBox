@@ -18,10 +18,10 @@ namespace WebUi.api.Controllers
     {
         readonly ILog _logger;
         readonly ModuleCommunication _info;
-        readonly ChannelTester _channelTester;
+        readonly IptvChannel _channelTester;
         static List<Channel> _channels;
 
-        public SettopBoxController(ILog logger, ModuleCommunication info, ChannelTester channelTester)
+        public SettopBoxController(ILog logger, ModuleCommunication info, IptvChannel channelTester)
         {
             _logger = logger;
             _info = info;
