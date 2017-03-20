@@ -5,6 +5,7 @@ using ChannelList;
 using FluentAssertions;
 using NUnit.Framework;
 using SharedComponents.Models;
+using System.Reflection;
 
 namespace ChannelListTest
 {
@@ -21,8 +22,9 @@ namespace ChannelListTest
         public void SetUp()
         { 
             _module = new JavascriptParser(Logger);
-            _script = File.ReadAllText("code.js.txt");
-            _scriptNed1 = File.ReadAllText("code.js_ned1_part.txt");
+            var assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            _script = File.ReadAllText(Path.Combine(assemblyFolder,"code.js.txt"));
+            _scriptNed1 = File.ReadAllText(Path.Combine(assemblyFolder,"code.js_ned1_part.txt"));
         }
 
         [Test]
