@@ -8,7 +8,7 @@ using SharedComponents.Module;
 using System.Linq;
 using SharedComponents.Models;
 using System;
-using WebUi.api.Rtp;
+using WebUi.api.Iptv;
 
 namespace WebUi.api.Controllers
 {

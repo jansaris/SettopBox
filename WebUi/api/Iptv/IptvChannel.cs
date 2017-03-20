@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using WebUi.api.Models;
 
-namespace WebUi.api.Rtp
+namespace WebUi.api.Iptv
 {
     public class IptvChannel
     {
