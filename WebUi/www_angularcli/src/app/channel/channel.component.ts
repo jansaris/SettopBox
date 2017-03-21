@@ -16,6 +16,7 @@ export class ChannelComponent implements OnInit {
     orgKeyblock: boolean;
     changes: number;
     loading: boolean;
+    TvHeadendLoading: boolean;
 
     constructor(private settopboxService: SettopboxService) {
         
@@ -45,8 +46,22 @@ export class ChannelComponent implements OnInit {
         switch (name) {
             case 'EPG': this.info.EpgGrabber = enabled; break;
             case 'Keyblock': this.info.Keyblock = enabled; break;
-            case 'TvHeadend': this.info.TvHeadend = enabled; break;
+            case 'TvHeadend': this.toggleTvHeadend(enabled); break;
         }
+    }
+
+    toggleTvHeadend(enabled) {
+        this.info.TvHeadend = enabled;
+        if (!enabled) return;
+        this.TvHeadendLoading = true;
+        this.settopboxService
+            .iptvInfo(this.info.Id)
+            .then(r => {
+                this.TvHeadendLoading = false;
+            }).catch(r => {
+                this.TvHeadendLoading = false;
+            });
+
     }
 
     saveSettings() {

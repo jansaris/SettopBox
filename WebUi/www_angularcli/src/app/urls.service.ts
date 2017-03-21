@@ -11,5 +11,6 @@ export class UrlsService{
     Module: string = this.base + "module";
     Performance: string = this.base + "performance";
     SettopBox: string = this.base + "settopbox";
+    IptvInfo: string = this.SettopBox + "\\iptvInfo\\";
     Headers: Headers = new Headers([ {'Content-Type': 'application/json'}]);
 }

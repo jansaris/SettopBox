@@ -18,13 +18,16 @@
       <app-toggle-button class="col-md-2" [text]="'EPG'" [value]="info.EpgGrabber" (onChanged)="onToggleButtonChange('EPG', $event)"></app-toggle-button>
       <app-toggle-button class="col-md-3" [text]="'Keyblock'" [value]="info.Keyblock" (onChanged)="onToggleButtonChange('Keyblock', $event)"></app-toggle-button>
       <app-toggle-button class="col-md-3" [text]="'TvHeadend'" [value]="info.TvHeadend" (onChanged)="onToggleButtonChange('TvHeadend', $event)"></app-toggle-button>
-      <div *ngIf="info.TvHeadend">
+      <div *ngIf="info.TvHeadend && !TvHeadendLoading">
         <select [(ngModel)]="info.TvHeadendChannel">
           <option *ngFor="let ch of info.AvailableChannels" [value]="ch.Url">
             <span *ngIf="ch.Name">{{ch.Name}}: </span><span>{{ch.Url}}</span>
           </option>
         </select>
         <div class="select-icon glyphicon glyphicon-chevron-down"></div>
+      </div>
+      <div *ngIf="info.TvHeadend && TvHeadendLoading">
+        <span class="fa fa-spinner fa-spin fa-2x"></span>
       </div>
     </div>
     <div class="row">

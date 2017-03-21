@@ -27,4 +27,14 @@ export class SettopboxService {
             .catch(this.error.handleError);
     }
 
+    iptvInfo(id: string): Promise<Response> {
+        return this.http
+            .get(this.urls.IptvInfo + id)
+            .toPromise()
+            .then(response => {
+                return response.json();
+            })
+            .catch(this.error.handleError);
+    }
+
 }

@@ -18,14 +18,14 @@ namespace WebUi.api.Controllers
     {
         readonly ILog _logger;
         readonly ModuleCommunication _info;
-        readonly IptvChannel _channelTester;
+        readonly IptvChannel _iptvChannel;
         static List<Channel> _channels;
 
-        public SettopBoxController(ILog logger, ModuleCommunication info, IptvChannel channelTester)
+        public SettopBoxController(ILog logger, ModuleCommunication info, IptvChannel iptvChannel)
         {
             _logger = logger;
             _info = info;
-            _channelTester = channelTester;
+            _iptvChannel = iptvChannel;
         }
 
         public IHttpActionResult Get()
@@ -37,9 +37,15 @@ namespace WebUi.api.Controllers
 
         private void LoadChannels(bool force)
         {
+            //if(force) LoadDummyData(); return;
+            
             if (_channels != null && !force) return;
             var channels = _info.Data(nameof(ChannelList)) as ChannelListInfo;
-            if (channels == null) return;
+            if (channels == null)
+            {
+                _channels = new List<Channel>();
+                return;
+            }
             _channels = channels.Channels.Select(Convert).ToList();
 
             if (_info.Data(nameof(EpgGrabber)) is EpgGrabberInfo epg)
@@ -65,9 +71,25 @@ namespace WebUi.api.Controllers
         public IHttpActionResult Get(string id)
         {
             _logger.Info($"get channel: {id}");
-            var index = _channels.FindIndex(c => c.Id == id);
-            if (index == -1) return NotFound();
-            return Ok(_channels[index]);
+            var channel = _channels.FirstOrDefault(c => c.Id == id);
+            if (channel == null) return NotFound();
+            return Ok(channel);
+        }
+
+        [Route("iptvInfo/{id}")]
+        [HttpGet]
+        public IHttpActionResult IptvInfo(string id)
+        {
+            _logger.Info($"get channels Iptv info: {id}");
+            LoadChannels(false);
+            var channel = _channels.FirstOrDefault(c => c.Id == id);
+            if (channel == null) return NotFound();
+            var data = channel.AvailableChannels
+                .AsParallel()
+                .Select(c => _iptvChannel.ReadInfo(c.Url))
+                .Where(inf => inf != null)
+                .ToList();
+            return Ok(data);
         }
 
         public async Task<IHttpActionResult> Put(Channel channel)
@@ -100,7 +122,7 @@ namespace WebUi.api.Controllers
         {
             if (newChannel.TvHeadend)
             {
-                _channelTester.ReadInfo(newChannel.TvHeadendChannel);
+                _iptvChannel.ReadInfo(newChannel.TvHeadendChannel);
             }
             if(newChannel.TvHeadend != oldChannel.TvHeadend)
             {
@@ -126,6 +148,64 @@ namespace WebUi.api.Controllers
         {
             if (newChannel.Keyblock == oldChannel.Keyblock) return;
             await Task.Delay(1000);
+        }
+
+        private void LoadDummyData()
+        {
+            _channels = new List<Channel>
+            {
+                new Channel
+                {
+                    Id = "ned1",
+                    Number = 1,
+                    Name = "NPO 1",
+                   AvailableChannels = new List<ChannelLocation>
+                   {
+                       new ChannelLocation{ Name= "HD+", Url="igmp://224.124.25.128:8426" },
+                       new ChannelLocation{ Name= "SD",Url="igmp://239.115.38.221:5689" },
+                       new ChannelLocation{ Name= "",Url="igmp://224.24.125.12:3421" },
+                   },
+                   EpgGrabber = true,
+                   Keyblock = false,
+                   KeyblockId = 661,
+                   TvHeadend = true,
+                   TvHeadendChannel = "igmp://224.124.25.128:8426"
+
+                },
+                new Channel
+                {
+                    Id = "ned2",
+                    Number = 2,
+                    Name = "NPO 2",
+                   AvailableChannels = new List<ChannelLocation>
+                   {
+                       new ChannelLocation{ Name= "HD+", Url="gmp://224.124.25.128:8426" },
+                       new ChannelLocation{ Name= "HD", Url="gmp://239.115.38.221:5689" },
+                       new ChannelLocation{ Name= "SD", Url="igmp://224.24.125.12:3421" },
+                   },
+                   EpgGrabber = true,
+                   Keyblock = true,
+                   KeyblockId = 662,
+                   TvHeadend = true,
+                   TvHeadendChannel = "igmp://224.124.25.128:8426"
+
+                },
+                new Channel
+                {
+                    Id = "ned3",
+                    Number = 3,
+                    Name = "NPO 3",
+                   AvailableChannels = new List<ChannelLocation>
+                   {
+                       new ChannelLocation{ Name= "HD+", Url="igmp://224.124.25.128:8426" },
+                       new ChannelLocation{ Name= "", Url="igmp://239.115.38.221:5689" },
+                       new ChannelLocation{ Name= "", Url="igmp://224.24.125.12:3421" },
+                   },
+                   EpgGrabber = false,
+                   Keyblock = false,
+                   TvHeadend = false
+                }
+            };
         }
     }
 }

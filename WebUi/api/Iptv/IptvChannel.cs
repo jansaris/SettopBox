@@ -30,7 +30,7 @@ namespace WebUi.api.Iptv
             var buffer = new byte[2048];
             var previous = new byte[0];
             var current = new byte[0];
-            var info = new IptvInfo();
+            var info = new IptvInfo { Url = url };
 
             try
             {
@@ -50,13 +50,13 @@ namespace WebUi.api.Iptv
                         previous = current;
                     }
                 }
+                return info;
             }
             catch(Exception ex)
             {
                 _log.Error($"Failed to read data from {url}: {ex.Message}");
+                return null;
             }
-
-            return info;
         }
 
         Socket OpenIptvStream(string url)
