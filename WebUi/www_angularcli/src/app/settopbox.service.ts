@@ -3,7 +3,7 @@ import { Http, Response } from '@angular/http'
 import { ErrorService } from './error.service';
 import { UrlsService } from './urls.service';
 
-import { Channel } from './models'
+import { Channel, IptvInfo } from './models'
 
 @Injectable()
 export class SettopboxService {
@@ -27,12 +27,12 @@ export class SettopboxService {
             .catch(this.error.handleError);
     }
 
-    iptvInfo(id: string): Promise<Response> {
+    iptvInfo(id: string): Promise<IptvInfo[]> {
         return this.http
             .get(this.urls.IptvInfo + id)
             .toPromise()
             .then(response => {
-                return response.json();
+                return response.json() as IptvInfo[];
             })
             .catch(this.error.handleError);
     }

@@ -97,3 +97,11 @@ export class Channel {
     EpgGrabber: boolean;
     TvHeadend: boolean;
 }
+
+export class IptvInfo {
+    Url: string;
+    Name: string;
+    Provider: string;
+    Number: number;
+    Kbs: number;
+}

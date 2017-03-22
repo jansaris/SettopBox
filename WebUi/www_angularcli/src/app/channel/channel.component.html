@@ -1,5 +1,5 @@
 ﻿<div class="channel">
-  <div class="row channel-header" data-toggle="collapse" [attr.data-target]="'#' + info.Number" aria-expanded="false" (click)="isCollapsed = !isCollapsed">
+  <div class="row channel-header" data-toggle="collapse" [attr.data-target]="'#' + info.Number" aria-expanded="false" (click)="toggleCollapsed()">
     <h3 class="left">{{info.Number}}: {{info.Name}}<span *ngIf="loading" class="fa fa-spinner fa-spin"></span></h3>
     <div class="right tags">
       <div class="right">
@@ -16,18 +16,18 @@
   <div class="row channel-details collapse" [id]="info.Number">
     <div class="row">
       <app-toggle-button class="col-md-2" [text]="'EPG'" [value]="info.EpgGrabber" (onChanged)="onToggleButtonChange('EPG', $event)"></app-toggle-button>
-      <app-toggle-button class="col-md-3" [text]="'Keyblock'" [value]="info.Keyblock" (onChanged)="onToggleButtonChange('Keyblock', $event)"></app-toggle-button>
-      <app-toggle-button class="col-md-3" [text]="'TvHeadend'" [value]="info.TvHeadend" (onChanged)="onToggleButtonChange('TvHeadend', $event)"></app-toggle-button>
-      <div *ngIf="info.TvHeadend && !TvHeadendLoading">
-        <select [(ngModel)]="info.TvHeadendChannel">
-          <option *ngFor="let ch of info.AvailableChannels" [value]="ch.Url">
-            <span *ngIf="ch.Name">{{ch.Name}}: </span><span>{{ch.Url}}</span>
+      <div *ngIf="TvHeadendLoading">
+        <span class="fa fa-spinner fa-spin fa-2x"></span>
+      </div>
+      <div *ngIf="!TvHeadendLoading">
+        <div class="channel-title">Channel: </div>
+        <select [(ngModel)]="info.TvHeadendChannel" (change)="channelSelected()">
+          <option [value]="noChannel">No channel</option>
+          <option *ngFor="let ch of channels" [value]="ch.Url">
+            {{ch.Provider}}: {{ch.Name}} ({{ch.Kbs}} Kbs, Key {{ch.Number}})
           </option>
         </select>
         <div class="select-icon glyphicon glyphicon-chevron-down"></div>
-      </div>
-      <div *ngIf="info.TvHeadend && TvHeadendLoading">
-        <span class="fa fa-spinner fa-spin fa-2x"></span>
       </div>
     </div>
     <div class="row">

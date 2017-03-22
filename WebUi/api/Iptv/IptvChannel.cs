@@ -1,5 +1,6 @@
 ﻿using log4net;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -18,14 +19,14 @@ namespace WebUi.api.Iptv
             _log = logger;
         }
 
-        public IptvInfo ReadInfo(string url)
+        public IptvInfo ReadInfo(string url, string channel)
         {
             if (string.IsNullOrWhiteSpace(url)) return null;
-            var data = ReadData(url);
+            var data = ReadData(url, channel);
             return data;
         }
 
-        IptvInfo ReadData(string url)
+        IptvInfo ReadData(string url, string channel)
         {
             var buffer = new byte[2048];
             var previous = new byte[0];
@@ -34,7 +35,7 @@ namespace WebUi.api.Iptv
 
             try
             {
-                _log.Info($"Try to read data from {url}");
+                _log.Debug($"Try to read data from {url} for {channel}");
                 using (var s = OpenIptvStream(url))
                 {
                     for (var count = 0; count < MaxCycles; count++)
@@ -45,18 +46,45 @@ namespace WebUi.api.Iptv
                         if (info.Complete())
                         {
                             _log.Debug($"Found IPTV Info after {count} blocks");
+                            _log.Info($"Found IPTV Info for {channel} at {url}: {info.Provider} - {info.Name} - {info.Kbs} Kbs (key: {info.Number})");
                             break;
                         }
                         previous = current;
                     }
+
+                    info.Kbs = MeasureBandwith(s, info.Name);
                 }
                 return info;
             }
             catch(Exception ex)
             {
-                _log.Error($"Failed to read data from {url}: {ex.Message}");
+                _log.Info($"Failed to read data from {url} for {channel}");
+                _log.Debug($"Failed to read data from {url}: {ex.Message}");
                 return null;
             }
+        }
+
+        private int MeasureBandwith(Socket s, string name)
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var bytes = 0;
+            var buffer = new byte[2048];
+            while (stopwatch.ElapsedMilliseconds < 500)
+            {
+                bytes += s.Receive(buffer);
+            }
+            stopwatch.Stop();
+            return CalculateBandwith(bytes, stopwatch.ElapsedMilliseconds, name);
+        }
+
+        private int CalculateBandwith(long totalBytes, long elapsedMilliseconds, string name)
+        {
+            double factor = ((double)1000) / elapsedMilliseconds;
+            var aSecondBytes = totalBytes * factor;
+            var kbs = aSecondBytes / 1024;
+            _log.Debug($"Calculated mbs for '{name}': {kbs:0.####}");
+            return (int)kbs;
         }
 
         Socket OpenIptvStream(string url)
@@ -108,11 +136,11 @@ namespace WebUi.api.Iptv
             index += vmecmbytes.Length + 6;
             if (data.Length <= index)
             {
-                _log.Info("Found VMECM but the message was truncated");
+                _log.Debug("Found VMECM but the message was truncated");
                 return false;
             }
             channel = (data[index - 1] << 8) + data[index];
-            _log.Info($"Found channel {channel} in the bytes");
+            _log.Debug($"Found channel {channel} in the bytes");
             return true;
         }
 
@@ -200,11 +228,6 @@ namespace WebUi.api.Iptv
             }
             _log.Warn($"Failed to extract port from {url}");
             return 0;
-        }
-
-        void ParseData(byte[] b, int length)
-        {
-            _log.Info($"Start reading {length} bytes of data");
         }
 
         string StripUrl(string url)

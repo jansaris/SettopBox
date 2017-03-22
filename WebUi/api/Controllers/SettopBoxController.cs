@@ -86,7 +86,7 @@ namespace WebUi.api.Controllers
             if (channel == null) return NotFound();
             var data = channel.AvailableChannels
                 .AsParallel()
-                .Select(c => _iptvChannel.ReadInfo(c.Url))
+                .Select(c => _iptvChannel.ReadInfo(c.Url, c.Name))
                 .Where(inf => inf != null)
                 .ToList();
             return Ok(data);
@@ -122,7 +122,7 @@ namespace WebUi.api.Controllers
         {
             if (newChannel.TvHeadend)
             {
-                _iptvChannel.ReadInfo(newChannel.TvHeadendChannel);
+                //_iptvChannel.ReadInfo(newChannel.TvHeadendChannel);
             }
             if(newChannel.TvHeadend != oldChannel.TvHeadend)
             {
