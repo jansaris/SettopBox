@@ -106,8 +106,14 @@ But it's not the desired solution, because it changes the setting for the whole 
 
                 https://msdn.microsoft.com/fr-fr/library/cc783349(v=ws.10).aspx
                  */
+                /*
+                   Latest version of Mono is also giving problems
+                   https://bugzilla.xamarin.com/show_bug.cgi?id=44963
+                   Add command: export MONO_TLS_PROVIDER="legacy"
+                   Before starting the application on linux. This will allow mono to generate TLS SSL stream
+                */
                 var sslStream = new SslStream(client.GetStream(), true, ValidateServerCertificate, null);
-                sslStream.AuthenticateAsClient(server, null, SslProtocols.Tls, false);
+                sslStream.AuthenticateAsClient(server, null, SslProtocols.Default, false);
                 stream = sslStream;
             }
             else
