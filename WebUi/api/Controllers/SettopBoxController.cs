@@ -85,7 +85,7 @@ namespace WebUi.api.Controllers
             var channel = _channels.FirstOrDefault(c => c.Id == id);
             if (channel == null) return NotFound();
             var data = channel.AvailableChannels
-                .AsParallel()
+                //.AsParallel()
                 .Select(c => _iptvChannel.ReadInfo(c.Url, c.Name))
                 .Where(inf => inf != null)
                 .ToList();

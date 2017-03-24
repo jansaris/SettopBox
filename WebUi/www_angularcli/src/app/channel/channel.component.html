@@ -24,10 +24,11 @@
         <select [(ngModel)]="info.TvHeadendChannel" (change)="channelSelected()">
           <option [value]="noChannel">No channel</option>
           <option *ngFor="let ch of channels" [value]="ch.Url">
-            {{ch.Provider}}: {{ch.Name}} ({{ch.Kbs}} Kbs, Key {{ch.Number}})
+            {{ch.Provider}}: {{ch.Name}} ({{ch.MBps}} MB/s, Key {{ch.Number}})
           </option>
         </select>
         <div class="select-icon glyphicon glyphicon-chevron-down"></div>
+        <button id="refresh" class="btn btn-info" (click)="refreshChannels()"><span class="glyphicon glyphicon-refresh"></span></button>
       </div>
     </div>
     <div class="row">

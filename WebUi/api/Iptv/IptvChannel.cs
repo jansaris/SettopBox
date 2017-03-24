@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using WebUi.api.Models;
@@ -12,11 +11,13 @@ namespace WebUi.api.Iptv
     public class IptvChannel
     {
         ILog _log;
+        Func<IptvSocket> _socketFactory;
         const int MaxCycles = 2048;
 
-        public IptvChannel(ILog logger)
+        public IptvChannel(ILog logger, Func<IptvSocket> socketFactory)
         {
             _log = logger;
+            _socketFactory = socketFactory;
         }
 
         public IptvInfo ReadInfo(string url, string channel)
@@ -36,8 +37,9 @@ namespace WebUi.api.Iptv
             try
             {
                 _log.Debug($"Try to read data from {url} for {channel}");
-                using (var s = OpenIptvStream(url))
+                using (var s = _socketFactory())
                 {
+                    s.Open(url);
                     for (var count = 0; count < MaxCycles; count++)
                     {
                         var length = s.Receive(buffer);
@@ -45,14 +47,14 @@ namespace WebUi.api.Iptv
                         UpdateInfo(info, previous, current);
                         if (info.Complete())
                         {
+                            info.KBps = s.KBps;
+                            info.MBps = s.MBps;
                             _log.Debug($"Found IPTV Info after {count} blocks");
-                            _log.Info($"Found IPTV Info for {channel} at {url}: {info.Provider} - {info.Name} - {info.Kbs} Kbs (key: {info.Number})");
+                            _log.Info($"Found IPTV Info for {channel} at {url}: {info.Provider} - {info.Name} - {info.KBps} KB/s (key: {info.Number})");
                             break;
                         }
                         previous = current;
                     }
-
-                    info.Kbs = MeasureBandwith(s, info.Name);
                 }
                 return info;
             }
@@ -62,46 +64,6 @@ namespace WebUi.api.Iptv
                 _log.Debug($"Failed to read data from {url}: {ex.Message}");
                 return null;
             }
-        }
-
-        private int MeasureBandwith(Socket s, string name)
-        {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            var bytes = 0;
-            var buffer = new byte[2048];
-            while (stopwatch.ElapsedMilliseconds < 500)
-            {
-                bytes += s.Receive(buffer);
-            }
-            stopwatch.Stop();
-            return CalculateBandwith(bytes, stopwatch.ElapsedMilliseconds, name);
-        }
-
-        private int CalculateBandwith(long totalBytes, long elapsedMilliseconds, string name)
-        {
-            double factor = ((double)1000) / elapsedMilliseconds;
-            var aSecondBytes = totalBytes * factor;
-            var kbs = aSecondBytes / 1024;
-            _log.Debug($"Calculated mbs for '{name}': {kbs:0.####}");
-            return (int)kbs;
-        }
-
-        Socket OpenIptvStream(string url)
-        {
-            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
-            {
-                ReceiveTimeout = 100
-            };
-            var port = ExtractPort(url);
-            var strippedUrl = StripUrl(url);
-
-            var ipep = new IPEndPoint(IPAddress.Any, port);
-            var ip = IPAddress.Parse(strippedUrl);
-
-            socket.Bind(ipep);
-            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(ip, IPAddress.Any));
-            return socket;
         }
 
         private void UpdateInfo(IptvInfo info, byte[] previous, byte[] current)
@@ -216,46 +178,6 @@ namespace WebUi.api.Iptv
             if (message.EndsWith("\0")) message = message.Substring(0, message.Length - 1);
             _log.Debug($"Read string '{message}' from the data");
             return index + length;
-        }
-
-        int ExtractPort(string url)
-        {
-            var index = url.LastIndexOf(":");
-            if (index > 0)
-            {
-                index++;
-                return int.Parse(url.Substring(index, url.Length - index));
-            }
-            _log.Warn($"Failed to extract port from {url}");
-            return 0;
-        }
-
-        string StripUrl(string url)
-        {
-            return StripPort(StripProtocol(url));
-        }
-
-        string StripPort(string url)
-        {
-            var index = url.IndexOf(":");
-            if (index > 0)
-            {
-                return url.Substring(0, index);
-            }
-            _log.Warn($"Failed to strip port from {url}");
-            return url;
-        }
-
-        string StripProtocol(string url)
-        {
-            var index = url.IndexOf("://");
-            if(index > 0)
-            {
-                index += 3;
-                return url.Substring(index, url.Length - index);
-            }
-            _log.Warn($"Failed to strip protocol from {url}");
-            return url;
         }
     }
 }

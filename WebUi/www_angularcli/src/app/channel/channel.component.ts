@@ -54,16 +54,20 @@ export class ChannelComponent implements OnInit {
     }
 
     loadChannels() {
-        if (this.channels.length > 0) return;
+        if (this.channels.length > 0 || this.TvHeadendLoading) return;
+        this.refreshChannels();
+    }
+
+    refreshChannels() {
         this.TvHeadendLoading = true;
         this.settopboxService
-          .iptvInfo(this.info.Id)
-          .then(r => {
-              this.channels = r;
-              this.TvHeadendLoading = false;
-          }).catch(r => {
-              this.TvHeadendLoading = false;
-          });
+            .iptvInfo(this.info.Id)
+            .then(r => {
+                this.channels = r;
+                this.TvHeadendLoading = false;
+            }).catch(r => {
+                this.TvHeadendLoading = false;
+            });
     }
 
     saveSettings() {

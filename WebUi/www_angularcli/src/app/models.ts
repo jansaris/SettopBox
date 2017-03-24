@@ -103,5 +103,6 @@ export class IptvInfo {
     Name: string;
     Provider: string;
     Number: number;
-    Kbs: number;
+    KBps: number;
+    MBps: number;
 }

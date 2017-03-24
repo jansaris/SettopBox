@@ -123,6 +123,7 @@
     <Compile Include="api\Controllers\SettingsController.cs" />
     <Compile Include="api\Controllers\SettopBoxController.cs" />
     <Compile Include="api\Extensions.cs" />
+    <Compile Include="api\Iptv\IptvSocket.cs" />
     <Compile Include="api\Logging\InMemoryLogger.cs" />
     <Compile Include="api\Logging\LimitedList.cs" />
     <Compile Include="api\Models\Channel.cs" />

@@ -6,6 +6,7 @@ using SimpleInjector;
 using SimpleInjector.Extensions.ExecutionContextScoping;
 using WebUi.api;
 using WebUi.api.Logging;
+using WebUi.api.Iptv;
 
 namespace WebUi
 {
@@ -19,6 +20,7 @@ namespace WebUi
         {
             container.Register<InMemoryLogger>(Lifestyle.Singleton);
             container.Register<PerformanceMeter>(Lifestyle.Singleton);
+            container.Register<Func<IptvSocket>>(() => () => container.GetInstance<IptvSocket>());
         }
 
         public override Type Module => typeof(Program);
