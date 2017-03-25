@@ -64,6 +64,8 @@
     <Compile Include="Models\ChannelListInfo.cs" />
     <Compile Include="Models\ChannelLocation.cs" />
     <Compile Include="Models\EpgChannelUpdate.cs" />
+    <Compile Include="Models\KeyblockChannelUpdate.cs" />
+    <Compile Include="Models\TvHeadendChannelUpdate.cs" />
     <Compile Include="Module\BaseModule.cs" />
     <Compile Include="Module\CommunicationData.cs" />
     <Compile Include="Module\DataType.cs" />

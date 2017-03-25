@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using WebUi.api.Models;
-using System.Threading.Tasks;
 using SharedComponents.Module;
 using System.Linq;
 using SharedComponents.Models;
@@ -55,6 +54,17 @@ namespace WebUi.api.Controllers
                     if (epg.Channels.Contains(c.Name)) c.EpgGrabber = true;
                 });
             }
+            if (_info.Data(nameof(Keyblock)) is KeyblockInfo keyblock)
+            {
+                _channels.ForEach(c =>
+                {
+                    if (keyblock.ChannelsToMonitor.ContainsKey(c.Id))
+                    {
+                        c.Keyblock = true;
+                        c.KeyblockId = keyblock.ChannelsToMonitor[c.Id];
+                    }
+                });
+            }
         }
 
         private Channel Convert(ChannelInfo info)
@@ -92,7 +102,7 @@ namespace WebUi.api.Controllers
             return Ok(data);
         }
 
-        public async Task<IHttpActionResult> Put(Channel channel)
+        public IHttpActionResult Put(Channel channel)
         {
             try
             {
@@ -100,7 +110,7 @@ namespace WebUi.api.Controllers
                 LoadChannels(false);
                 var index = _channels.FindIndex(c => c.Id == channel.Id);
                 if (index == -1) return NotFound();
-                await UpdateChannel(channel, _channels[index]);
+                UpdateChannel(channel, _channels[index]);
                 _channels[index] = channel;
                 return Ok();
             }
@@ -111,27 +121,26 @@ namespace WebUi.api.Controllers
             }
         }
 
-        private async Task UpdateChannel(Channel newChannel, Channel oldChannel)
+        private void UpdateChannel(Channel newChannel, Channel oldChannel)
         {
-            await UpdateKeyblock(newChannel, oldChannel);
+            UpdateKeyblock(newChannel, oldChannel);
             UpdateEpg(newChannel, oldChannel);
-            await UpdateTvHeadend(newChannel, oldChannel);
+            UpdateTvHeadend(newChannel, oldChannel);
         }
 
-        private async Task UpdateTvHeadend(Channel newChannel, Channel oldChannel)
+        private void UpdateTvHeadend(Channel newChannel, Channel oldChannel)
         {
-            if (newChannel.TvHeadend)
-            {
-                //_iptvChannel.ReadInfo(newChannel.TvHeadendChannel);
-            }
-            if(newChannel.TvHeadend != oldChannel.TvHeadend)
-            {
-                await Task.Delay(1000);
-            }
-            else if(newChannel.TvHeadendChannel != oldChannel.TvHeadendChannel)
-            {
-                await Task.Delay(500);
-            }
+            if (newChannel.TvHeadend == oldChannel.TvHeadend &&
+                newChannel.TvHeadendChannel == oldChannel.TvHeadendChannel &&
+                newChannel.EpgGrabber == oldChannel.EpgGrabber) return;
+            if (newChannel.TvHeadend && !oldChannel.TvHeadend) _logger.Info($"Add to TvHeadend: {newChannel.Id} - {newChannel.Name}");
+            else if (newChannel.TvHeadend == oldChannel.TvHeadend) _logger.Info($"Update TvHeadend: {newChannel.Id} to {newChannel.Name}");
+            else if (!newChannel.TvHeadend && oldChannel.TvHeadend) _logger.Info($"Remove from TvHeadend: {oldChannel.Id}");
+
+            var tcu = new TvHeadendChannelUpdate { Id = newChannel.Id, OldUrl = oldChannel.TvHeadendChannel, NewUrl = newChannel.TvHeadendChannel, Epg = newChannel.EpgGrabber };
+            var data = new CommunicationData(DataType.TvHeadendChannelUpdate, tcu);
+            var thread = _info.SendData(nameof(WebUi), nameof(TvHeadendIntegration), data);
+            thread?.Join();
         }
 
         private void UpdateEpg(Channel newChannel, Channel oldChannel)
@@ -144,10 +153,14 @@ namespace WebUi.api.Controllers
             thread?.Join();
         }
 
-        private async Task UpdateKeyblock(Channel newChannel, Channel oldChannel)
+        private void UpdateKeyblock(Channel newChannel, Channel oldChannel)
         {
-            if (newChannel.Keyblock == oldChannel.Keyblock) return;
-            await Task.Delay(1000);
+            if (newChannel.Keyblock == oldChannel.Keyblock && newChannel.KeyblockId == oldChannel.KeyblockId) return;
+            _logger.Info($"{(newChannel.Keyblock ? "Add to" : "Remove from")} Keyblock - {newChannel.Name}: {newChannel.KeyblockId}");
+            var kcu = new KeyblockChannelUpdate { Id = newChannel.Id, Name = newChannel.Name, Enabled = newChannel.Keyblock, OldKey = oldChannel.KeyblockId, NewKey = newChannel.KeyblockId };
+            var data = new CommunicationData(DataType.KeyblockChannelUpdate, kcu);
+            var thread = _info.SendData(nameof(WebUi), nameof(Keyblock), data);
+            thread?.Join();
         }
 
         private void LoadDummyData()

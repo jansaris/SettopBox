@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using log4net;
 using SharedComponents.Settings;
 
@@ -33,23 +32,5 @@ namespace NewCamd
         } 
 
         public int MaxWaitTimeInMs { get; private set; } = 60000;
-        public string KeyblockChannelsToIgnore { get; set; }
-        public IList<int> GetChannelsToIgnore()
-        {
-            var retValue = new List<int>();
-            if (string.IsNullOrWhiteSpace(KeyblockChannelsToIgnore)) return retValue;
-            try
-            {
-                return KeyblockChannelsToIgnore
-                    .Split(';')
-                    .Select(v => Convert.ToInt32(v))
-                    .ToList();
-            }
-            catch
-            {
-                Logger.Error($"Failed to parse KeyblockChannelsToIgnore: {KeyblockChannelsToIgnore}");
-            }
-            return retValue;
-        } 
     }
 }

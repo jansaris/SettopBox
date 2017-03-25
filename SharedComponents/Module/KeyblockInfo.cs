@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SharedComponents.Module
 {
@@ -10,5 +11,6 @@ namespace SharedComponents.Module
         public DateTime? ValidFrom { get; set; }
         public DateTime? ValidTo { get; set; }
         public DateTime? RefreshAfter { get; set; }
+        public IDictionary<string, int> ChannelsToMonitor { get; set; }
     }
 }

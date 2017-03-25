@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using log4net;
+using SharedComponents.Models;
 using SharedComponents.Settings;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -55,6 +56,7 @@ namespace Keyblock
         public bool ForceInitialKeyblockDownload { get; set; } = false;
         public bool InitialLoadKeyblock { get; set; } = true;
         public string KeyblockChannelsToIgnore { get; set; }
+        public string KeyblockChannelsToMonitor { get; set; }
         public bool KeepBlockIfChannelsAreOutdated { get; set; }
 
         public IList<int> GetChannelsToIgnore()
@@ -71,6 +73,24 @@ namespace Keyblock
             catch
             {
                 Logger.Error($"Failed to parse KeyblockChannelsToIgnore: {KeyblockChannelsToIgnore}");
+            }
+            return retValue;
+        }
+
+        public IDictionary<string, int> GetChannelsToMonitor()
+        {
+            var retValue = new Dictionary<string, int>();
+            if (string.IsNullOrWhiteSpace(KeyblockChannelsToMonitor)) return retValue;
+            try
+            {
+                retValue = KeyblockChannelsToMonitor
+                    .Split(';') //Split on ; --> ned1:601;ned2:602
+                    .Select(s => s.Split(':')) //Split on : --> ned1:601
+                    .ToDictionary(key => key[0], value => int.Parse(value[1])); //And convert to dictionary
+            }
+            catch
+            {
+                Logger.Error($"Failed to parse KeyblockChannelsToMonitor: {KeyblockChannelsToMonitor}");
             }
             return retValue;
         }
@@ -132,6 +152,38 @@ namespace Keyblock
                 directory.Create();
                 Logger.Info($"Created data folder '{directory.FullName}'");
             }
+        }
+
+        internal void ToggleChannel(KeyblockChannelUpdate update)
+        {
+            if (update == null) return;
+            Logger.Debug("Update channel list to monitor");
+            var list = GetChannelsToMonitor();
+            if (update.Enabled)
+            {
+                if (list.ContainsKey(update.Id))
+                {
+                    Logger.Info($"Updated key {update.NewKey} for {update.Id}");
+                    list[update.Id] = update.NewKey;
+                }
+                else
+                {
+                    Logger.Info($"Add key {update.NewKey} for {update.Id}");
+                    list.Add(update.Id, update.NewKey);
+                }
+            }
+            else if(list.ContainsKey(update.Id))
+            {
+                Logger.Info($"Removed key for {update.Id}");
+                list.Remove(update.Id);
+            }
+            KeyblockChannelsToMonitor = String.Join(";", list.Select(kv => $"{kv.Key}:{kv.Value}"));
+            Save();
+        }
+
+        internal IList<int> GetChannelNumbersToMonitor()
+        {
+            return GetChannelsToMonitor().Select(kv => kv.Value).ToList();
         }
     }
 }

@@ -222,7 +222,7 @@ namespace Keyblock
                 return false;
             }
             var data = File.ReadAllBytes(KeyblockFile);
-            _block.Load(data, _settings.GetChannelsToIgnore());
+            _block.Load(data, _settings.GetChannelNumbersToMonitor(), _settings.GetChannelsToIgnore());
             if (_block.NrOfChannels < 1)
             {
                 _logger.Error("No channels found in the keyblock data");
@@ -295,7 +295,7 @@ namespace Keyblock
         public DateTime FirstRefreshDateInFuture()
         {
             var nextRetrieval = DateTime.Now.AddHours(_settings.KeyblockValidationInHours);
-            var blockDate = _block.FirstFutureExpirationDate(_settings.GetChannelsToIgnore());
+            var blockDate = _block.FirstFutureExpirationDate(_settings.GetChannelNumbersToMonitor(), _settings.GetChannelsToIgnore());
             return blockDate ?? nextRetrieval;
         }
     }

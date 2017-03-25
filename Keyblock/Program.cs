@@ -5,6 +5,7 @@ using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
+using SharedComponents.Models;
 
 namespace Keyblock
 {
@@ -126,6 +127,19 @@ namespace Keyblock
             Error();
         }
 
+        public override void ProcessDataFromOtherModule(string moduleName, CommunicationData data)
+        {
+            base.ProcessDataFromOtherModule(moduleName, data);
+            switch (data.Type)
+            {
+                case DataType.KeyblockChannelUpdate:
+                    Logger.Info($"Received KeyblockChannelUpdate from {moduleName}");
+                    _settings.ToggleChannel(data.Data as KeyblockChannelUpdate);
+                    _nextRetrieval = DateTime.Now;
+                    break;
+            }
+        }
+
         protected override void StartModule()
         {
             Logger.Info("Welcome to Keyblock");
@@ -149,6 +163,7 @@ namespace Keyblock
                 RefreshAfter = _keyblock.BlockRefreshAfter,
                 LastRetrieval = _lastRetrieval,
                 NextRetrieval = _nextRetrieval,
+                ChannelsToMonitor = _settings.GetChannelsToMonitor()
             };
         }
     }

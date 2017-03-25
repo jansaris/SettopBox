@@ -4,6 +4,8 @@
     {
         KeyBlock,
         Epg,
-        EpgChannelUpdate
+        EpgChannelUpdate,
+        KeyblockChannelUpdate,
+        TvHeadendChannelUpdate
     }
 }
