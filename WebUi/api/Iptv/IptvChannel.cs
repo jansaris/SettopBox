@@ -1,6 +1,8 @@
 ﻿using log4net;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -27,6 +29,24 @@ namespace WebUi.api.Iptv
             return data;
         }
 
+        public void SaveStream(string url, string channel)
+        {
+            var buffer = new byte[2048];
+            var data = new List<byte>();
+            _log.Debug($"Try to save data from {url} for {channel}");
+            using (var s = _socketFactory())
+            {
+                s.Open(url);
+                for (var count = 0; count < MaxCycles; count++)
+                {
+                    var length = s.Receive(buffer);
+                    data.AddRange(buffer.Take(length));
+                }
+            }
+            _log.Debug($"Write {data.Count} bytes to file C:\\temp\\{channel}.data");
+            File.WriteAllBytes($"C:\\temp\\{channel}.data", data.ToArray());
+        }
+
         IptvInfo ReadData(string url, string channel)
         {
             var buffer = new byte[2048];
@@ -47,14 +67,15 @@ namespace WebUi.api.Iptv
                         UpdateInfo(info, previous, current);
                         if (info.Complete())
                         {
-                            info.KBps = s.KBps;
-                            info.MBps = s.MBps;
                             _log.Debug($"Found IPTV Info after {count} blocks");
-                            _log.Info($"Found IPTV Info for {channel} at {url}: {info.Provider} - {info.Name} - {info.KBps} KB/s (key: {info.Number})");
                             break;
                         }
                         previous = current;
                     }
+
+                    info.KBps = s.KBps;
+                    info.MBps = s.MBps;
+                    _log.Info($"Found IPTV Info for {channel} at {url}: {info.Provider} - {info.Name} - {info.KBps} KB/s (key: {info.Number})");
                 }
                 return info;
             }

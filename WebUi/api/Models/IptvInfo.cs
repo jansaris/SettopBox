@@ -12,7 +12,6 @@
         internal bool Complete()
         {
             return Number.HasValue &&
-                   !string.IsNullOrWhiteSpace(Provider) &&
                    !string.IsNullOrWhiteSpace(Name);
         }
     }
