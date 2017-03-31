@@ -37,6 +37,12 @@
     <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.HttpUtility, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.HttpUtility.1.0.0.1\lib\net40\Mono.HttpUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="SimpleInjector, Version=3.3.2.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
       <HintPath>..\packages\SimpleInjector.3.3.2\lib\net45\SimpleInjector.dll</HintPath>
       <Private>True</Private>
@@ -55,6 +61,22 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="TvHeadend\Caid.cs" />
+    <Compile Include="TvHeadend\Channel.cs" />
+    <Compile Include="TvHeadend\Epg.cs" />
+    <Compile Include="TvHeadend\Mux.cs" />
+    <Compile Include="TvHeadend\Network.cs" />
+    <Compile Include="TvHeadend\Service.cs" />
+    <Compile Include="TvHeadend\Stream.cs" />
+    <Compile Include="TvHeadend\Tag.cs" />
+    <Compile Include="TvHeadend\TvhConfiguration.cs" />
+    <Compile Include="TvHeadend\TvhJsonTextWriter.cs" />
+    <Compile Include="TvHeadend\TvhObject.cs" />
+    <Compile Include="TvHeadend\Web\TvhCommunication.cs" />
+    <Compile Include="TvHeadend\Web\TvhJsonConvert.cs" />
+    <Compile Include="TvHeadend\Web\TvhTable.cs" />
+    <Compile Include="TvHeadend\Web\TvhWebCommunication.cs" />
+    <Compile Include="TvHeadend\Web\Urls.cs" />
     <Compile Include="UnixEndPoint.cs" />
     <Compile Include="UpdateEpg.cs" />
   </ItemGroup>
@@ -74,9 +96,7 @@
       <Name>SharedComponents</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="TvHeadend\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
