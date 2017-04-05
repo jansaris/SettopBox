@@ -11,6 +11,7 @@ namespace TvHeadendIntegration.TvHeadend.Web
     public class TvhCommunication
     {
         private readonly string _hostAddress;
+        private readonly string _hostName;
         private readonly string _username;
         private readonly string _password;
         private readonly ILog _logger;
@@ -21,6 +22,7 @@ namespace TvHeadendIntegration.TvHeadend.Web
             _logger = logger;
             _hostAddress = settings.WebUrl ?? string.Empty;
             if (!_hostAddress.StartsWith("http://")) _hostAddress = string.Concat("http://", _hostAddress);
+            _hostName = _hostAddress.Substring(7);
             _username = settings.Username;
             _password = settings.Password;
         }
@@ -143,9 +145,9 @@ namespace TvHeadendIntegration.TvHeadend.Web
         private WebClient CreateWebClient()
         {
             var webClient = new WebClient();
-            var host = _hostAddress.Substring(7);
-            webClient.Headers.Add("Host", host);
-            webClient.Headers.Add("Origin", host);
+
+            webClient.Headers.Add("Host", _hostName);
+            webClient.Headers.Add("Origin", _hostName);
             webClient.Headers.Add("X-Requested-With", "XMLHttpRequest");
             webClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36");
             webClient.Headers.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
