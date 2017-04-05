@@ -19,7 +19,8 @@ namespace TvHeadendIntegration.TvHeadend.Web
         public TvhCommunication(ILog logger, Settings settings)
         {
             _logger = logger;
-            _hostAddress = settings.WebUrl;
+            _hostAddress = settings.WebUrl ?? string.Empty;
+            if (!_hostAddress.StartsWith("http://")) _hostAddress = string.Concat("http://", _hostAddress);
             _username = settings.Username;
             _password = settings.Password;
         }
@@ -53,7 +54,32 @@ namespace TvHeadendIntegration.TvHeadend.Web
                 _logger.Error($"Failed to convert the response into a table of {typeof(T).Name}. Result: {sResult}");
                 return default(TvhTable<T>);
             }
-        } 
+        }
+
+        internal bool TestAuthentication()
+        {
+            try
+            {
+                using (var client = CreateWebClient())
+                {
+                    _logger.Debug($"Test authentication on {_hostAddress}");
+                    var url = string.Concat(_hostAddress, "/extjs.html");
+                    var result = client.DownloadString(url);
+                    _logger.Info($"Succesfully authenticated on {_hostAddress}");
+                    return true;
+                }
+            }
+            catch(WebException ex) when((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                _logger.Warn($"Authentication denied for user {_username} on {_hostAddress}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to to test communication with tvheadend ({_hostAddress})", ex);
+                return false;
+            }
+        }
 
         public T Post<T>(string uri, object data)
         {
@@ -82,7 +108,7 @@ namespace TvHeadendIntegration.TvHeadend.Web
                 using (var client = CreateWebClient())
                 {
                     var uploadData = ConvertToQueryString(data);
-                    var url = string.Concat("http://", _hostAddress, uri);
+                    var url = string.Concat(_hostAddress, uri);
                     var result = client.UploadString(url, "POST", uploadData);
                     _logger.Debug($"Posted object on {url} with result {result}");
                     return result;
@@ -101,7 +127,7 @@ namespace TvHeadendIntegration.TvHeadend.Web
             {
                 using (var client = CreateWebClient())
                 {
-                    var url = string.Concat("http://", _hostAddress, uri);
+                    var url = string.Concat(_hostAddress, uri);
                     var result = client.DownloadString(url);
                     _logger.Debug($"Get from {url} with result {result}");
                     return result;
@@ -117,9 +143,9 @@ namespace TvHeadendIntegration.TvHeadend.Web
         private WebClient CreateWebClient()
         {
             var webClient = new WebClient();
-
-            webClient.Headers.Add("Host", _hostAddress);
-            webClient.Headers.Add("Origin", _hostAddress);
+            var host = _hostAddress.Substring(7);
+            webClient.Headers.Add("Host", host);
+            webClient.Headers.Add("Origin", host);
             webClient.Headers.Add("X-Requested-With", "XMLHttpRequest");
             webClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36");
             webClient.Headers.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");

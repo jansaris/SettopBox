@@ -52,7 +52,7 @@ namespace WebUi.api.Iptv
             var buffer = new byte[2048];
             var previous = new byte[0];
             var current = new byte[0];
-            var info = new IptvInfo { Url = url };
+            var info = new IptvInfo { Url = url.Replace("igmp","rtp") };
 
             try
             {

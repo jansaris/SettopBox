@@ -4,6 +4,7 @@ using log4net;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
+using TvHeadendIntegration.TvHeadend;
 
 namespace TvHeadendIntegration
 {
@@ -12,11 +13,13 @@ namespace TvHeadendIntegration
         readonly TvHeadendIntegrationInfo _info = new TvHeadendIntegrationInfo();
         readonly Settings _settings;
         readonly UpdateEpg _epg;
+        readonly TvhModel _configuration;
 
-        public Program(ILog logger, Settings settings, UpdateEpg epg, LinuxSignal signal, ModuleCommunication communication) : base(logger, signal, communication)
+        public Program(ILog logger, Settings settings, UpdateEpg epg, LinuxSignal signal, ModuleCommunication communication, TvhModel tvhConfiguration) : base(logger, signal, communication)
         {
             _settings = settings;
             _epg = epg;
+            _configuration = tvhConfiguration;
         }
 
         static void Main()
@@ -42,8 +45,14 @@ namespace TvHeadendIntegration
             if (!string.IsNullOrWhiteSpace(_settings.InitialEpgFile))
             {
                 UpdateEpg(Path.Combine(_settings.DataFolder, _settings.InitialEpgFile));
-                
+                LoadConfiguration();
             }
+        }
+
+        private void LoadConfiguration()
+        {
+            _configuration.ReadFromWeb();
+            _info.Channels = _configuration.GetChannelInfo();
         }
 
         void UpdateEpg(string file)

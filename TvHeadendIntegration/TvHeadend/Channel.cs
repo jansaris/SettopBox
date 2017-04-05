@@ -56,11 +56,6 @@ namespace TvHeadendIntegration.TvHeadend
             }
         }
 
-        public void Remove(string tvhFolder)
-        {
-            RemoveFromFile(Path.Combine(GetFolder(tvhFolder), uuid));
-        }
-
         public override Urls Urls
         {
             get

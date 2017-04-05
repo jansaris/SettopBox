@@ -69,7 +69,7 @@
     <Compile Include="TvHeadend\Service.cs" />
     <Compile Include="TvHeadend\Stream.cs" />
     <Compile Include="TvHeadend\Tag.cs" />
-    <Compile Include="TvHeadend\TvhConfiguration.cs" />
+    <Compile Include="TvHeadend\TvhModel.cs" />
     <Compile Include="TvHeadend\TvhJsonTextWriter.cs" />
     <Compile Include="TvHeadend\TvhObject.cs" />
     <Compile Include="TvHeadend\Web\TvhCommunication.cs" />

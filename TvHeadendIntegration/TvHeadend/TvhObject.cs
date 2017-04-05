@@ -40,50 +40,6 @@ namespace TvHeadendIntegration.TvHeadend
             State = State.New;
         }
 
-        protected static T LoadFromFile<T>(string filename) where T : TvhObject
-        {
-            try
-            {
-                var json = File.ReadAllText(filename);
-                var tvhFile = JsonConvert.DeserializeObject<T>(json);
-                tvhFile._originalJson = json;
-                tvhFile.uuid = tvhFile.ExtractId(filename);
-                tvhFile.State = State.Loaded;
-                return tvhFile;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Failed to load {typeof(T).Name} from file {filename}", ex);
-                return null;
-            }
-        }
-
-        protected void SaveToFile(string filename)
-        {
-            try
-            {
-                var json = TvhJsonConvert.Serialize(this);
-                Logger.Debug($"Generated json: {json} for {filename}");
-
-                if (json == _originalJson)
-                {
-                    Logger.Debug($"No changes made to object, don't save to file {filename}");
-                    return;
-                }
-
-                State = File.Exists(filename) ? State.Updated : State.Created;
-                if (!PostOnUrl())
-                {
-                    File.WriteAllText(filename, json);
-                    Logger.Debug($"Written json to file {filename} ({State})");
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Failed to save {GetType().Name} to file {filename}", ex);
-            }
-        }
-
         private bool PostOnUrl()
         {
             if (State != State.Created) return false;
@@ -98,23 +54,6 @@ namespace TvHeadendIntegration.TvHeadend
         protected virtual string ExtractId(string filename)
         {
             return filename.Split(Path.DirectorySeparatorChar).Last();
-        }
-
-        protected void RemoveFromFile(string file)
-        {
-            var fileinfo = new FileInfo(file);
-            var folder = fileinfo.Directory;
-            if (fileinfo.Exists)
-            {
-                Logger.Debug($"Remove file {file} for {GetType().Name} {uuid}");
-                fileinfo.Delete();
-            }
-            if (folder != null && folder.Exists && !folder.EnumerateFiles().Any())
-            {
-                Logger.Debug($"Remove empty folder {folder} for {GetType().Name} {uuid}");
-                folder.Delete(true);
-            }
-            State = State.Removed;
         }
     }
 }

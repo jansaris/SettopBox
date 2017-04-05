@@ -57,6 +57,7 @@
     <Compile Include="DependencyInjection\TypedLogger.cs" />
     <Compile Include="DependencyInjection\SharedContainer.cs" />
     <Compile Include="DependencyInjection\DependecyContext.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Helpers\LinuxSignal.cs" />
     <Compile Include="Keyblock\Block.cs" />
     <Compile Include="Keyblock\Channel.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Module\NewCamdInfo.cs" />
     <Compile Include="Module\RunAndMonitorInfo.cs" />
     <Compile Include="Module\ThreadHelper.cs" />
+    <Compile Include="Module\TvhChannelInfo.cs" />
     <Compile Include="Module\TvHeadendIntegrationInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\IniSettings.cs" />

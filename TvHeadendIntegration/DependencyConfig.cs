@@ -2,6 +2,7 @@
 using log4net;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
+using TvHeadendIntegration.TvHeadend.Web;
 
 namespace TvHeadendIntegration
 {
@@ -13,7 +14,7 @@ namespace TvHeadendIntegration
         
         public override void RegisterComponents(Container container)
         {
-            
+            container.RegisterSingleton<Func<TvhCommunication>>(() => container.GetInstance<TvhCommunication>());
         }
 
         public override Type Module => typeof(Program);

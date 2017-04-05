@@ -65,6 +65,18 @@ namespace WebUi.api.Controllers
                     }
                 });
             }
+            if(_info.Data(nameof(TvHeadendIntegration)) is TvHeadendIntegrationInfo tvh)
+            {
+                _channels.ForEach(c =>
+                {
+                    var match = tvh.Channels.FirstOrDefault(tvhChannel => string.Compare(c.Name, tvhChannel.Name, true) == 0);
+                    if (match != null)
+                    {
+                        c.TvHeadend = true;
+                        c.TvHeadendChannel = match.Url;
+                    }
+                });
+            }
         }
 
         private Channel Convert(ChannelInfo info)

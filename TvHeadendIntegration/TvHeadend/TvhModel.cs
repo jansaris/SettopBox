@@ -3,21 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using TvHeadendIntegration.TvHeadend.Web;
 using log4net;
+using SharedComponents.Module;
 
 namespace TvHeadendIntegration.TvHeadend
 {
     public enum State { New, Loaded, Created, Updated, Removed }
 
-    public class TvhConfiguration
+    public class TvhModel
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(TvhConfiguration));
-        
+        private readonly ILog _logger;
+        private readonly Settings _settings;
+        private readonly Func<TvhCommunication> _communicationFactory;
+
         private List<Network> _networks = new List<Network>();
         private List<Channel> _channels = new List<Channel>();
         private List<Tag> _tags = new List<Tag>();
         private List<Epg> _epgs = new List<Epg>(); 
         private string _tvhFolder = string.Empty;
         private string _defaultNetworkName = string.Empty;
+        
+        public TvhModel(ILog logger, Settings settings, Func<TvhCommunication> communicationFactory)
+        {
+            _logger = logger;
+            _settings = settings;
+            _communicationFactory = communicationFactory;
+        }
 
         private Network DefaultNetwork
         {
@@ -28,42 +38,50 @@ namespace TvHeadendIntegration.TvHeadend
             }
         }
 
-        public static TvhConfiguration ReadFromWeb(Settings settings)
+        public void ReadFromWeb()
         {
-            var config = new TvhConfiguration
-            {
-                _defaultNetworkName = settings.TvhNetworkName,
-                _networks = ReadFromWeb<Network>(settings),
-                _channels = ReadFromWeb<Channel>(settings),
-                _tags = ReadFromWeb<Tag>(settings),
-                _epgs = ReadFromWeb<Epg>(settings)
+            if (!_communicationFactory().TestAuthentication()) return;
+            
+            _defaultNetworkName = _settings.TvhNetworkName;
+            _networks = ReadFromWeb<Network>();
+            _channels = ReadFromWeb<Channel>();
+            _tags = ReadFromWeb<Tag>();
+            _epgs = ReadFromWeb<Epg>();
                 //TODO: Ik probeer de EPG tabel op te halen via het web
-            };
-            var muxes = ReadFromWeb<Mux>(settings);
-            var services = ReadFromWeb<Service>(settings);
+
+            var muxes = ReadFromWeb<Mux>();
+            var services = ReadFromWeb<Service>();
             muxes.ForEach(mux => mux.Services.AddRange(services.Where(service => service.multiplex_uuid == mux.uuid)));
-            config._networks.ForEach(network => network.Muxes.AddRange(muxes.Where(mux => mux.network_uuid == network.uuid)));
-            return config;
+            _networks.ForEach(network => network.Muxes.AddRange(muxes.Where(mux => mux.network_uuid == network.uuid)));
         }
 
-        private static List<T> ReadFromWeb<T>(object tvheadendHostAddress)
+        internal List<TvHeadendChannelInfo> GetChannelInfo()
         {
-            throw new NotImplementedException();
+            return _networks.SelectMany(n => n.Muxes.Select(GetNameAndUrl)).ToList();
         }
 
-        private static List<T> ReadFromWeb<T>(Settings settings) where T : TvhObject, new()
+        private TvHeadendChannelInfo GetNameAndUrl(Mux mux)
         {
-            Logger.Debug($"Read {typeof(T).Name} from web at {settings.WebUrl}");
-            var instance = new T();
-            var web = new TvhCommunication(Logger, settings);
-            var result = web.GetTableResult<T>(instance.Urls.List);
-            if (result == null)
+            return new TvHeadendChannelInfo
             {
-                Logger.WarnFormat($"Received no awnser from the web interface at {settings.WebUrl}");
+                Name = mux.Services.FirstOrDefault()?.svcname ?? mux.iptv_muxname,
+                Url = mux.iptv_url
+            };
+        }
+
+        private List<T> ReadFromWeb<T>() where T : TvhObject, new()
+        {
+            _logger.Debug($"Read {typeof(T).Name} from web at {_settings.WebUrl}");
+            var instance = new T();
+            var web = _communicationFactory();
+            var result = web.GetTableResult<T>(instance.Urls.List);
+            if (result?.entries == null)
+            {
+                _logger.WarnFormat($"Received no awnser from the web interface at {_settings.WebUrl}");
                 return new List<T>();
             }
             result.entries.ForEach(obj => obj.State = State.Loaded);
-            Logger.InfoFormat("Read {0} {1} from the tvheadend web interface", result.total, typeof(T).Name);
+            _logger.InfoFormat("Read {0} {1} from the tvheadend web interface", result.total, typeof(T).Name);
             return result.entries;
         } 
         
@@ -93,7 +111,7 @@ namespace TvHeadendIntegration.TvHeadend
 
         private Tag CreateTag(string name)
         {
-            Logger.InfoFormat("Create new TVH tag for {0}", name);
+            _logger.InfoFormat("Create new TVH tag for {0}", name);
             var tag = new Tag { name = name };
             _tags.Add(tag);
             return tag;
@@ -101,7 +119,7 @@ namespace TvHeadendIntegration.TvHeadend
 
         private Channel CreateChannel(string name)
         {
-            Logger.InfoFormat("Create new TVH channel for {0}", name);
+            _logger.InfoFormat("Create new TVH channel for {0}", name);
             var channel = new Channel { name = name };
             _channels.Add(channel);
             return channel;
@@ -109,7 +127,7 @@ namespace TvHeadendIntegration.TvHeadend
 
         private Mux CreateMux(string name)
         {
-            Logger.InfoFormat("Create new TVH mux with service for {0}", name);
+            _logger.InfoFormat("Create new TVH mux with service for {0}", name);
             var mux = new Mux {network_uuid = DefaultNetwork.uuid};
             DefaultNetwork.Muxes.Add(mux);
             return mux;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SharedComponents.Module
 {
@@ -6,12 +7,14 @@ namespace SharedComponents.Module
     {
         public DateTime? LastEpgUpdate;
         public bool LastEpgUpdateSuccessfull;
+        public IList<TvHeadendChannelInfo> Channels;
         public object Clone()
         {
             return new TvHeadendIntegrationInfo
             {
                 LastEpgUpdate = LastEpgUpdate,
-                LastEpgUpdateSuccessfull = LastEpgUpdateSuccessfull
+                LastEpgUpdateSuccessfull = LastEpgUpdateSuccessfull,
+                Channels = Channels.Clone()
             };
         }
     }
