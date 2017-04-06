@@ -9,6 +9,7 @@ namespace ChannelList
         {
         }
         protected override string Name => "ChannelList";
-        public string Url { get; private set; }
+        public string Url { get; set; } = "http://w.zt6.nl/tvmenu/code.js.gz";
+        public string StreamProtocol { get; set; } = "rtp";
     }
 }

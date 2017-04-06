@@ -10,10 +10,12 @@ namespace ChannelList
     public class JavascriptParser
     {
         readonly ILog _logger;
+        readonly Settings _settings;
 
-        public JavascriptParser(ILog logger)
+        public JavascriptParser(ILog logger, Settings settings)
         {
             _logger = logger;
+            _settings = settings;
         }
 
         private const string ChannelSeparatorRegex = "e.push\\(\"";
@@ -132,7 +134,10 @@ namespace ChannelList
                         location.Url = location.Url.Substring(0, location.Url.Length - RtpSkip.Length);
                         location.RtpSkip = true;
                     }
-
+                    if (!string.IsNullOrWhiteSpace(_settings.StreamProtocol) && location.Url.IndexOf(":") < 10)
+                    {
+                        location.Url = _settings.StreamProtocol + location.Url.Substring(location.Url.IndexOf(":"));
+                    }
                 }
                 var nameIndex = scriptPart.IndexOf(ChannelLocationStart, previousUrlIndex, StringComparison.InvariantCulture);
                 if (nameIndex != -1 && nameIndex < urlIndex)

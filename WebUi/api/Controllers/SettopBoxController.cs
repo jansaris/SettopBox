@@ -69,7 +69,7 @@ namespace WebUi.api.Controllers
             {
                 _channels.ForEach(c =>
                 {
-                    var match = tvh.Channels.FirstOrDefault(tvhChannel => string.Compare(c.Name, tvhChannel.Name, true) == 0);
+                    var match = tvh.Channels.FirstOrDefault(tvhChannel => c.AvailableChannels.Any(l => l.Url == tvhChannel.Url));
                     if (match != null)
                     {
                         c.TvHeadend = true;

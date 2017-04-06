@@ -54,7 +54,7 @@ namespace EpgGrabber
             var splitted = line.Split('|');
             if (splitted.Length == 2) return new Tuple<string, string>(splitted[0], splitted[1]);
 
-            _logger.Warn("Failed to read line '{item}' in '{file.FullName}' (expect key|name)");
+            _logger.Warn($"Failed to read line '{line}' (expect key|name)");
             return null;
         }
 

@@ -20,8 +20,12 @@ namespace ChannelListTest
 
         [SetUp]
         public void SetUp()
-        { 
-            _module = new JavascriptParser(Logger);
+        {
+            var settings = new Settings(Logger)
+            {
+                StreamProtocol = "udp"
+            };
+            _module = new JavascriptParser(Logger, settings);
             var assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _script = File.ReadAllText(Path.Combine(assemblyFolder,"code.js.txt"));
             _scriptNed1 = File.ReadAllText(Path.Combine(assemblyFolder,"code.js_ned1_part.txt"));
@@ -47,11 +51,11 @@ namespace ChannelListTest
             channel.Icons.Count.Should().Be(1);
             channel.Icons.First().Should().Be("npotv1.png");
             channel.Locations.Count.Should().Be(5);
-            channel.Locations.First(l => l.Name == "HD+").Url.Should().Be("igmp://224.0.251.124:8248");
-            channel.Locations.First(l => l.Name == "HD").Url.Should().Be("igmp://224.0.252.126:7252");
-            channel.Locations.First(l => l.Name == "SD").Url.Should().Be("igmp://224.0.251.1:8002");
-            channel.Locations.First(l => l.Name == "ztv-hd").Url.Should().Be("igmp://239.193.252.126:7252");
-            channel.Locations.First(l => l.Name == "ztv-sd").Url.Should().Be("igmp://239.192.4.101:6202");
+            channel.Locations.First(l => l.Name == "HD+").Url.Should().Be("udp://224.0.251.124:8248");
+            channel.Locations.First(l => l.Name == "HD").Url.Should().Be("udp://224.0.252.126:7252");
+            channel.Locations.First(l => l.Name == "SD").Url.Should().Be("udp://224.0.251.1:8002");
+            channel.Locations.First(l => l.Name == "ztv-hd").Url.Should().Be("udp://239.193.252.126:7252");
+            channel.Locations.First(l => l.Name == "ztv-sd").Url.Should().Be("udp://239.192.4.101:6202");
             channel.Radio.Should().BeFalse();
         }
 
@@ -68,11 +72,11 @@ namespace ChannelListTest
             channel.Icons.Count.Should().Be(1);
             channel.Icons.First().Should().Be("npotv2.png");
             channel.Locations.Count.Should().Be(5);
-            channel.Locations.First(l => l.Name == "HD+").Url.Should().Be("igmp://224.0.251.125:8250");
-            channel.Locations.First(l => l.Name == "HD").Url.Should().Be("igmp://224.0.252.127:7254");
-            channel.Locations.First(l => l.Name == "SD").Url.Should().Be("igmp://224.0.251.2:8004");
-            channel.Locations.First(l => l.Name == "ztv-hd").Url.Should().Be("igmp://239.193.252.127:7254");
-            channel.Locations.First(l => l.Name == "ztv-sd").Url.Should().Be("igmp://239.192.4.102:6204");
+            channel.Locations.First(l => l.Name == "HD+").Url.Should().Be("udp://224.0.251.125:8250");
+            channel.Locations.First(l => l.Name == "HD").Url.Should().Be("udp://224.0.252.127:7254");
+            channel.Locations.First(l => l.Name == "SD").Url.Should().Be("udp://224.0.251.2:8004");
+            channel.Locations.First(l => l.Name == "ztv-hd").Url.Should().Be("udp://239.193.252.127:7254");
+            channel.Locations.First(l => l.Name == "ztv-sd").Url.Should().Be("udp://239.192.4.102:6204");
             channel.Radio.Should().BeFalse();
         }
 
@@ -90,10 +94,10 @@ namespace ChannelListTest
             channel.Icons.First().Should().Be("rtl5.png");
             channel.Icons.Skip(1).First().Should().Be("rtl5_wit.png");
             channel.Locations.Count.Should().Be(4);
-            channel.Locations.Any(l => l.Name == "HD+" && l.Url == "igmp://224.0.251.135:8270" && l.RtpSkip).Should().BeTrue();
-            channel.Locations.Any(l => l.Name == "ztv" && l.Url == "igmp://239.192.4.105:6210" && !l.RtpSkip).Should().BeTrue();
-            channel.Locations.Any(l => l.Name == null && l.Url == "igmp://224.0.252.137:7274" && l.RtpSkip).Should().BeTrue();
-            channel.Locations.Any(l => l.Name == null && l.Url == "igmp://224.0.251.5:8010" && l.RtpSkip).Should().BeTrue();
+            channel.Locations.Any(l => l.Name == "HD+" && l.Url == "udp://224.0.251.135:8270" && l.RtpSkip).Should().BeTrue();
+            channel.Locations.Any(l => l.Name == "ztv" && l.Url == "udp://239.192.4.105:6210" && !l.RtpSkip).Should().BeTrue();
+            channel.Locations.Any(l => l.Name == null && l.Url == "udp://224.0.252.137:7274" && l.RtpSkip).Should().BeTrue();
+            channel.Locations.Any(l => l.Name == null && l.Url == "udp://224.0.251.5:8010" && l.RtpSkip).Should().BeTrue();
             channel.Radio.Should().BeFalse();
         }
 
@@ -112,9 +116,9 @@ namespace ChannelListTest
             channel.Icons.Any(i => i == "discovery_wit.png").Should().BeTrue();
             channel.Icons.Any(i => i == "discovery_thumb.png").Should().BeTrue();
             channel.Locations.Count.Should().Be(3);
-            channel.Locations.Any(l => l.Name == null && l.Url == "igmp://224.0.252.129:7258" && l.RtpSkip).Should().BeTrue();
-            channel.Locations.Any(l => l.Name == "ztv" && l.Url == "igmp://239.192.4.114:6228" && !l.RtpSkip).Should().BeTrue();
-            channel.Locations.Any(l => l.Name == null && l.Url == "igmp://224.0.251.18:8036" && l.RtpSkip).Should().BeTrue();
+            channel.Locations.Any(l => l.Name == null && l.Url == "udp://224.0.252.129:7258" && l.RtpSkip).Should().BeTrue();
+            channel.Locations.Any(l => l.Name == "ztv" && l.Url == "udp://239.192.4.114:6228" && !l.RtpSkip).Should().BeTrue();
+            channel.Locations.Any(l => l.Name == null && l.Url == "udp://224.0.251.18:8036" && l.RtpSkip).Should().BeTrue();
             channel.Radio.Should().BeFalse();
         }
 
@@ -131,8 +135,8 @@ namespace ChannelListTest
             channel.Icons.Count.Should().Be(1);
             channel.Icons.Any(i => i == "nporadio1.png").Should().BeTrue();
             channel.Locations.Count.Should().Be(2);
-            channel.Locations.Any(l => l.Name == null && l.Url == "igmp://224.0.251.161:8322" && l.RtpSkip).Should().BeTrue();
-            channel.Locations.Any(l => l.Name == "ztv" && l.Url == "igmp://239.193.251.161:8322" && !l.RtpSkip).Should().BeTrue();
+            channel.Locations.Any(l => l.Name == null && l.Url == "udp://224.0.251.161:8322" && l.RtpSkip).Should().BeTrue();
+            channel.Locations.Any(l => l.Name == "ztv" && l.Url == "udp://239.193.251.161:8322" && !l.RtpSkip).Should().BeTrue();
             channel.Radio.Should().BeTrue();
         }
 
