@@ -5,6 +5,7 @@ using SharedComponents.DependencyInjection;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
 using TvHeadendIntegration.TvHeadend;
+using SharedComponents.Models;
 
 namespace TvHeadendIntegration
 {
@@ -52,6 +53,7 @@ namespace TvHeadendIntegration
         private void LoadConfiguration()
         {
             _configuration.ReadFromWeb();
+            _info.AuthenticationSuccessfull = _configuration.AuthenticationSuccessfull;
             _info.Channels = _configuration.GetChannelInfo();
         }
 
@@ -69,6 +71,25 @@ namespace TvHeadendIntegration
                 case DataType.Epg:
                     UpdateEpg(data.Data.ToString());
                     break;
+                case DataType.TvHeadendChannelUpdate:
+                    UpdateTvhConfiguration(data.Data as TvHeadendChannelUpdate);
+                    break;
+            }
+        }
+
+        private void UpdateTvhConfiguration(TvHeadendChannelUpdate tcu)
+        {
+            if (string.IsNullOrWhiteSpace(tcu.TvhId))
+            {
+                _configuration.AddChannel(tcu.Id, tcu.NewUrl, tcu.Epg);
+            }
+            else if (string.IsNullOrWhiteSpace(tcu.NewUrl))
+            {
+                _configuration.RemoveChannel(tcu.TvhId, tcu.Id);
+            }
+            else
+            {
+                _configuration.UpdateChannel(tcu.TvhId, tcu.Id, tcu.NewUrl, tcu.Epg);
             }
         }
 

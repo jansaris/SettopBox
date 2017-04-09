@@ -74,6 +74,7 @@ namespace WebUi.api.Controllers
                     {
                         c.TvHeadend = true;
                         c.TvHeadendChannel = match.Url;
+                        c.TvhId = match.UUID;
                     }
                 });
             }
@@ -149,7 +150,7 @@ namespace WebUi.api.Controllers
             else if (newChannel.TvHeadend == oldChannel.TvHeadend) _logger.Info($"Update TvHeadend: {newChannel.Id} to {newChannel.Name}");
             else if (!newChannel.TvHeadend && oldChannel.TvHeadend) _logger.Info($"Remove from TvHeadend: {oldChannel.Id}");
 
-            var tcu = new TvHeadendChannelUpdate { Id = newChannel.Id, OldUrl = oldChannel.TvHeadendChannel, NewUrl = newChannel.TvHeadendChannel, Epg = newChannel.EpgGrabber };
+            var tcu = new TvHeadendChannelUpdate { TvhId = newChannel.TvhId, Id = newChannel.Id, OldUrl = oldChannel.TvHeadendChannel, NewUrl = newChannel.TvHeadendChannel, Epg = newChannel.EpgGrabber };
             var data = new CommunicationData(DataType.TvHeadendChannelUpdate, tcu);
             var thread = _info.SendData(nameof(WebUi), nameof(TvHeadendIntegration), data);
             thread?.Join();

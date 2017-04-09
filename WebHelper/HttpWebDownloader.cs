@@ -1,5 +1,6 @@
 ﻿using System;
 using log4net;
+using System.Net;
 
 namespace WebHelper
 {
@@ -34,6 +35,11 @@ namespace WebHelper
             {
                 var webClient = _webClientFactory();
                 return webClient.DownloadString(url);
+            }
+            catch (WebException ex)
+            {
+                _logger.Warn($"Failed to download the string from {url}: {ex.Message}");
+                return null;
             }
             catch (Exception ex)
             {

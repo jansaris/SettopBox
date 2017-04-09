@@ -62,6 +62,7 @@ namespace TvHeadendIntegration.TvHeadend
             if (string.IsNullOrWhiteSpace(UpdateUrl)) return false;
             Func<string, string> extendUploadData = (data) => string.Concat("node=", data);
             var response = comm.Post(UpdateUrl, UpdateData, extendUploadData);
+            if (response == "{}") response = "OK";
             Logger.InfoFormat($"Updated {GetType().Name} on tvheadend with response: {response}");
             return !string.IsNullOrWhiteSpace(response);
         }

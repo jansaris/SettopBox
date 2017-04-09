@@ -14,6 +14,7 @@ namespace TvHeadendIntegration.TvHeadend
         private readonly ILog _logger;
         private readonly Settings _settings;
         private readonly Func<TvhCommunication> _communicationFactory;
+        public bool AuthenticationSuccessfull { get; private set; }
 
         private List<Network> _networks = new List<Network>();
         private List<Channel> _channels = new List<Channel>();
@@ -45,7 +46,8 @@ namespace TvHeadendIntegration.TvHeadend
 
         public void ReadFromWeb()
         {
-            if (!_communicationFactory().TestAuthentication()) return;
+            AuthenticationSuccessfull = _communicationFactory().TestAuthentication();
+            if (!AuthenticationSuccessfull) return;
             
             _defaultNetworkName = _settings.TvhNetworkName;
             _networks = ReadFromWeb<Network>();
@@ -70,8 +72,32 @@ namespace TvHeadendIntegration.TvHeadend
             return new TvHeadendChannelInfo
             {
                 Name = mux.Services.FirstOrDefault()?.svcname ?? mux.iptv_muxname,
-                Url = mux.iptv_url
+                Url = mux.iptv_url,
+                UUID = mux.uuid
             };
+        }
+
+        internal void AddChannel(string id, string newUrl, bool epg)
+        {
+            _logger.Info($"Add channel '{id}' with url '{newUrl}' to TvHeadend");
+        }
+
+        internal void RemoveChannel(string tvhId, string id)
+        {
+            _logger.Info($"Remove channel '{id}' with UUID '{tvhId}' from TvHeadend");
+        }
+
+        internal void UpdateChannel(string tvhId, string id, string newUrl, bool epg)
+        {
+            _logger.Info($"Update channel '{id}' with UUID '{tvhId}' in TvHeadend");
+            var mux = ResolveMux(tvhId);
+            if(mux.iptv_url != newUrl)
+            {
+                _logger.Info($"Update mux ({id}) url from '{mux.iptv_url}' to '{newUrl}'");
+                mux.iptv_url = newUrl;
+                UpdateOnTvh(mux);
+            }
+            //TODO: Update EPG tag
         }
 
         private List<T> ReadFromWeb<T>() where T : TvhObject, new()
@@ -92,7 +118,7 @@ namespace TvHeadendIntegration.TvHeadend
         
         public Mux ResolveMux(string name)
         {
-            var mux = _networks.SelectMany(n => n.Muxes).FirstOrDefault(m => m.iptv_muxname == name);
+            var mux = _networks.SelectMany(n => n.Muxes).FirstOrDefault(m => m.iptv_muxname == name || m.uuid == name);
             return mux ?? CreateMux(name);
         }
 

@@ -88,6 +88,7 @@ export class ChannelLocations {
 
 export class Channel {
     Number: number;
+    TvhId: string;
     Id: string;
     Name: string;
     AvailableChannels: ChannelLocations[];

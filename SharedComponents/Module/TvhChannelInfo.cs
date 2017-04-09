@@ -6,13 +6,15 @@ namespace SharedComponents.Module
     {
         public string Name { get; set; }
         public string Url { get; set; }
+        public string UUID { get; set; }
 
         public object Clone()
         {
             return new TvHeadendChannelInfo
             {
                 Name = Name,
-                Url = Url
+                Url = Url,
+                UUID = UUID
             };
         }
     }

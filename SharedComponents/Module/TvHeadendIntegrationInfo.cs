@@ -7,6 +7,7 @@ namespace SharedComponents.Module
     {
         public DateTime? LastEpgUpdate;
         public bool LastEpgUpdateSuccessfull;
+        public bool AuthenticationSuccessfull;
         public IList<TvHeadendChannelInfo> Channels;
         public object Clone()
         {

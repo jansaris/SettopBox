@@ -5,6 +5,7 @@ namespace WebUi.api.Models
 {
     public class Channel
     {
+        public string TvhId { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
         public List<ChannelLocation> AvailableChannels { get; set; }
