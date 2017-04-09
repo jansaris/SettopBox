@@ -3,8 +3,8 @@ using System.Linq;
 using System.Net;
 using log4net;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Mono.Web;
+using System.Threading.Tasks;
 
 namespace TvHeadendIntegration.TvHeadend.Web
 {
@@ -83,33 +83,19 @@ namespace TvHeadendIntegration.TvHeadend.Web
             }
         }
 
-        public T Post<T>(string uri, object data)
+        public string Post(string uri, object data, Func<string, string> extendUploadData)
         {
-            var sResult = PostData(uri, data);
-            if (sResult == null) return default(T);
-            try
-            {
-                return JsonConvert.DeserializeObject<T>(sResult);
-            }
-            catch (Exception)
-            {
-                _logger.Error($"Failed to convert the response {typeof(T).Name}. Result: {sResult}");
-                return default(T);
-            }
+            return PostData(uri, data, extendUploadData);
         }
 
-        public void Post(string uri, object data)
-        {
-            PostData(uri, data);
-        }
-
-        private string PostData(string uri, object data)
+        private string PostData(string uri, object data, Func<string, string> extendUploadData)
         {
             try
             {
                 using (var client = CreateWebClient())
                 {
                     var uploadData = ConvertToQueryString(data);
+                    if(extendUploadData != null) uploadData = extendUploadData(uploadData);
                     var url = string.Concat(_hostAddress, uri);
                     var result = client.UploadString(url, "POST", uploadData);
                     _logger.Debug($"Posted object on {url} with result {result}");
@@ -179,13 +165,32 @@ namespace TvHeadendIntegration.TvHeadend.Web
 
         private static string ConvertToQueryString(object data)
         {
+            if (data is string) return data.ToString();
             var json = TvhJsonConvert.Serialize(data);
-
-            var jObj = (JObject)JsonConvert.DeserializeObject(json);
-            var query = String.Join("&",
-                jObj.Children().Cast<JProperty>()
-                    .Select(jp => jp.Name + "=" + HttpUtility.UrlEncode(jp.Value.ToString())));
+            var query = json.Replace("\n", "").Replace("\t", "");
+            query = HttpUtility.UrlEncode(query);
+            query = query.Replace("+", "%20");
             return query;
+        }
+        public void WaitUntilScanCompleted()
+        {
+            var count = 0;
+            while (!IsScanComplete() && count < 30)
+            {
+                _logger.InfoFormat("Wait 1 second until scan is complete");
+                Task.Delay(1000).Wait();
+                count++;
+            }
+            if (count == 30) _logger.Error("Aborted after waiting 30 seconds for the scan to complete");
+        }
+
+        private bool IsScanComplete()
+        {
+            var client = CreateWebClient();
+            var url = string.Concat(_hostAddress, "/api/mpegts/mux/grid");
+            var data = client.DownloadString(url);
+            var deserialized = JsonConvert.DeserializeObject<TvhTable<Mux>>(data);
+            return deserialized.entries.All(s => s.scan_state == 0);
         }
     }
 }

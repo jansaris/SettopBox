@@ -11,6 +11,7 @@ namespace TvHeadendIntegration.TvHeadend
 {
     public abstract class TvhObject
     {
+        [JsonIgnore]
         private static readonly ILog Logger = LogManager.GetLogger(typeof(TvhObject));
 
         /*TvHeadend properties*/
@@ -23,8 +24,13 @@ namespace TvHeadendIntegration.TvHeadend
         [JsonIgnore]
         public virtual string CreateUrl { get { return string.Empty; } }
         [JsonIgnore]
+        public virtual string UpdateUrl { get { return "/api/idnode/save"; } }
+        [JsonIgnore]
         public virtual object CreateData { get { return string.Empty; } }
+        [JsonIgnore]
+        public virtual object UpdateData { get { return string.Empty; } }
 
+        [JsonIgnore]
         public abstract Urls Urls { get; }
 
         [JsonIgnore] private string _originalJson;
@@ -40,15 +46,24 @@ namespace TvHeadendIntegration.TvHeadend
             State = State.New;
         }
 
-        private bool PostOnUrl()
+        public bool CreateOnTvh(TvhCommunication comm)
         {
             if (State != State.Created) return false;
             if (string.IsNullOrWhiteSpace(CreateUrl)) return false;
-            var comm = new TvhWebCommunication();
-            comm.Create(CreateUrl, CreateData);
-            Logger.InfoFormat($"Created {GetType().Name} on tvheadend using web. Give it 5 sec to initialize");
+            comm.Post(CreateUrl, CreateData, null);
+            Logger.InfoFormat($"Created {GetType().Name} on tvheadend. Give it 5 sec to initialize");
             comm.WaitUntilScanCompleted();
             return true;
+        }
+
+        public bool UpdateOnTvh(TvhCommunication comm)
+        {
+            if (State != State.Loaded) return false;
+            if (string.IsNullOrWhiteSpace(UpdateUrl)) return false;
+            Func<string, string> extendUploadData = (data) => string.Concat("node=", data);
+            var response = comm.Post(UpdateUrl, UpdateData, extendUploadData);
+            Logger.InfoFormat($"Updated {GetType().Name} on tvheadend with response: {response}");
+            return !string.IsNullOrWhiteSpace(response);
         }
 
         protected virtual string ExtractId(string filename)

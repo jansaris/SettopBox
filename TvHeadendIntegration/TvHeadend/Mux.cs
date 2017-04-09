@@ -9,6 +9,7 @@ namespace TvHeadendIntegration.TvHeadend
 {
     public class Mux : TvhObject
     {
+        [JsonIgnore]
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Mux));
 
         public override string CreateUrl
@@ -37,6 +38,14 @@ namespace TvHeadendIntegration.TvHeadend
                     uuid = network_uuid,
                     conf = this
                 };
+            }
+        }
+
+        public override object UpdateData
+        {
+            get
+            {
+                return this;
             }
         }
 

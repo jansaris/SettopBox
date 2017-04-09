@@ -38,6 +38,11 @@ namespace TvHeadendIntegration.TvHeadend
             }
         }
 
+        public void UpdateOnTvh(TvhObject obj)
+        {
+            obj.UpdateOnTvh(_communicationFactory());
+        }
+
         public void ReadFromWeb()
         {
             if (!_communicationFactory().TestAuthentication()) return;
@@ -85,9 +90,9 @@ namespace TvHeadendIntegration.TvHeadend
             return result.entries;
         } 
         
-        public Mux ResolveMux(string name, int nrOfExtraServices)
+        public Mux ResolveMux(string name)
         {
-            var mux = _networks.SelectMany(n => n.Muxes).FirstOrDefault(m => m.iptv_sname == name);
+            var mux = _networks.SelectMany(n => n.Muxes).FirstOrDefault(m => m.iptv_muxname == name);
             return mux ?? CreateMux(name);
         }
 
