@@ -185,5 +185,10 @@ namespace Keyblock
         {
             return GetChannelsToMonitor().Select(kv => kv.Value).ToList();
         }
+
+        internal IProtocol GetProtocol(ILog logger)
+        {
+            return ProtocolFactory.CreateProtocol(this, logger);
+        }
     }
 }

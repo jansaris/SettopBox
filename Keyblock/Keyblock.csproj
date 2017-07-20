@@ -56,6 +56,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyConfig.cs" />
+    <Compile Include="IProtocol.cs" />
+    <Compile Include="Protocol1154.cs" />
+    <Compile Include="Protocol1155.cs" />
+    <Compile Include="ProtocolFactory.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Keyblock.cs" />
     <Compile Include="KeyblockException.cs" />

@@ -33,6 +33,7 @@ namespace Keyblock
         string _timestamp;
         string _ski;
         byte[] _password;
+        private IProtocol Protocol => _settings.GetProtocol(_logger);
 
         public Keyblock(Settings settings, SslTcpClient sslClient, ILog logger, X509CertificateRequest certificateRequest, Block block)
         {
@@ -50,7 +51,7 @@ namespace Keyblock
             _settings.UpdateEmail($"{_settings.MachineId}.{t64}@{_settings.EmailHost}");
             _logger.Debug($"Using email: {_settings.Email}");
             _certificateRequest.Generate();
-            var msg = $"{_settings.MessageFormat}~{_settings.ClientId}~getCertificate~{_settings.Company}~NA~NA~{_certificateRequest}~{_settings.Common}~{_settings.Address}~ ~{_settings.City}~{_settings.Province}~{_settings.ZipCode}~{_settings.Country}~{_settings.Telephone}~{_settings.Email}~{_settings.MachineId}~{_settings.ChallengePassword}~";
+            var msg = Protocol.GetCertificate(_certificateRequest);
 
             _logger.Debug($"Requesting Certificate: {msg}");
             var response = _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort);
@@ -65,7 +66,7 @@ namespace Keyblock
 
         bool GetSessionKey()
         {
-            var msg = $"{_settings.MessageFormat}~{_settings.ClientId}~CreateSessionKey~{_settings.Company}~{_settings.MachineId}~";
+            var msg = Protocol.GetSessionKey();
             _logger.Debug($"Requesting Session Key: {msg}");
 
             var response = _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort);
@@ -112,16 +113,9 @@ namespace Keyblock
 
             var encodedBytes = RC4.Encrypt(_sessionKey, _password);
             var password = BytesAsHex(encodedBytes);
-            
-            var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{_timestamp}~{_settings.MachineId}~";
-            var encryptedMsgPart = $"{_settings.ClientId}~SaveEncryptedPassword~{_settings.Company}~{_ski}~64~{password}~";
+            var msg = Protocol.SaveEncryptedPassword(_timestamp, _ski, password, _sessionKey);
 
-            _logger.Debug($"Save encryption password: {unencryptedMsgPart}{encryptedMsgPart}");
-
-            var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
-            msg.AddRange(RC4.Encrypt(_sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
-
-            var response = _sslClient.SendAndReceive(msg.ToArray(), _settings.VcasServer, _settings.VcasPort + 1, false);
+            var response = _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort + 1, false);
 
             if (response == null || response.Length < 8)
             {
@@ -135,17 +129,10 @@ namespace Keyblock
 
         bool GetEncryptedPassword()
         {
-            var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{_timestamp}~{_settings.MachineId}~";
-            var encryptedMsgPart = $"{_settings.ClientId}~GetEncryptedPassword~{_settings.Company}~{_ski}~";
+            var msg = Protocol.GetEncryptedPassword(_timestamp, _ski, _sessionKey);
+            var response = _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort + 1, false);
 
-            _logger.Debug($"Get encryption password: {unencryptedMsgPart}{encryptedMsgPart}");
-
-            var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
-            msg.AddRange(RC4.Encrypt(_sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
-
-            var response = _sslClient.SendAndReceive(msg.ToArray(), _settings.VcasServer, _settings.VcasPort + 1, false);
-
-            if (response == null || response.Length < 8)
+            if (response == null || response.Length <= 8)
             {
                 _logger.Error("Failed to GetEncryptedPassword, no valid response!");
                 return false;
@@ -180,16 +167,9 @@ namespace Keyblock
         bool LoadKeyBlock()
         {
             var hash = GenerateSignedHash();
+            var msg = Protocol.LoadKeyBlock(_timestamp, _ski, hash, _sessionKey);
 
-            var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{_timestamp}~{_settings.MachineId}~";
-            var encryptedMsgPart = $"{_settings.ClientId}~GetAllChannelKeys~{_settings.Company}~{_ski.ToUpper()}~{hash}~{_settings.MachineId}~ ~ ~";
-
-            var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
-            msg.AddRange(RC4.Encrypt(_sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
-
-            _logger.Debug($"GetAllChannelKeys from server: {unencryptedMsgPart}{encryptedMsgPart}");
-
-            var response = _sslClient.SendAndReceive(msg.ToArray(), _settings.VksServer, _settings.VksPort + 1, false);
+            var response = _sslClient.SendAndReceive(msg, _settings.VksServer, _settings.VksPort, false);
 
             if (response == null || response.Length < 10)
             {
@@ -245,12 +225,12 @@ namespace Keyblock
             var retValue = GetSessionKey();
             if (!retValue) return false;
             //Look if we already have a valid certificate
-            if (GenerateSki())
-            {
-                //Load password
-                retValue = GetEncryptedPassword();
-            }
-            else
+            //if (GenerateSki())
+            //{
+            //    //Load password
+            //    retValue = GetEncryptedPassword();
+            //}
+            //else
             {
                 //Get a certificate
                 retValue = GetCertificate();
