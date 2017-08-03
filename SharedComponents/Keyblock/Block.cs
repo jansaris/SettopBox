@@ -35,7 +35,7 @@ namespace SharedComponents.Keyblock
             //Take the minimal last date per block 
             //often we got 2 blocks per channel, 1 block per week
             //So take always the last block as reference point for refresh
-            _refreshDate = grouped.Min(g => g.Value.Last().To);
+            _refreshDate = grouped.Min(g => g.Value?.Last()?.To) ?? DateTime.MinValue;
             //And save the ID's of the channels for logging purposes
             _refreshDateChannelIds = grouped.Where(g => g.Value.Last().To == _refreshDate)
                                             .Select(k => k.Key)

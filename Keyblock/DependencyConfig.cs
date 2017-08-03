@@ -1,6 +1,5 @@
 ﻿using System;
 using log4net;
-using SharedComponents;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
 

@@ -21,6 +21,7 @@ namespace Keyblock
 
         //Filenames
         string SignedCertificateFile => Path.Combine(_settings.DataFolder, "SignedCert.der");
+        private string CertificateRequestFile => Path.Combine(_settings.DataFolder, "Request.csr");
         public string KeyblockFile => Path.Combine(_settings.DataFolder, _settings.KeyblockFile);
 
         readonly ILog _logger;
@@ -51,6 +52,7 @@ namespace Keyblock
             _settings.UpdateEmail($"{_settings.MachineId}.{t64}@{_settings.EmailHost}");
             _logger.Debug($"Using email: {_settings.Email}");
             _certificateRequest.Generate();
+            File.WriteAllText(CertificateRequestFile, $"{_certificateRequest}");
             var msg = Protocol.GetCertificate(_certificateRequest);
 
             _logger.Debug($"Requesting Certificate: {msg}");
@@ -71,7 +73,7 @@ namespace Keyblock
 
             var response = _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort);
 
-            if (response == null) return false;
+            if (response == null || response.Length == 0) return false;
             _sessionKey = response.Skip(4).Take(16).ToArray();
             _timestamp = Encoding.ASCII.GetString(response.Skip(20).Take(19).ToArray());
 
@@ -164,6 +166,30 @@ namespace Keyblock
             return generated;
         }
 
+        bool GetVksConnectionInfo()
+        {
+            var msg = Protocol.GetVksConnectionInfo(_timestamp, _ski, _sessionKey);
+            if (msg == null)
+            {
+                _logger.Debug("No VKS info in protocol");
+                return true;
+            }
+            var response = _sslClient.SendAndReceive(msg, _settings.VcasServer, _settings.VcasPort + 1, false);
+
+            if (response == null || response.Length <= 8)
+            {
+                _logger.Error("Failed to GetVKSConnectionInfo, no valid response!");
+                return false;
+            }
+
+            var encryptedPassword = response.Skip(4).Take(response.Length - 4).ToArray();
+            var decrypted = RC4.Decrypt(_sessionKey, encryptedPassword);
+            var passwordHex = Encoding.ASCII.GetString(decrypted.Skip(4).ToArray());
+
+            _logger.Info($"GetEncryptedPassword completed: {passwordHex}");
+            return true;
+        }
+
         bool LoadKeyBlock()
         {
             var hash = GenerateSignedHash();
@@ -225,12 +251,12 @@ namespace Keyblock
             var retValue = GetSessionKey();
             if (!retValue) return false;
             //Look if we already have a valid certificate
-            //if (GenerateSki())
-            //{
-            //    //Load password
-            //    retValue = GetEncryptedPassword();
-            //}
-            //else
+            if (GenerateSki())
+            {
+                //Load password
+                retValue = GetEncryptedPassword();
+            }
+            else
             {
                 //Get a certificate
                 retValue = GetCertificate();
@@ -238,6 +264,7 @@ namespace Keyblock
                 //And save the password
                 retValue = retValue && SaveEncryptedPassword();
             }
+            retValue = retValue && GetVksConnectionInfo();
             retValue = retValue && LoadKeyBlock();
             retValue = retValue && ValidateKeyBlock(true);
             return retValue;
@@ -263,8 +290,8 @@ namespace Keyblock
                 _logger.Warn("Remove certificate request file");
                 _certificateRequest.CleanUp();
             }
-            _settings.GenerateClientId();
-            _settings.GenerateMachineId();
+            _settings.GenerateNewClientId();
+            _settings.GenerateNewMachineId();
         }
         
         static string BytesAsHex(byte[] bytes)

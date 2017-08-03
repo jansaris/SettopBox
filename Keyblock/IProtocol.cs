@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Keyblock
+﻿namespace Keyblock
 {
     public interface IProtocol
     {
@@ -9,5 +7,6 @@ namespace Keyblock
         byte[] SaveEncryptedPassword(string timestamp, string ski, string password, byte[] sessionKey);
         byte[] GetEncryptedPassword(string timestamp, string ski, byte[] sessionKey);
         byte[] LoadKeyBlock(string timestamp, string ski, string hash, byte[] sessionKey);
+        byte[] GetVksConnectionInfo(string timestamp, string ski, byte[] sessionKey);
     }
 }

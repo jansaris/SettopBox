@@ -19,7 +19,9 @@ namespace Keyblock
         protected override string Name => "Keyblock";
 
         public string MachineId { get; private set; }
+        public bool GenerateMachineId { get; private set; }
         public string ClientId { get; private set; }
+        public bool GenerateClientId { get; private set; }
 
         // Cert data
         public string Address { get; private set; }
@@ -103,12 +105,18 @@ namespace Keyblock
         public override void Load()
         {
             base.Load();
-            if (string.IsNullOrWhiteSpace(ClientId)) GenerateClientId();
-            if (string.IsNullOrWhiteSpace(MachineId)) GenerateMachineId();
+            if (string.IsNullOrWhiteSpace(ClientId)) GenerateNewClientId();
+            if (string.IsNullOrWhiteSpace(MachineId)) GenerateNewMachineId();
         }
 
-        public void GenerateMachineId()
+        public void GenerateNewMachineId()
         {
+            if (!GenerateMachineId)
+            {
+                Logger.Debug("Generation of Machine ID disabled in settings");
+                return;
+            }
+
             Logger.Debug("Generate new MachineID");
             var buf = new byte[10];
             _random.NextBytes(buf);
@@ -122,23 +130,29 @@ namespace Keyblock
             Save();
         }
 
-        public void UpdateEmail(string newMailAdress)
+        public void GenerateNewClientId()
         {
-            Email = newMailAdress;
+            if (!GenerateClientId)
+            {
+                Logger.Debug("Generation of Client ID disabled in settings");
+                return;
+            }
+
+            Logger.Debug($"Generate new ClientId");
+            var text = "";
+            var possible = "abcd0123456789";
+            var random = new Random();
+            for (var i = 0; i < 56; i++)
+                text += possible[random.Next(0, possible.Length)];
+
+            ClientId = text;
+            Logger.Debug($"Your ClientID is: {ClientId}");
             Save();
         }
 
-        public void GenerateClientId()
+        public void UpdateEmail(string newMailAdress)
         {
-            Logger.Debug("Generate new ClientId");
-            var buf = new byte[28];
-            _random.NextBytes(buf);
-            ClientId = string.Empty;
-            foreach (var b in buf)
-            {
-                ClientId += (b & 0xFF).ToString("x2");
-            }
-            Logger.Debug($"Your ClientID is: {ClientId}");
+            Email = newMailAdress;
             Save();
         }
 

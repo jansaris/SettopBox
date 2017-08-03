@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using log4net;
 
 namespace Keyblock
@@ -66,6 +63,11 @@ namespace Keyblock
             _logger.Debug($"GetAllChannelKeys from server: {unencryptedMsgPart}{encryptedMsgPart}");
 
             return msg.ToArray();
+        }
+
+        public byte[] GetVksConnectionInfo(string timestamp, string ski, byte[] sessionKey)
+        {
+            return null;
         }
     }
 }

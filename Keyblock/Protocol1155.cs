@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Text;
 using log4net;
@@ -9,101 +8,76 @@ namespace Keyblock
     {
         private readonly Settings _settings;
         private readonly ILog _logger;
-        private string machineId = "0002024C7138";
-        private string clientId = "";
 
         public Protocol1155(Settings settings, ILog logger)
         {
             _settings = settings;
             _logger = logger;
-
-            GenerateClientId(17);
         }
 
         public string GetCertificate(X509CertificateRequest certificateRequest)
         {
-            var msg = $"{_settings.MessageFormat}~{clientId}~getCertificate~{_settings.Company}~NA~NA~{certificateRequest}~{_settings.Common}~{_settings.Address}~ ~{_settings.City}~{_settings.Province}~{_settings.ZipCode}~{_settings.Country}~{_settings.Telephone}~{_settings.Email}~{machineId}~{_settings.ChallengePassword}~";
+            var msg = $"{_settings.ClientId}~getCertificate~{_settings.Company}~NA~NA~{certificateRequest}~{_settings.Common}~{_settings.Address}~ ~{_settings.City}~{_settings.Province}~{_settings.ZipCode}~{_settings.Country}~{_settings.Telephone}~{_settings.Email}~{_settings.MachineId}~{_settings.ChallengePassword}~";
+            msg = Add1155Header(msg);
             return msg;
         }
 
         public string GetSessionKey()
         {
-            return $"{_settings.MessageFormat}~{clientId}~CreateSessionKey~{_settings.Company}~{machineId}~";
-        }
-
-        public byte[] SaveEncryptedPassword(string timestamp, string ski, string password, byte[] sessionKey)
-        {
-            var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{timestamp}~{machineId}~";
-            var encryptedMsgPart = $"{clientId}~SaveEncryptedPassword~{_settings.Company}~{ski}~64~{password}~";
-
-            _logger.Debug($"Save encryption password: {unencryptedMsgPart}{encryptedMsgPart}");
-
-            var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
-            msg.AddRange(RC4.Encrypt(sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
-
-            return msg.ToArray();
+            var msg = $"{_settings.ClientId}~CreateSessionKey~{_settings.Company}~{_settings.MachineId}~";
+            msg = Add1155Header(msg);
+            return msg;
         }
 
         public byte[] GetEncryptedPassword(string timestamp, string ski, byte[] sessionKey)
         {
-            var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{timestamp}~{machineId}~";
-            var encryptedMsgPart = $"{clientId}~GetEncryptedPassword~{_settings.Company}~{ski}~";
+            var unencryptedMsgPart = $"{_settings.Company}~{timestamp}~{_settings.MachineId}~";
+            var encryptedMsgPart = $"{_settings.ClientId}~GetEncryptedPassword~{_settings.Company}~{ski}~";
 
-            _logger.Debug($"Get encryption password: {unencryptedMsgPart}{encryptedMsgPart}");
-
-            var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
-            msg.AddRange(RC4.Encrypt(sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
-
-            return msg.ToArray();
+            return Rc4Encrypt(unencryptedMsgPart, encryptedMsgPart, sessionKey, "Get encryption password");
         }
 
-        public byte[] LoadKeyBlockNew(string timestamp, string ski, string hash, byte[] sessionKey)
+        public byte[] SaveEncryptedPassword(string timestamp, string ski, string password, byte[] sessionKey)
         {
-            var unencryptedMsgPart = $"{_settings.MessageFormat}~00664~{_settings.Company}~{timestamp}~{machineId}~";
-            var encryptedMsgPart = $"{clientId}~GetCurrentChannelKeys~{_settings.Company}~{ski.ToUpper()}~{hash}~{machineId}~ ~ ~";
+            var unencryptedMsgPart = $"{_settings.Company}~{timestamp}~{_settings.MachineId}~";
+            var encryptedMsgPart = $"{_settings.ClientId}~SaveEncryptedPassword~{_settings.Company}~{ski}~64~{password}~";
 
-            var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
-            msg.AddRange(RC4.Encrypt(sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
-
-            _logger.Debug($"GetAllChannelKeys from server: {unencryptedMsgPart}{encryptedMsgPart}");
-
-            return msg.ToArray();
+            return Rc4Encrypt(unencryptedMsgPart, encryptedMsgPart, sessionKey, "Save encryption password");
         }
 
         public byte[] LoadKeyBlock(string timestamp, string ski, string hash, byte[] sessionKey)
         {
-            //var unencryptedMsgPart = $"{_settings.MessageFormat}~00664~{_settings.Company}~{timestamp}~{machineId}~";
-            //var encryptedMsgPart = $"{clientId}~GetAllChannelKeys~{_settings.Company}~{ski}~{hash}~{machineId}~ ~";
-            //1155~00664~KPN-GHM~07/20/2017 19:02:52~0002024C7138~
-            var unencryptedMsgPart = $"{_settings.MessageFormat}~{_settings.Company}~{timestamp}~{machineId}~";
-            var encryptedMsgPart = $"{clientId}~GetAllChannelKeys~{_settings.Company}~{ski}~{hash}~{machineId}~ ~ ~";
+            var unencryptedMsgPart = $"{_settings.Company}~{timestamp}~{_settings.MachineId}~";
+            var encryptedMsgPart = $"{_settings.ClientId}~GetAllChannelKeys~{_settings.Company}~{ski.ToUpper()}~{hash}~{_settings.MachineId}~ ~ ~";
+
+            return Rc4Encrypt(unencryptedMsgPart, encryptedMsgPart, sessionKey, "GetAllChannelKeys from server");
+        }
+
+        public byte[] GetVksConnectionInfo(string timestamp, string ski, byte[] sessionKey)
+        {
+            var unencryptedMsgPart = $"{_settings.Company}~{timestamp}~{_settings.MachineId}~";
+            var encryptedMsgPart = $"{_settings.ClientId}~GetVKSConnectionInfo~{_settings.Company}~{ski.ToUpper()}~";
+
+            return Rc4Encrypt(unencryptedMsgPart, encryptedMsgPart, sessionKey, "GetVKSConnectionInfo");
+        }
+
+        private byte[] Rc4Encrypt(string unencryptedMsgPart, string encryptedMsgPart, byte[] sessionKey, string debugMessage)
+        {
+            var encryptedData = RC4.Encrypt(sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart));
+            unencryptedMsgPart = Add1155Header(unencryptedMsgPart, encryptedData.Length);
+
+            _logger.Debug($"{debugMessage}: {unencryptedMsgPart}{encryptedMsgPart}");
 
             var msg = Encoding.ASCII.GetBytes(unencryptedMsgPart).ToList();
-            msg.AddRange(RC4.Encrypt(sessionKey, Encoding.ASCII.GetBytes(encryptedMsgPart)));
-
-            _logger.Debug($"GetAllChannelKeys from server: {unencryptedMsgPart}{encryptedMsgPart}");
+            msg.AddRange(encryptedData);
 
             return msg.ToArray();
         }
 
-        public void GenerateClientId(int length)
+        private string Add1155Header(string message, int encryptedBytesCount = 0)
         {
-
-            var text = "";
-            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var random = new Random();
-            for (var i = 0; i < length; i++)
-                text += possible[random.Next(0, possible.Length)];
-
-            clientId = text;
-            
-            //var buf = new byte[length/2];
-            //new Random().NextBytes(buf);
-            //clientId = string.Empty;
-            //foreach (var b in buf)
-            //{
-            //    clientId += (b & 0xFF).ToString("x2");
-            //}
+            var length = Encoding.ASCII.GetByteCount("1155~00000~") + Encoding.ASCII.GetByteCount(message) + encryptedBytesCount;
+            return $"1155~{length:D5}~{message}";
         }
     }
 }
