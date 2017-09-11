@@ -145,7 +145,7 @@ namespace KeyblockTestServer
             return Path.Combine(Program.CommunicationsFolder, name);
         }
 
-        byte[] Read(Stream stream)
+        public static byte[] Read(Stream stream)
         {
             // Read the  message sent by the server.
             Logger.Debug("Start reading bytes from the client");

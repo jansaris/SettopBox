@@ -60,6 +60,7 @@ namespace Keyblock
         public string KeyblockChannelsToIgnore { get; set; }
         public string KeyblockChannelsToMonitor { get; set; }
         public bool KeepBlockIfChannelsAreOutdated { get; set; }
+        public bool AutoCleanUp { get; set; }
 
         public IList<int> GetChannelsToIgnore()
         {
