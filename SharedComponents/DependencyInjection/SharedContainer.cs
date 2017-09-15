@@ -17,7 +17,9 @@ namespace SharedComponents.DependencyInjection
 
         static Container Create(string log4NetConfig)
         {
-            XmlConfigurator.ConfigureAndWatch(new FileInfo(log4NetConfig));
+            var logfile  = new FileInfo(log4NetConfig);
+            Console.WriteLine($"Load logging configuration from: {logfile.FullName}");
+            XmlConfigurator.ConfigureAndWatch(logfile);
             Logger.Debug("Create container");
             var container = new Container();
             container.Register<IThreadHelper, ThreadHelper>(Lifestyle.Singleton);
