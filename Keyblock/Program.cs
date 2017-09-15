@@ -118,7 +118,15 @@ namespace Keyblock
                 }
                 Logger.Error($"Failed to download a new keyblock at run {i}/{_settings.MaxRetries}");
                 if (ModuleShouldStop()) return;
-                _keyblock.CleanUp();
+                if (_settings.AutoCleanUp)
+                {
+                    Logger.Info("Clean up data of previous unsuccessfull run");
+                    _keyblock.CleanUp();
+                }
+                else
+                {
+                    Logger.Warn("Don't clean up data of previous run");
+                }
                 Logger.Info($"Give the server '{_settings.WaitOnFailingBlockRetrievalInMilliseconds}ms' time");
                 if (ModuleShouldStop()) return;
                 Thread.Sleep(_settings.WaitOnFailingBlockRetrievalInMilliseconds);
