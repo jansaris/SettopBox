@@ -99,20 +99,18 @@ namespace KeyblockTestServer
         private string _rootDirectory;
         private HttpListener _listener;
         private int _port;
-        private string _hostname = "*";
         private readonly string _fallbackServer;
 
         /// <summary>
         /// Construct server with given port.
         /// </summary>
         /// <param name="path">Directory path to serve.</param>
-        /// <param name="host">Hostname of the server.</param>
         /// <param name="port">Port of the server.</param>
         /// <param name="fallback">Fallback webserver to query if file is not found</param>
-        public SimpleHttpServer(string path, string host,  int port, string fallback)
+        public SimpleHttpServer(string path, int port, string fallback)
         {
             _fallbackServer = fallback;
-            Initialize(path, host, port);
+            Initialize(path, port);
         }
 
         /// <summary>
@@ -129,7 +127,7 @@ namespace KeyblockTestServer
             try
             {
                 _listener = new HttpListener();
-                _listener.Prefixes.Add($"http://{_hostname}:{_port}/");
+                _listener.Prefixes.Add($"http://*:{_port}/");
                 _listener.Start();
             }
             catch (Exception ex)
@@ -241,10 +239,9 @@ namespace KeyblockTestServer
             }
         }
 
-        private void Initialize(string path, string host,  int port)
+        private void Initialize(string path,  int port)
         {
             _rootDirectory = path;
-            _hostname = host;
             _port = port;
             _serverThread = new Thread(Listen);
             _serverThread.Start();

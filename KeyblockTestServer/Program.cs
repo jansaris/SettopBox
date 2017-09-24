@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using log4net;
@@ -20,8 +21,8 @@ namespace KeyblockTestServer
 
         private static string _appDataFolder = @".\KeyblockServerPrograms";
         internal static string MacAddress = "001234567890";
-        private static string _ipAddress = "127.0.0.1";
-        private static string _fallback = "http://www.google.nl";
+        private static string _fallbackWebServer = "http://www.google.nl";
+        private static string _fallbackKeyServer = "10.10.10.10";
 
         private const int VcasPort = 12697;
         private const int VcasPasswordPort = 12698;
@@ -43,7 +44,7 @@ namespace KeyblockTestServer
                 XmlConfigurator.ConfigureAndWatch(new FileInfo("Log4net.config"));
                 if (!ParseArguments(args))
                 {
-                    Logger.Error("Please use: KeyblockTestServer.exe <appdata folder> <Servers MacAddress> <Servers Ip-address> <Fallback web-server>");
+                    Logger.Error("Please use: KeyblockTestServer.exe <appdata folder> <Servers MacAddress> <Fallback web-server> <Fallback keyblock server ip adress");
                     return;
                 }
                 var program = new Program();
@@ -93,12 +94,12 @@ namespace KeyblockTestServer
             Logger.Info($"Found MacAddress on the commandline: {args[1]}");
             MacAddress = args[1];
             
-            Logger.Info($"Found IpAddress on the commandline: {args[2]}");
-            _ipAddress = args[2];
-            
-            Logger.Info($"Found fallback web address for web server on the commandline: {args[3]}");
-            _fallback = args[3];
-            
+            Logger.Info($"Found fallback web address for web server on the commandline: {args[2]}");
+            _fallbackWebServer = args[2];
+
+            Logger.Info($"Found fallback key server on the commandline: {args[3]}");
+            _fallbackKeyServer = args[3];
+
             OpenSslFolder = Path.Combine(_appDataFolder, "Openssl");
             CommunicationsFolder = Path.Combine(_appDataFolder, "KeyblockMessages");
             CommunicationLogFolder = Path.Combine(_appDataFolder, "ServerCommunication");
@@ -110,29 +111,29 @@ namespace KeyblockTestServer
         {
             if (!Directory.Exists(CommunicationLogFolder)) Directory.CreateDirectory(CommunicationLogFolder);
 
-            Logger.Info($"Start listening at {_ipAddress}:{VksPort}");
+            Logger.Info($"Start listening at port:{VksPort}");
             _vks = new TcpListener(GetIpAddress(), VksPort);
             _vks.Start();
             StartAccept(_vks, HandleKeyblock);
 
-            Logger.Info($"Start listening at {_ipAddress}:{VcasPasswordPort}");
+            Logger.Info($"Start listening at port:{VcasPasswordPort}");
             _password = new TcpListener(GetIpAddress(), VcasPasswordPort);
             _password.Start();
             StartAccept(_password, HandlePassword);
 
-            Logger.Info($"Start listening at {_ipAddress}:{VcasPort}");
+            Logger.Info($"Start listening at port:{VcasPort}");
             _ssl = new SslTcpServer(_certificateFile, CertificatePassword);
             _vcs = new TcpListener(GetIpAddress(), VcasPort);
             _vcs.Start();
             StartAccept(_vcs, HandleVcas);
 
-            Logger.Info($"Start listening at {_ipAddress}:{12686}");
+            Logger.Info($"Start listening at port:{12686} with keyblock server at {_fallbackKeyServer}");
             _start = new TcpListener(GetIpAddress(), 12686);
             _start.Start();
             StartAccept(_start, HandleStartBox);
 
-            Logger.Info($"Start listening at {_ipAddress}:{WebPort} with a fallback to {_fallback}");
-            _webServer = new SimpleHttpServer(Path.Combine(_appDataFolder, "www"), _ipAddress, WebPort, _fallback);
+            Logger.Info($"Start listening at port:{WebPort} with a fallback to {_fallbackWebServer}");
+            _webServer = new SimpleHttpServer(Path.Combine(_appDataFolder, "www"), WebPort, _fallbackWebServer);
         }
 
         private void StartAccept(TcpListener listener, Action<IAsyncResult> handler)
@@ -210,13 +211,24 @@ namespace KeyblockTestServer
                 var client = _start.EndAcceptTcpClient(res);
                 //proceed
                 Logger.Debug("Handle the start box stream");
-                var stream = client.GetStream();
-                var data = KeyblockCall.Read(stream);
+                var clientStream = client.GetStream();
+                var data = KeyblockCall.Read(clientStream);
                 Logger.Debug($"Read {data.Length} bytes from the start box stream");
+                File.WriteAllBytes(Path.Combine(_appDataFolder, "KeyblockMessages", "12686.request"), data);
+
+                Logger.Info("Connect to remote to handle start box request");
+                var remote = new TcpClient();
+                remote.Connect(_fallbackKeyServer, 12686);
+                var remoteStream = remote.GetStream();
+                remoteStream.Write(data, 0, data.Length);
+                var buff = new byte[2048];
+                var size = remoteStream.Read(buff, 0, buff.Length);
+                File.WriteAllBytes(Path.Combine(_appDataFolder, "KeyblockMessages", "12686.response"), buff.Take(size).ToArray());
+
                 var response = File.ReadAllBytes(Path.Combine(_appDataFolder, "KeyblockMessages", "12686.response"));
-                Logger.Debug($"Write {response.Length} bytes to the start box stream");
-                stream.Write(response, 264, response.Length - 264);
-                stream.Flush();
+                Logger.Info($"Write {response.Length} bytes to the start box stream");
+                clientStream.Write(response, 0, response.Length);
+                clientStream.Flush();
                 client.Close();
             }
             catch (Exception ex)
@@ -227,7 +239,7 @@ namespace KeyblockTestServer
 
         IPAddress GetIpAddress()
         {
-            return IPAddress.Parse(_ipAddress);
+            return IPAddress.Any;
         }
     }
 }
