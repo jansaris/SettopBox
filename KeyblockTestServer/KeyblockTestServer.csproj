@@ -49,6 +49,7 @@
     <Compile Include="CertGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleHTTPServer.cs" />
     <Compile Include="SslTcpServer .cs" />
     <Compile Include="KeyblockCall.cs" />
   </ItemGroup>

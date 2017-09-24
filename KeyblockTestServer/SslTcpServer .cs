@@ -19,7 +19,7 @@ namespace KeyblockTestServer
 
         public bool ProcessClient(TcpClient client)
         {
-            Logger.Info("Handle a client...");
+            Logger.Debug("Handle a client...");
             // A client has connected. Create the 
             // SslStream using the client's network stream.
             SslStream sslStream = new SslStream(client.GetStream(), false);

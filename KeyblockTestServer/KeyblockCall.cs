@@ -25,8 +25,7 @@ namespace KeyblockTestServer
         {
             try
             {
-                Logger.Info("Handle the keyblock stream");
-                Logger.Info("Waiting for client message...");
+                Logger.Debug("Waiting for client message...");
                 var data = Read(stream);
                 var message = Encoding.ASCII.GetString(data);
                 if (rc4Encrypted)
@@ -92,9 +91,9 @@ namespace KeyblockTestServer
 
         private string Decrypt(string message, byte[] data)
         {
-            var encrytedIndex = message.IndexOf(Program.MacAdress, StringComparison.Ordinal);
+            var encrytedIndex = message.IndexOf(Program.MacAddress, StringComparison.Ordinal);
             if (encrytedIndex < 0) return string.Empty;
-            var unEncryptedMessage = message.Substring(0, encrytedIndex + Program.MacAdress.Length + 1);
+            var unEncryptedMessage = message.Substring(0, encrytedIndex + Program.MacAddress.Length + 1);
             var unEncryptedBytes = Encoding.ASCII.GetBytes(unEncryptedMessage);
             var encryptedBytes = data.Skip(unEncryptedBytes.Length).ToArray();
             var decrypted = RC4.Decrypt(_sessionKey, encryptedBytes);
