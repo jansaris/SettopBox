@@ -50,6 +50,7 @@ namespace KeyblockTestServer
             catch (Exception ex)
             {
                 Logger.Error($"Something went wrong: {ex.Message}");
+                Logger.Error(ex.StackTrace);
                 return false;
             }
             finally

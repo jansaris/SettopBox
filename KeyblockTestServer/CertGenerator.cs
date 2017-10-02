@@ -1,33 +1,48 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using log4net;
 
 namespace KeyblockTestServer
 {
     public class CertGenerator
     {
+        private readonly ILog _logger = LogManager.GetLogger(typeof(CertGenerator));
+
         public byte[] SignWithOpenSsl(string pemcsr)
         {
-            var batch = "generate.bat";
-            var responseFile = Path.Combine(Program.OpenSslFolder, "response.der");
-            if(File.Exists(responseFile)) File.Delete(responseFile);
-            File.WriteAllText(Path.Combine(Program.OpenSslFolder, "Certificate.csr"), pemcsr);
-            var process = new Process
+            try
             {
-                StartInfo = new ProcessStartInfo
+                var batch = "generate.bat";
+                var responseFile = Path.Combine(Program.OpenSslFolder, "response.der");
+                if (File.Exists(responseFile)) File.Delete(responseFile);
+                File.WriteAllText(Path.Combine(Program.OpenSslFolder, "Certificate.csr"), pemcsr);
+                var process = new Process
                 {
-                    WorkingDirectory = Program.OpenSslFolder,
-                    FileName = Path.Combine(Program.OpenSslFolder, batch)
-                }
-            };
-            process.Start();
-            process.WaitForExit();
+                    StartInfo = new ProcessStartInfo
+                    {
+                        WorkingDirectory = Program.OpenSslFolder,
+                        FileName = Path.Combine(Program.OpenSslFolder, batch)
+                    }
+                };
+                process.Start();
+                process.WaitForExit();
 
-            while (!File.Exists(responseFile))
-            {
-                Task.Delay(50).Wait();
+                for (var i = 0; i < 10; i++)
+                {
+                    if (File.Exists(responseFile)) break;
+                    Task.Delay(50).Wait();
+                }
+
+                return File.ReadAllBytes(responseFile);
             }
-            return File.ReadAllBytes(responseFile);
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to generate a certificate: {ex.Message}");
+                _logger.Error(ex.StackTrace);
+                throw;
+            }
         }
     }
 }
