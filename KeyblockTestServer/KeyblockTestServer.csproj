@@ -49,6 +49,7 @@
     <Compile Include="CertGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleHTTPServer.cs" />
     <Compile Include="SslTcpServer .cs" />
     <Compile Include="KeyblockCall.cs" />
   </ItemGroup>
@@ -56,6 +57,7 @@
     <None Include="App.config" />
     <None Include="Log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
   </ItemGroup>
