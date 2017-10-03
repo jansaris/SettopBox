@@ -100,7 +100,16 @@ namespace KeyblockTestServer
             Logger.Info($"Found fallback key server on the commandline: {args[3]}");
             _fallbackKeyServer = args[3];
 
-            OpenSslFolder = Path.Combine(_appDataFolder, "Openssl");
+            if (args.Length > 4)
+            {
+                Logger.Info($"Use custom OpenSSL folder {args[4]}");
+                OpenSslFolder = args[4];
+            }
+            else
+            {
+                OpenSslFolder = Path.Combine(_appDataFolder, "Openssl");
+            }
+            
             CommunicationsFolder = Path.Combine(_appDataFolder, "KeyblockMessages");
             CommunicationLogFolder = Path.Combine(_appDataFolder, "ServerCommunication");
             _certificateFile = Path.Combine(_appDataFolder, "Certificates", "servercert.pfx");

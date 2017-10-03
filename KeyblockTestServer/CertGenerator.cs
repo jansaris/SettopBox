@@ -18,12 +18,14 @@ namespace KeyblockTestServer
                 var responseFile = Path.Combine(Program.OpenSslFolder, "response.der");
                 if (File.Exists(responseFile)) File.Delete(responseFile);
                 File.WriteAllText(Path.Combine(Program.OpenSslFolder, "Certificate.csr"), pemcsr);
+                var executable = Path.Combine(Program.OpenSslFolder, batch);
+                _logger.Info($"Start generate certificate using: {executable} with working directory {Program.OpenSslFolder}");
                 var process = new Process
                 {
                     StartInfo = new ProcessStartInfo
                     {
                         WorkingDirectory = Program.OpenSslFolder,
-                        FileName = Path.Combine(Program.OpenSslFolder, batch)
+                        FileName = executable
                     }
                 };
                 process.Start();
