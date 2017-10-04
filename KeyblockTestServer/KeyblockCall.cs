@@ -10,6 +10,7 @@ namespace KeyblockTestServer
 {
     public class KeyblockCall
     {
+        private static readonly object SyncRoot = new object();
         private static readonly ILog Logger = LogManager.GetLogger(typeof(KeyblockCall));
         private readonly byte[] _sessionKey;
 
@@ -19,6 +20,23 @@ namespace KeyblockTestServer
                 .Skip(4)
                 .Take(16)
                 .ToArray();
+        }
+   
+        private int GetCallCount()
+        {
+            lock (SyncRoot)
+            {
+                var file = Path.Combine(Program.CommunicationLogFolder, "call.count");
+                if (!File.Exists(file))
+                {
+                    File.WriteAllText(file, "1");
+                    return 1;
+                }
+                var count = Convert.ToInt32(File.ReadAllText(file));
+                count++;
+                File.WriteAllText(file, count.ToString());
+                return count;
+            }
         }
 
         public bool Handle(Stream stream, bool rc4Encrypted)
@@ -35,10 +53,11 @@ namespace KeyblockTestServer
                 Logger.Info($"Received {data.Length} bytes: {message}");
                 var response = GetResponseMessage(message);
 
+                var call = GetCallCount();
+
                 //Save communication for analysis
-                File.WriteAllBytes(Path.Combine(Program.CommunicationLogFolder, $"{response.Item1}.request"), data);
-                File.WriteAllBytes(Path.Combine(Program.CommunicationLogFolder, $"{response.Item1}.response"),
-                    response.Item2);
+                File.WriteAllBytes(Path.Combine(Program.CommunicationLogFolder, $"{call}_{response.Item1}.request"), data);
+                File.WriteAllBytes(Path.Combine(Program.CommunicationLogFolder, $"{call}_{response.Item1}.response"), response.Item2);
 
                 // Write a message to the client.
                 Logger.Info($"Sending message: {response.Item2.Length} bytes");
@@ -63,30 +82,36 @@ namespace KeyblockTestServer
         {
             if (message.Contains("CreateSessionKey"))
             {
+                Logger.Info("Generate 'CreateSessionKey' response");
                 var data = GenerateCreateSessionKeyResponse(File.ReadAllBytes(GetPath("GetSessionKey.response")));
                 return new Tuple<string, byte[]>("CreateSessionKey", data);
             }
             if (message.Contains("getCertificate"))
             {
+                Logger.Info("Generate 'getCertificate' response");
                 var data = GenerateCertificateResponse(message);
                 return new Tuple<string, byte[]>("getCertificate", data);
             }
             if (message.Contains("SaveEncryptedPassword"))
             {
+                Logger.Info("Generate 'SaveEncryptedPassword' response");
                 var data = File.ReadAllBytes(GetPath(@"SaveEncryptedPassword.response"));
                 return new Tuple<string, byte[]>("SaveEncryptedPassword", data);
             }
             if (message.Contains("GetVKSConnectionInfo"))
             {
+                Logger.Info("Generate 'GetVKSConnectionInfo' response");
                 var data = File.ReadAllBytes(GetPath(@"GetVKSConnectionInfo.response"));
                 return new Tuple<string, byte[]>("GetVKSConnectionInfo", data);
             }
             if (message.Contains("GetAllChannelKeys"))
             {
+                Logger.Info("Generate 'GetAllChannelKeys' response");
                 var data = File.ReadAllBytes(GetPath(@"GetAllChannelKeys.response"));
                 return new Tuple<string, byte[]>("GetAllChannelKeys", data);
             }
 
+            Logger.Info("Generate 'Unkown call' response");
             return new Tuple<string, byte[]>("Unkown call", Encoding.ASCII.GetBytes("Unknown message"));
         }
 
