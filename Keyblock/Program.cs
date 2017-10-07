@@ -48,6 +48,7 @@ namespace Keyblock
         {
             try
             {
+                Logger.Info("Run in Single Test Mode");
                 _settings.Load();
                 _keyblock.DownloadNew();
             }
