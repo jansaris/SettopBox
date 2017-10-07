@@ -25,15 +25,37 @@ namespace Keyblock
             _keyblock = keyblock;
         }
 
-        static void Main()
+        static void Main(string[] args)
         {
             var container = SharedContainer.CreateAndFill<DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
-            prog.Start();
-            Console.WriteLine("Press enter to exit");
-            Console.ReadLine();
-            prog.Stop();
+            if (args.Length > 0 && args[0].ToLower() == "-single")
+            {
+                prog.SingleRun();
+            }
+            else
+            {
+                prog.Start();
+                Console.WriteLine("Press enter to exit");
+                Console.ReadLine();
+                prog.Stop();
+            }
+            
             container.Dispose();
+        }
+
+        private void SingleRun()
+        {
+            try
+            {
+                _settings.Load();
+                _keyblock.DownloadNew();
+            }
+            catch (Exception ex)
+            {
+                Logger.Fatal($"Something went wrong: {ex.Message}");
+                Logger.Error(ex.StackTrace);
+            }
         }
 
         void LoadKeyBlockLoop()
