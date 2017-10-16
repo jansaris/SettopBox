@@ -55,6 +55,8 @@
     <Compile Include="JavascriptParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RtspDataParser.cs" />
+    <Compile Include="RtspDataReceiver.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
