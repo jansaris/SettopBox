@@ -62,7 +62,9 @@
     <Compile Include="ChannelList.cs" />
     <Compile Include="DependencyConfig.cs" />
     <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="Grabber.cs" />
+    <Compile Include="GrabberFactory.cs" />
+    <Compile Include="IGrabber.cs" />
+    <Compile Include="ObnGrabber.cs" />
     <Compile Include="IO\CachedWebDownloader.cs" />
     <Compile Include="IO\CacheObject.cs" />
     <Compile Include="Models\Channel.cs" />
@@ -71,6 +73,7 @@
     <Compile Include="Models\Program.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RawGrabber.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="GenreTranslator.cs" />
     <Compile Include="XmlTv.cs" />

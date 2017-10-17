@@ -15,18 +15,18 @@ namespace EpgGrabber
     {
         readonly IThreadHelper _threadHelper;
         readonly Settings _settings;
-        readonly Grabber _epgGrabber;
+        readonly GrabberFactory _epgGrabberFactory;
         readonly ChannelList _channelList;
         readonly CachedWebDownloader _webDownloader;
         Thread _runningEpgGrabTask;
         DateTime? _lastRetrieval;
         DateTime? _nextRetrieval;
 
-        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, Grabber epgGrabber, IWebDownloader webDownloader, ChannelList channelList, LinuxSignal signal, ModuleCommunication communication) : base(logger, signal, communication)
+        public Program(ILog logger, IThreadHelper threadHelper, Settings settings, GrabberFactory epgGrabberFactory, IWebDownloader webDownloader, ChannelList channelList, LinuxSignal signal, ModuleCommunication communication) : base(logger, signal, communication)
         {
             _threadHelper = threadHelper;
             _settings = settings;
-            _epgGrabber = epgGrabber;
+            _epgGrabberFactory = epgGrabberFactory;
             _webDownloader = webDownloader as CachedWebDownloader;
             _channelList = channelList;
         }
@@ -57,7 +57,7 @@ namespace EpgGrabber
 
         protected override void StartModule()
         {
-            Logger.Info("Welcome to EPG Grabber");
+            Logger.Info("Welcome to EPG ObnGrabber");
             _settings.Load();
             _runningEpgGrabTask = _threadHelper.RunSafeInNewThread(DownloadEpgGrabberLoop, Logger, ThreadPriority.Lowest);
         }
@@ -85,7 +85,9 @@ namespace EpgGrabber
             if (ModuleShouldStop()) return;
             try
             {
-                var epgFile = _epgGrabber.Download(ModuleShouldStop);
+
+                var grabber = _epgGrabberFactory.Create();
+                var epgFile = grabber.Download(ModuleShouldStop);
                 if (epgFile != null)
                 {
                     SignalNewData(DataType.Epg, epgFile);

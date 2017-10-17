@@ -11,7 +11,7 @@ using WebHelper;
 
 namespace EpgGrabber
 {
-    public class Grabber
+    public class ObnGrabber : IGrabber
     {
         readonly ILog _logger;
         readonly Settings _settings;
@@ -24,7 +24,7 @@ namespace EpgGrabber
         Func<bool> _stop;
 
 
-        public Grabber(ILog logger, Settings settings, IDownloader downloader, Compression compression, XmlTv xmlTv, GenreTranslator genreTranslator, ChannelList channelList)
+        public ObnGrabber(ILog logger, Settings settings, IDownloader downloader, Compression compression, XmlTv xmlTv, GenreTranslator genreTranslator, ChannelList channelList)
         {
             _logger = logger;
             _settings = settings;
