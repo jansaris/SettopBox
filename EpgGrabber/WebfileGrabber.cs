@@ -5,12 +5,12 @@ using log4net;
 
 namespace EpgGrabber
 {
-    public class RawGrabber : IGrabber
+    public class WebfileGrabber : IGrabber
     {
         readonly ILog _logger;
         readonly Settings _settings;
 
-        public RawGrabber(ILog logger, Settings settings)
+        public WebfileGrabber(ILog logger, Settings settings)
         {
             _logger = logger;
             _settings = settings;

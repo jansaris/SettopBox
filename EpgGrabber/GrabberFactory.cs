@@ -19,7 +19,8 @@ namespace EpgGrabber
             {
                 case "Kpn": throw new NotImplementedException();
                 case "Obn": return _container.GetInstance<ObnGrabber>();
-                case "Raw": return _container.GetInstance<RawGrabber>();
+                case "Webfile": return _container.GetInstance<WebfileGrabber>();
+                case "ItvOnline": return _container.GetInstance<ItvOnlineGrabber>();
                     default: throw new NotSupportedException($"Grabber '{_settings.Type}' is not supported");
             }
         }
