@@ -14,8 +14,8 @@ namespace ChannelList
         public override void RegisterComponents(Container container)
         {
             container.Register<ChannelList>();
-            container.Register<JavascriptParser>();
-            WebHelper.DependencyConfig.RegisterComponents(container);
+            container.Register<RtspDataReceiver>();
+            container.Register<RtspDataParser>();
         }
 
         public override Type Module => typeof(Program);

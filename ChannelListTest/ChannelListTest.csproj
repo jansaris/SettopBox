@@ -57,8 +57,10 @@
   <ItemGroup>
     <Compile Include="BaseTestWithLogging.cs" />
     <Compile Include="IptvChannelTester.cs" />
-    <Compile Include="JavascriptParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RtspDataParserTest.cs" />
+    <Compile Include="RtspDataReceiverTest.cs" />
+    <Compile Include="TvhChannelTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChannelList\ChannelList.csproj">
@@ -68,6 +70,10 @@
     <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
       <Project>{17e72fdd-c439-4955-8fa6-125f08702a79}</Project>
       <Name>SharedComponents</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TvHeadendIntegration\TvHeadendIntegration.csproj">
+      <Project>{7F602308-99F7-4516-934D-3DCC28DC6782}</Project>
+      <Name>TvHeadendIntegration</Name>
     </ProjectReference>
     <ProjectReference Include="..\WebUi\WebUi.csproj">
       <Project>{61aca837-0874-4bcc-8815-b3e64207480d}</Project>
@@ -86,8 +92,16 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
+    <None Include="RtspData.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

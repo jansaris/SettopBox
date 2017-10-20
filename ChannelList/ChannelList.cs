@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using log4net;
-using WebHelper;
 using SharedComponents.Models;
 
 namespace ChannelList
@@ -11,29 +10,27 @@ namespace ChannelList
     {
         private readonly ILog _logger;
         private readonly Settings _settings;
-        private readonly IWebDownloader _downloader;
-        private readonly Compression _compression;
-        private readonly JavascriptParser _javascriptParser;
+        private readonly RtspDataReceiver _receiver;
+        private readonly RtspDataParser _parser;
 
-        public ChannelList(ILog logger, Settings settings, IWebDownloader downloader, Compression compression, JavascriptParser javascriptParser)
+
+        public ChannelList(ILog logger, Settings settings, RtspDataReceiver receiver, RtspDataParser parser)
         {
             _logger = logger;
             _settings = settings;
-            _downloader = downloader;
-            _compression = compression;
-            _javascriptParser = javascriptParser;
+            _receiver = receiver;
+            _parser = parser;
         }
 
         public List<ChannelInfo> Load()
         {
             try
             {
-                _logger.Info($"Start downloading data from {_settings.Url}");
-                var compressed = _downloader.DownloadBinary(_settings.Url);
-                var uncompressed = _compression.Decompress(compressed);
-                var javascript = System.Text.Encoding.UTF8.GetString(uncompressed);
-                _logger.Info($"Received {javascript.Length} characters of javascript");
-                var channels = _javascriptParser.ParseChannels(javascript);
+                _logger.Info($"Start downloading data from {_settings.Host}:{_settings.Port}");
+                var data = _receiver.ReadDataFromServer(_settings.Host, _settings.Port);
+                _logger.Info($"Received {data.Length} bytes of channel list data");
+                var channels = _parser.ParseChannels(data);
+                _logger.Info($"Parsed the data into {channels.Count} channels");
                 return channels.Where(c => c.Number != -1).OrderBy(c => c.Number).ToList();
             }
             catch (Exception ex)
