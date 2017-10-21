@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using log4net;
 using log4net.Config;
 
@@ -19,10 +20,11 @@ namespace KeyblockTestServer
 
         private const string CertificatePassword = "settopbox";
 
-        private static string _appDataFolder = @".\KeyblockServerPrograms";
-        internal static string MacAddress = "001234567890";
-        private static string _fallbackWebServer = "http://www.google.nl";
+        private static string _appDataFolder = @".\";
+        internal static string MacAddress = "00029BE0880D";
+        private static string _fallbackWebServer = "http://webapp.stb.itvonline.nl";
         private static string _fallbackKeyServer = "10.10.10.10";
+        private static string _wwwRoot;
 
         private const int VcasPort = 12697;
         private const int VcasPasswordPort = 12698;
@@ -36,6 +38,9 @@ namespace KeyblockTestServer
         private TcpListener _start;
         private SimpleHttpServer _webServer;
         private bool _stopping;
+        public static bool OnlySearchForSettopBoxInfo;
+        public static SettopBoxInfo SettopBoxInfo = null;
+
 
         static void Main(string[] args)
         {
@@ -44,13 +49,31 @@ namespace KeyblockTestServer
                 XmlConfigurator.ConfigureAndWatch(new FileInfo("Log4net.config"));
                 if (!ParseArguments(args))
                 {
-                    Logger.Error("Please use: KeyblockTestServer.exe <appdata folder> <Servers MacAddress> <Fallback web-server> <Fallback keyblock server ip adress");
+                    Logger.Error("Please use: KeyblockTestServer.exe <Fallback web-server> [MacAddress] [appdata folder] [Fallback keyblock] [OpenSSL folder]");
                     return;
                 }
                 var program = new Program();
                 program.StartTcpServer();
-                Logger.Info("Hit 'Enter' to exit");
-                Console.ReadLine();
+                if (OnlySearchForSettopBoxInfo)
+                {
+                    while (SettopBoxInfo == null)
+                    {
+                        Thread.Sleep(50);
+                    }
+                    Logger.Info("We found the SettopBoxInfo, generate Keyblock settings");
+                    var inf = new FileInfo("Settings.ini");
+                    Logger.Info($"Write keyblock settings to: {inf.FullName}");
+                    File.WriteAllText(inf.FullName, SettopBoxInfo.Serialize());
+                    Logger.Info(SettopBoxInfo.Serialize());
+                    Logger.Info("");
+                    Logger.Info("We are done here. You can use these settings to get the Keyblock.");
+                    Logger.Info("KTHXBYE!");
+                }
+                else
+                {
+                    Logger.Info("Hit 'Enter' to exit");
+                    Console.ReadLine();
+                }
                 program.Stop();
             }
             catch (Exception ex)
@@ -86,19 +109,33 @@ namespace KeyblockTestServer
 
         private static bool ParseArguments(string[] args)
         {
-            if (args.Length < 4) return false;
-           
-            Logger.Info($"Found appdata folder on the commandline: {args[0]}");
-            _appDataFolder = args[0];
-            
-            Logger.Info($"Found MacAddress on the commandline: {args[1]}");
-            MacAddress = args[1];
-            
-            Logger.Info($"Found fallback web address for web server on the commandline: {args[2]}");
-            _fallbackWebServer = args[2];
+            if (args.Length < 1) return false;
 
-            Logger.Info($"Found fallback key server on the commandline: {args[3]}");
-            _fallbackKeyServer = args[3];
+            Logger.Info($"Found fallback web address for web server on the commandline: {args[0]}");
+            _fallbackWebServer = args[0];
+
+            if (args.Length > 1)
+            {
+                Logger.Info($"Found MacAddress on the commandline: {args[1]}");
+                MacAddress = args[1];
+            }
+
+            if (args.Length > 2)
+            {
+                Logger.Info($"Found appdata folder on the commandline: {args[2]}");
+                _appDataFolder = args[2];
+            }
+            else
+            {
+                OnlySearchForSettopBoxInfo = true;
+                _appDataFolder = ".";
+            }
+
+            if (args.Length > 3)
+            {
+                Logger.Info($"Found fallback key server on the commandline: {args[3]}");
+                _fallbackKeyServer = args[3];
+            }
 
             if (args.Length > 4)
             {
@@ -113,6 +150,7 @@ namespace KeyblockTestServer
             CommunicationsFolder = Path.Combine(_appDataFolder, "KeyblockMessages");
             CommunicationLogFolder = Path.Combine(_appDataFolder, "ServerCommunication");
             _certificateFile = Path.Combine(_appDataFolder, "Certificates", "servercert.pfx");
+            _wwwRoot = Path.Combine(_appDataFolder, "www");
             return true;
         }
 
@@ -142,7 +180,7 @@ namespace KeyblockTestServer
             StartAccept(_start, HandleStartBox);
 
             Logger.Info($"Start listening at port:{WebPort} with a fallback to {_fallbackWebServer}");
-            _webServer = new SimpleHttpServer(Path.Combine(_appDataFolder, "www"), WebPort, _fallbackWebServer);
+            _webServer = new SimpleHttpServer(_wwwRoot, WebPort, _fallbackWebServer);
         }
 
         private void StartAccept(TcpListener listener, Action<IAsyncResult> handler)

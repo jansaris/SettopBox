@@ -49,6 +49,7 @@
     <Compile Include="CertGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SettopBoxInfo.cs" />
     <Compile Include="SimpleHTTPServer.cs" />
     <Compile Include="SslTcpServer .cs" />
     <Compile Include="KeyblockCall.cs" />
@@ -60,6 +61,12 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
+    <None Include="www\rootcert.pem">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Certificates\servercert.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Keyblock\Keyblock.csproj">

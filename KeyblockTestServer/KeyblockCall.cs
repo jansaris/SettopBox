@@ -12,15 +12,7 @@ namespace KeyblockTestServer
     {
         private static readonly object SyncRoot = new object();
         private static readonly ILog Logger = LogManager.GetLogger(typeof(KeyblockCall));
-        private readonly byte[] _sessionKey;
-
-        public KeyblockCall()
-        {
-            _sessionKey = File.ReadAllBytes(GetPath("GetSessionKey.response"))
-                .Skip(4)
-                .Take(16)
-                .ToArray();
-        }
+        private readonly byte[] _sessionKey = { 0x99, 0xcc, 0x54, 0xa4, 0xde, 0x88, 0xdf, 0x08, 0x67, 0x7e, 0xde, 0xa6, 0x95, 0x99, 0x31, 0xd4 };
    
         private int GetCallCount()
         {
@@ -83,11 +75,19 @@ namespace KeyblockTestServer
             if (message.Contains("CreateSessionKey"))
             {
                 Logger.Info("Generate 'CreateSessionKey' response");
-                var data = GenerateCreateSessionKeyResponse(File.ReadAllBytes(GetPath("GetSessionKey.response")));
+                var data = GenerateCreateSessionKeyResponse();
                 return new Tuple<string, byte[]>("CreateSessionKey", data);
             }
             if (message.Contains("getCertificate"))
             {
+
+                if (Program.OnlySearchForSettopBoxInfo)
+                {
+                    Logger.Info("Parse getCertificate request");
+                    Program.SettopBoxInfo = SettopBoxInfo.Create(message);
+                    return new Tuple<string, byte[]>("getCertificate", Encoding.ASCII.GetBytes("Stop"));
+                }
+
                 Logger.Info("Generate 'getCertificate' response");
                 var data = GenerateCertificateResponse(message);
                 return new Tuple<string, byte[]>("getCertificate", data);
@@ -127,12 +127,13 @@ namespace KeyblockTestServer
             return unEncryptedMessage + decryptedMessage;
         }
 
-        private byte[] GenerateCreateSessionKeyResponse(byte[] originalMessage)
+        private byte[] GenerateCreateSessionKeyResponse()
         {
             var data = new List<byte>();
-            data.AddRange(originalMessage.Take(20));
+            data.AddRange(new List<byte>{ 0x00, 0x00, 0x00, 0x2d });
+            data.AddRange(_sessionKey);
             data.AddRange(Encoding.ASCII.GetBytes($"{DateTime.Now:dd/MM/yyyy HH:mm:ss}"));
-            data.AddRange(originalMessage.Skip(39));
+            data.AddRange(new List<byte> { 0x00, 0x00, 0x00, 0x00, 0x00, 0x03 });
             return data.ToArray();
         }
 
