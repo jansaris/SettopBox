@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Org.BouncyCastle.Asn1.X509;
 
 namespace KeyblockTestServer
 {
@@ -27,6 +28,12 @@ IKaId93FQLfvUzNv0xw=
             {
                 throw new InvalidDataException();
             }
+
+            var reader = new Org.BouncyCastle.OpenSsl.PemReader(new StringReader(parts[7]));
+            var req = (Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest)reader.ReadObject();
+            var info = req.GetCertificationRequestInfo();
+            var organization = info.Subject.GetValueList(X509Name.OU)[0].ToString();
+
             return new SettopBoxInfo
             {
                 Protocol = parts[0],
@@ -37,6 +44,7 @@ IKaId93FQLfvUzNv0xw=
                 //NA = parts[5],
                 //NA = parts[6],
                 //CertificateRequest = parts[7],
+                Organization = organization,
                 Common = parts[8],
                 Address = parts[9],
                 //space = parts[10],
@@ -46,7 +54,7 @@ IKaId93FQLfvUzNv0xw=
                 Country = parts[14],
                 Telephone = parts[15],
                 Email = parts[16],
-                MacAddress = parts[17],
+                MachineId = parts[17],
                 ChallengePassword = parts[18]
             };
         }
@@ -55,7 +63,7 @@ IKaId93FQLfvUzNv0xw=
 
         public string ClientId { get; set; }
 
-        public string MacAddress { get; set; }
+        public string MachineId { get; set; }
 
         public string Company { get; set; }
 
@@ -77,13 +85,15 @@ IKaId93FQLfvUzNv0xw=
 
         public string Address { get; set; }
         public string EmailHost => Email.Substring(Email.IndexOf("@", StringComparison.Ordinal) + 1);
+        public string Organization { get; set; }
 
         public string Serialize()
         {
             return $"{nameof(Protocol)}|{Protocol}" + Environment.NewLine +
                    $"{nameof(ClientId)}|{ClientId}" + Environment.NewLine +
-                   $"{nameof(MacAddress)}|{MacAddress}" + Environment.NewLine +
+                   $"{nameof(MachineId)}|{MachineId}" + Environment.NewLine +
                    $"{nameof(Company)}|{Company}" + Environment.NewLine +
+                   $"{nameof(Organization)}|{Organization}" + Environment.NewLine +
                    $"{nameof(Common)}|{Common}" + Environment.NewLine +
                    $"{nameof(ChallengePassword)}|{ChallengePassword}" + Environment.NewLine +
                    $"{nameof(Email)}|{Email}" + Environment.NewLine +
