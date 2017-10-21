@@ -49,6 +49,7 @@
     <Compile Include="CertGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RC4.cs" />
     <Compile Include="SettopBoxInfo.cs" />
     <Compile Include="SimpleHTTPServer.cs" />
     <Compile Include="SslTcpServer .cs" />
@@ -67,12 +68,6 @@
     <None Include="Certificates\servercert.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Keyblock\Keyblock.csproj">
-      <Project>{e62c2573-7885-4eb6-92c1-a708e7736f34}</Project>
-      <Name>Keyblock</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
