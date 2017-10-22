@@ -24,6 +24,7 @@ namespace SharedComponents.DependencyInjection
             var container = new Container();
             container.Register<IThreadHelper, ThreadHelper>(Lifestyle.Singleton);
             container.RegisterLog4Net();
+            System.Net.ServicePointManager.ServerCertificateValidationCallback += (o, certificate, chain, errors) => true;
             return container;
         }
 

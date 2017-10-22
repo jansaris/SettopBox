@@ -76,6 +76,13 @@ namespace EpgGrabber
             catch (Exception ex)
             {
                 _logger.Warn($"Failed during download for {start:s} - {end:s}", ex);
+                var inner = ex.InnerException;
+                while (inner != null)
+                {
+                    _logger.Warn($"Caused by: {inner.GetType().Name} - {inner.Message}");
+                    inner = inner.InnerException;
+                }
+
             }
             return epgData;
         }

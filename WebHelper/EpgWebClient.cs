@@ -12,7 +12,7 @@ namespace WebHelper
         public EpgWebClient(ILog logger)
         {
             _logger = logger;
-            _timeout = 5000;
+            _timeout = 30000;
         }
 
         protected override WebRequest GetWebRequest(Uri uri)

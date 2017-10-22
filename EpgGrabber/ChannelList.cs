@@ -37,7 +37,7 @@ namespace EpgGrabber
                     Channels = File.ReadAllLines(_file.FullName)
                         .Select(ParseLine)
                         .Where(item => item != null)
-                        .ToDictionary(k => k.Item1, v => v.Item2);
+                        .ToDictionary(k => k.Item1.ToLower(), v => v.Item2);
                 }
                 catch (Exception ex)
                 {
@@ -63,7 +63,7 @@ namespace EpgGrabber
             if (Channels.Count == 0) return epgData;
 
             var current = epgData.Count;
-            var filtered = epgData.Where(e => Channels.ContainsKey(e.Name)).ToList();
+            var filtered = epgData.Where(e => Channels.ContainsKey(e.Name.ToLower())).ToList();
             if (current != filtered.Count)
             {
                 _logger.Debug($"Filtered {current - filtered.Count} channels");

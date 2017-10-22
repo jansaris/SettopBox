@@ -7,13 +7,13 @@ SBS 6|SBS 6
 RTL 7|RTL 7
 Veronica / Disney XD|Veronica/Disney XD
 RTL Z|RTL Z
-Net5|Net5
+Net 5|Net 5
 RTL 8|RTL 8
-Ã©Ã©n|één
+één|één
 Canvas|Canvas
 Ketnet|Ketnet/OP12
-SBS 9|SBS 9
-Discovery Channel|Discovery
+SBS9|SBS 9
+Discovery Channel|Discovery Channel
 TLC|TLC
 Animal Planet|Animal Planet
 National Geographic|National Geographic

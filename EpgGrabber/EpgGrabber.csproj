@@ -102,7 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\Channels.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\TvhEpgGenres.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -1,6 +1,7 @@
 ﻿using System;
 using log4net;
 using System.Net;
+using System.Text;
 
 namespace WebHelper
 {
@@ -20,7 +21,9 @@ namespace WebHelper
             try
             {
                 var webClient = _webClientFactory();
-                return webClient.DownloadData(url);
+                var data = webClient.DownloadData(url);
+                _logger.Debug($"Downloaded {data.Length} bytes from {url}");
+                return data;
             }
             catch (Exception ex)
             {
@@ -34,7 +37,8 @@ namespace WebHelper
             try
             {
                 var webClient = _webClientFactory();
-                return webClient.DownloadString(url);
+                var data = webClient.DownloadData(url);
+                return Encoding.UTF8.GetString(data);
             }
             catch (WebException ex)
             {
