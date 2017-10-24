@@ -18,7 +18,6 @@ namespace EpgGrabber
 
         Func<bool> _stop;
 
-
         public ItvOnlineGrabber(ILog logger, Settings settings, IDownloader downloader, XmlTv xmlTv, ChannelList channelList)
         {
             _logger = logger;
@@ -70,7 +69,6 @@ namespace EpgGrabber
                 var jsonData = JsonConvert.DeserializeObject<ItvOnlineJson>(epgString);
                 var data = ConvertToChannelList(jsonData);
                 epgData = _channelList.FilterOnSelectedChannels(data);
-                //DownloadDetails(epgData);
                 _logger.Info($"Downloaded EPG data for {epgData.SelectMany(channel => channel.Programs).Count()} programs for {start:s} - {end:s}");
             }
             catch (Exception ex)

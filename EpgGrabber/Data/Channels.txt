@@ -1,28 +1,28 @@
-﻿NPO 1|NPO 1
-NPO 2|NPO 2
-NPO 3|NPO 3
-RTL 4|RTL 4
-RTL 5|RTL 5
-SBS 6|SBS 6
-RTL 7|RTL 7
-Veronica / Disney XD|Veronica/Disney XD
-RTL Z|RTL Z
-Net 5|Net 5
-RTL 8|RTL 8
-één|één
-Canvas|Canvas
-Ketnet|Ketnet/OP12
-SBS9|SBS 9
-Discovery Channel|Discovery Channel
-TLC|TLC
-Animal Planet|Animal Planet
-National Geographic|National Geographic
-BBC1|BBC One
-BBC2|BBC Two
-Eurosport|Eurosport
-Nickelodeon|Nickelodeon
-Nick Jr.|Nick Junior
-NickToons|Nick Toons
-Comedy Central|Comedy Central
-Cartoon Network|Cartoon Network
-Fox|Fox
+﻿NPO 1
+NPO 2
+NPO 3
+RTL 4
+RTL 5
+SBS 6
+RTL 7
+Veronica / Disney XD
+RTL Z
+Net 5
+RTL 8
+één
+Canvas
+Ketnet
+SBS9
+Discovery Channel
+TLC
+Animal Planet
+National Geographic
+BBC1
+BBC2
+Eurosport
+Nickelodeon
+Nick Jr.
+NickToons
+Comedy Central
+Cartoon Network
+Fox

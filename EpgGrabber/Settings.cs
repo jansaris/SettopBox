@@ -18,8 +18,6 @@ namespace EpgGrabber
         public string EpgTranslationsFile { get; set; } = "TvhEpgGenres.txt";
         public string EpgChannelListFile { get; set; } = "Channels.txt";
         public bool InitialEpgGrab { get; set; } = true;
-
-        public int WebRequestTimeoutInMs { get; set; } = 5000;
         public string Type { get; set; }
     }
 }
