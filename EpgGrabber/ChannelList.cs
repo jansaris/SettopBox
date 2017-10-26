@@ -5,16 +5,17 @@ using System.Linq;
 using EpgGrabber.Models;
 using log4net;
 using SharedComponents.Models;
+// ReSharper disable InconsistentlySynchronizedField
 
 namespace EpgGrabber
 {
     public class ChannelList
     {
-        readonly Settings _settings;
-        readonly ILog _logger;
+        private readonly Settings _settings;
+        private readonly ILog _logger;
         static readonly object Lock = new object();
-        FileInfo _file => new FileInfo(Path.Combine(_settings.DataFolder, _settings.EpgChannelListFile));
-        public Dictionary<string, string> Channels { get; private set; } = new Dictionary<string, string>();
+        private FileInfo File => new FileInfo(Path.Combine(_settings.DataFolder, _settings.EpgChannelListFile));
+        public List<string> Channels { get; private set; } = new List<string>();
 
 
         public ChannelList(Settings settings, ILog logger)
@@ -27,35 +28,24 @@ namespace EpgGrabber
         {
             lock (Lock)
             {
-                if (!_file.Exists)
+                if (!File.Exists)
                 {
-                    _logger.Warn($"No channel list file available at '{_file.FullName}'. No channels will be filtered");
+                    _logger.Warn($"No channel list file available at '{File.FullName}'. No channels will be filtered");
                     return;
                 }
                 try
                 {
-                    Channels = File.ReadAllLines(_file.FullName)
-                        .Select(ParseLine)
-                        .Where(item => item != null)
-                        .ToDictionary(k => k.Item1.ToLower(), v => v.Item2);
+                    Channels = System.IO.File.ReadAllLines(File.FullName)
+                        .Where(item => !string.IsNullOrWhiteSpace(item))
+                        .Distinct()
+                        .ToList();
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn($"Failed to read channel list file '{_file.FullName}'. No channels will be filtered", ex);
-                    Channels = new Dictionary<string, string>();
+                    _logger.Warn($"Failed to read channel list file '{File.FullName}'. No channels will be filtered", ex);
+                    Channels = new List<string>();
                 }
             }
-        }
-
-        Tuple<string, string> ParseLine(string line)
-        {
-            if (string.IsNullOrWhiteSpace(line)) return null;
-
-            var splitted = line.Split('|');
-            if (splitted.Length == 2) return new Tuple<string, string>(splitted[0], splitted[1]);
-
-            _logger.Warn($"Failed to read line '{line}' (expect key|name)");
-            return null;
         }
 
         public List<Channel> FilterOnSelectedChannels(List<Channel> epgData)
@@ -63,7 +53,7 @@ namespace EpgGrabber
             if (Channels.Count == 0) return epgData;
 
             var current = epgData.Count;
-            var filtered = epgData.Where(e => Channels.ContainsKey(e.Name.ToLower())).ToList();
+            var filtered = epgData.Where(e => Channels.Any(c => c.Equals(e.Name, StringComparison.InvariantCultureIgnoreCase))).ToList();
             if (current != filtered.Count)
             {
                 _logger.Debug($"Filtered {current - filtered.Count} channels");
@@ -76,15 +66,15 @@ namespace EpgGrabber
             if (epgChannelUpdate == null) return;
             if (epgChannelUpdate.Enabled)
             {
-                if (!Channels.ContainsKey(epgChannelUpdate.Id))
+                if (!Channels.Contains(epgChannelUpdate.Id))
                 {
                     _logger.Info($"Add channel {epgChannelUpdate.Id} - {epgChannelUpdate.Name}");
-                    Channels.Add(epgChannelUpdate.Id, epgChannelUpdate.Name);
+                    Channels.Add(epgChannelUpdate.Id);
                 }
             }
             else
             {
-                if (Channels.ContainsKey(epgChannelUpdate.Id))
+                if (Channels.Contains(epgChannelUpdate.Id))
                 {
                     _logger.Info($"Remove channel {epgChannelUpdate.Id} - {epgChannelUpdate.Name}");
                     Channels.Remove(epgChannelUpdate.Id);
@@ -100,16 +90,14 @@ namespace EpgGrabber
                 _logger.Info($"Save channel list ({Channels.Count}) to disk");
                 try
                 {
-                    using (var writer = new StreamWriter(_file.OpenWrite()))
+                    using (var writer = new StreamWriter(File.OpenWrite()))
                     {
-                        Channels.Select(kv => $"{kv.Key}|{kv.Value}")
-                                .ToList()
-                                .ForEach(writer.WriteLine);
+                        Channels.ForEach(writer.WriteLine);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error($"Failed to write channel list file '{_file.FullName}'.", ex);
+                    _logger.Error($"Failed to write channel list file '{File.FullName}'.", ex);
                 }
             }
         }

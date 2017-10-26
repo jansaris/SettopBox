@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using EpgGrabber.IO;
 using log4net;
@@ -13,14 +12,14 @@ namespace EpgGrabber
 {
     public class Program : BaseModule
     {
-        readonly IThreadHelper _threadHelper;
-        readonly Settings _settings;
-        readonly GrabberFactory _epgGrabberFactory;
-        readonly ChannelList _channelList;
-        readonly CachedWebDownloader _webDownloader;
-        Thread _runningEpgGrabTask;
-        DateTime? _lastRetrieval;
-        DateTime? _nextRetrieval;
+        private readonly IThreadHelper _threadHelper;
+        private readonly Settings _settings;
+        private readonly GrabberFactory _epgGrabberFactory;
+        private readonly ChannelList _channelList;
+        private readonly CachedWebDownloader _webDownloader;
+        private Thread _runningEpgGrabTask;
+        private DateTime? _lastRetrieval;
+        private DateTime? _nextRetrieval;
 
         public Program(ILog logger, IThreadHelper threadHelper, Settings settings, GrabberFactory epgGrabberFactory, IWebDownloader webDownloader, ChannelList channelList, LinuxSignal signal, ModuleCommunication communication) : base(logger, signal, communication)
         {
@@ -31,7 +30,7 @@ namespace EpgGrabber
             _channelList = channelList;
         }
 
-        static void Main()
+        private static void Main()
         {
             var container = SharedContainer.CreateAndFill<DependencyConfig>("Log4net.config");
             var prog = container.GetInstance<Program>();
@@ -51,7 +50,7 @@ namespace EpgGrabber
             {
                 LastRetrieval = _lastRetrieval,
                 NextRetrieval = _nextRetrieval,
-                Channels = _channelList.Channels.Select(kv => kv.Value).ToArray()
+                Channels = _channelList.Channels.ToArray()
             };
         }
 
@@ -62,7 +61,7 @@ namespace EpgGrabber
             _runningEpgGrabTask = _threadHelper.RunSafeInNewThread(DownloadEpgGrabberLoop, Logger, ThreadPriority.Lowest);
         }
 
-        void DownloadEpgGrabberLoop()
+        private void DownloadEpgGrabberLoop()
         {
             _nextRetrieval = _settings.InitialEpgGrab ? DateTime.Now : DetermineNextRetrieval();
             while (!ModuleShouldStop())
@@ -78,7 +77,7 @@ namespace EpgGrabber
             }
         }
 
-        void WaitAndRun()
+        private void WaitAndRun()
         {
             Logger.Info($"Next EPG will be fetched at {_nextRetrieval:yyyy-MM-dd HH:mm:ss}");
             WaitForSpecificState(ModuleState.Running, UpdateStateAfterNextRetrievalTimestamp);
@@ -107,14 +106,14 @@ namespace EpgGrabber
             if (!ModuleShouldStop()) ChangeState(ModuleState.Idle);
         }
 
-        void UpdateStateAfterNextRetrievalTimestamp()
+        private void UpdateStateAfterNextRetrievalTimestamp()
         {
             if (DateTime.Now < (_nextRetrieval ?? DateTime.MinValue)) return;
             Logger.Info($"Next retrieval window passed ({_nextRetrieval:yyyy-MM-dd HH:mm:ss}), switch state");
             if (!ModuleShouldStop()) ChangeState(ModuleState.Running);
         }
 
-        DateTime DetermineNextRetrieval()
+        private DateTime DetermineNextRetrieval()
         {
             //Set default at next block validation hour
             var today = DateTime.Today;
