@@ -102,7 +102,9 @@ namespace ChannelList
 
             var location = new ChannelLocation
             {
-                Url = $"{protocol.ToLower()}://{address}:{port}",
+                Protocol = protocol.ToLower(),
+                Host = address,
+                Port = int.Parse(port),
                 Bitrate = int.Parse(bitrate)
             };
             return location;

@@ -1,20 +1,14 @@
 ﻿using log4net;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
 using System.Text;
-using WebUi.api.Models;
+using SharedComponents.Models;
 
-namespace WebUi.api.Iptv
-{
+namespace ChannelList { 
+
     public class IptvChannel
     {
-        ILog _log;
-        Func<IptvSocket> _socketFactory;
-        const int MaxCycles = 2048;
+        private readonly ILog _log;
+        private readonly Func<IptvSocket> _socketFactory;
 
         public IptvChannel(ILog logger, Func<IptvSocket> socketFactory)
         {
@@ -22,66 +16,48 @@ namespace WebUi.api.Iptv
             _socketFactory = socketFactory;
         }
 
-        public IptvInfo ReadInfo(string url, string channel)
+        public IptvInfo ReadInfo(ChannelLocation info, string channel)
         {
-            if (string.IsNullOrWhiteSpace(url)) return null;
-            var data = ReadData(url, channel);
+            if (string.IsNullOrWhiteSpace(info.Host))
+            {
+                _log.Warn("No valid host given");
+                return null;
+            }
+            var data = ReadData(info, channel);
             return data;
         }
 
-        public void SaveStream(string url, string channel)
+        private IptvInfo ReadData(ChannelLocation channelLocation, string channel)
         {
-            var buffer = new byte[2048];
-            var data = new List<byte>();
-            _log.Debug($"Try to save data from {url} for {channel}");
-            using (var s = _socketFactory())
-            {
-                s.Open(url);
-                for (var count = 0; count < MaxCycles; count++)
-                {
-                    var length = s.Receive(buffer);
-                    data.AddRange(buffer.Take(length));
-                }
-            }
-            _log.Debug($"Write {data.Count} bytes to file C:\\temp\\{channel}.data");
-            File.WriteAllBytes($"C:\\temp\\{channel}.data", data.ToArray());
-        }
-
-        IptvInfo ReadData(string url, string channel)
-        {
-            var buffer = new byte[2048];
-            var previous = new byte[0];
-            var info = new IptvInfo { Url = url };
-
+            var info = new IptvInfo { Url = channelLocation.Url };
+            
             try
             {
-                _log.Debug($"Try to read data from {url} for {channel}");
+                _log.Debug($"Try to read data from {channelLocation.Url} for {channel}");
                 using (var s = _socketFactory())
                 {
-                    s.Open(url);
-                    for (var count = 0; count < MaxCycles; count++)
-                    {
-                        var length = s.Receive(buffer);
-                        var current = buffer.Take(length).ToArray();
-                        UpdateInfo(info, previous, current);
-                        if (info.Complete())
-                        {
-                            _log.Debug($"Found IPTV Info after {count} blocks");
-                            break;
-                        }
-                        previous = current;
-                    }
+                    var start = DateTime.Now;
+                    var previous = new byte[0];
+                    s.Open(channelLocation.Host, channelLocation.Port);
 
-                    info.KBps = s.KBps;
-                    info.MBps = s.MBps;
-                    _log.Info($"Found IPTV Info for {channel} at {url}: {info.Provider} - {info.Name} - {info.KBps} KB/s (key: {info.Number})");
+                    while(!info.Complete())
+                    {
+                        var data = s.Receive();
+                        UpdateInfo(info, previous, data);
+                        previous = data;
+                    }
+                    var end = DateTime.Now;
+                    _log.Debug($"Found IPTV Info after {(int)(end - start).TotalMilliseconds}ms");
                 }
+
+                _log.Info($"Found IPTV Info for {channel} at {channelLocation.Url}: {info.Provider} - {info.Name} (key: {info.Number})");
+
                 return info;
             }
             catch(Exception ex)
             {
-                _log.Info($"Failed to read data from {url} for {channel}");
-                _log.Debug($"Failed to read data from {url}: {ex.Message}");
+                _log.Info($"Failed to read data from {channelLocation.Url} for {channel}");
+                _log.Debug($"Failed to read data from {channelLocation.Url}: {ex.Message}");
                 return null;
             }
         }
@@ -92,7 +68,7 @@ namespace WebUi.api.Iptv
             previous.CopyTo(data, 0);
             current.CopyTo(data, previous.Length);
 
-            if(FindChannelInfo(data, out string provider, out string name))
+            if (FindChannelInfo(data, out string provider, out string name))
             {
                 info.Provider = provider;
                 info.Name = name;
@@ -104,7 +80,7 @@ namespace WebUi.api.Iptv
             }
         }
 
-        bool FindChannelNumber(byte[] data, out int channel)
+        private bool FindChannelNumber(byte[] data, out int channel)
         {
             channel = -1;
             //Find VMECM
@@ -126,7 +102,7 @@ namespace WebUi.api.Iptv
             return true;
         }
 
-        bool FindChannelInfo(byte[] data, out string provider, out string name)
+        private bool FindChannelInfo(byte[] data, out string provider, out string name)
         {
             name = null;
             provider = null;
@@ -153,11 +129,11 @@ namespace WebUi.api.Iptv
             return true;
         }
 
-        int SearchBytes(byte[] haystack, byte[] needle, int start_index)
+        private int SearchBytes(byte[] haystack, byte[] needle, int startIndex)
         {
             int len = needle.Length;
             int limit = haystack.Length - len;
-            for (int i = start_index; i <= limit; i++)
+            for (int i = startIndex; i <= limit; i++)
             {
                 int k = 0;
                 for (; k < len; k++)
@@ -177,7 +153,7 @@ namespace WebUi.api.Iptv
         /// <param name="index">starting index of the message</param>
         /// <param name="message">The message if reading is successfull</param>
         /// <returns>The new index, or -1 if failed</returns>
-        int ReadStringFromData(byte[] data, int index, out string message)
+        private int ReadStringFromData(byte[] data, int index, out string message)
         {
             message = null;
             if (data.Length <= index)

@@ -2,13 +2,16 @@
 {
     public class ChannelLocation
     {
-        public string Name { get; set; }
-        public string Url { get; set; }
-        public bool RtpSkip { get; set; }
+        public string Host { get; set; }
+        public int Port { get; set; }
+        public string Protocol { get; set; }
+        public string Url => $"{Protocol}://{Host}:{Port}";
+        public int Bitrate { get; set; }
+        public int KeyblockId { get; set; }
 
         public override string ToString()
         {
-            return $"{Name}:{Url}";
+            return $"{Url} -- {Bitrate} bps";
         }
     }
 }

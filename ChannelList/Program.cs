@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using log4net;
 using SharedComponents.DependencyInjection;
@@ -14,6 +15,7 @@ namespace ChannelList
         readonly Settings _settings;
         readonly IThreadHelper _threadHelper;
         readonly ChannelList _channelList;
+        private readonly Func<IptvChannel> _channelFactory;
         DateTime? _lastRetrieval;
         List<ChannelInfo> _channels;
         string _lastRetrievalState;
@@ -29,11 +31,12 @@ namespace ChannelList
             container.Dispose();
         }
 
-        public Program(ILog logger, LinuxSignal signal, ModuleCommunication moduleCommunication, Settings settings, IThreadHelper threadHelper, ChannelList channelList) : base(logger, signal, moduleCommunication)
+        public Program(ILog logger, LinuxSignal signal, ModuleCommunication moduleCommunication, Settings settings, IThreadHelper threadHelper, ChannelList channelList, Func<IptvChannel> channelFactory) : base(logger, signal, moduleCommunication)
         {
             _settings = settings;
             _threadHelper = threadHelper;
             _channelList = channelList;
+            _channelFactory = channelFactory;
         }
 
         public override IModuleInfo GetModuleInfo()
@@ -66,6 +69,22 @@ namespace ChannelList
             {
                 WaitForSpecificState(ModuleState.Running, () => {});
                 LoadChannelList();
+                RetrieveKeyblockIds();
+            }
+        }
+
+        private void RetrieveKeyblockIds()
+        {
+            foreach (var channel in _channels)
+            {
+                foreach (var location in channel.Locations)
+                {
+                    if (ModuleShouldStop()) return;
+                    var iptv = _channelFactory();
+                    var info = iptv.ReadInfo(location, channel.Name);
+                    location.KeyblockId = info.Number.Value;
+                }
+                Logger.Info($"Resolved Keyblock ID's for {channel.Name}");
             }
         }
 

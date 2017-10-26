@@ -16,6 +16,10 @@ namespace ChannelList
             container.Register<ChannelList>();
             container.Register<RtspDataReceiver>();
             container.Register<RtspDataParser>();
+            container.Register<IptvChannel>();
+            container.Register<IptvSocket>();
+            container.Register<Func<IptvSocket>>(() => container.GetInstance<IptvSocket>);
+            container.Register<Func<IptvChannel>>(() => container.GetInstance<IptvChannel>);
         }
 
         public override Type Module => typeof(Program);

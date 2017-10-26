@@ -1,55 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace SharedComponents.Models
 {
     public class ChannelInfo
     {
+        private List<ChannelLocation> _locations;
+
         public ChannelInfo()
         {
             Icons = new List<string>();
-            Locations = new List<ChannelLocation>();
+            _locations = new List<ChannelLocation>();
             Number = -1;
         }
 
         public string Key { get; set; }
         public string Name { get; set; }
-        public List<ChannelLocation> Locations { get; set; }
+
+        public IReadOnlyList<ChannelLocation> Locations => _locations.AsReadOnly();
+
         public List<string> Icons { get; set; }
         public bool Radio { get; set; }
         public int Number { get; set; }
 
-        public void OrderLocations(List<string> importanceList)
-        {
-            if (importanceList == null || !importanceList.Any()) return;
-            //Get the list ordered based on the importance list
-            var newList = importanceList
-                .Select(item => Locations.FirstOrDefault(l => item.Equals(l.Name, StringComparison.InvariantCultureIgnoreCase)))
-                .Where(location => location != null)
-                .ToList();
-            //Add the missing ones which where not in the importance list to the end of the list
-            newList.AddRange(Locations.Where(l => !newList.Contains(l)));
-            //Set the new list
-            Locations = newList;
-        }
+        
 
-        public string FirstLocationUrl
-        {
-            get
-            {
-                if (Locations == null) Locations = new List<ChannelLocation>();
-                return Locations.Any() ? Locations.First().Url : null;
-            }
-        }
+        public string FirstLocationUrl => Locations.Any() ? Locations.First().Url : null;
 
-        public string FirstLocationQuality
+        public int FirstLocationQuality => Locations.Any() ? Locations.First().Bitrate : 0;
+
+        public void AddLocation(ChannelLocation location)
         {
-            get
-            {
-                if (Locations == null) Locations = new List<ChannelLocation>();
-                return Locations.Any() ? Locations.First().Name : null;
-            }
+            _locations.Add(location);
+            _locations = _locations.OrderByDescending(l => l.Bitrate).ToList();
         }
 
         public override string ToString()

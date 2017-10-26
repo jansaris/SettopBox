@@ -56,7 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseTestWithLogging.cs" />
-    <Compile Include="IptvChannelTester.cs" />
+    <Compile Include="IptvChannelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RtspDataParserTest.cs" />
     <Compile Include="RtspDataReceiverTest.cs" />
@@ -67,6 +67,10 @@
       <Project>{7B44A2BE-7885-43A8-B34D-C8397BA9588D}</Project>
       <Name>ChannelList</Name>
     </ProjectReference>
+    <ProjectReference Include="..\KeyblockTestServer\KeyblockTestServer.csproj">
+      <Project>{2fe17b9d-abbb-41b5-873f-99e6dec41105}</Project>
+      <Name>KeyblockTestServer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
       <Project>{17e72fdd-c439-4955-8fa6-125f08702a79}</Project>
       <Name>SharedComponents</Name>
@@ -74,10 +78,6 @@
     <ProjectReference Include="..\TvHeadendIntegration\TvHeadendIntegration.csproj">
       <Project>{7F602308-99F7-4516-934D-3DCC28DC6782}</Project>
       <Name>TvHeadendIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WebUi\WebUi.csproj">
-      <Project>{61aca837-0874-4bcc-8815-b3e64207480d}</Project>
-      <Name>WebUi</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

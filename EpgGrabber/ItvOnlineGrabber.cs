@@ -106,7 +106,7 @@ namespace EpgGrabber
 
         private DateTime FromEpoch(int epochTime)
         {
-            return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(epochTime).ToLocalTime();
+            return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(epochTime);
         }
 
         string DownloadEpgJson(DateTime start, DateTime end)
