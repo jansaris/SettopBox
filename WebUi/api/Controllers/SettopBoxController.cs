@@ -87,7 +87,7 @@ namespace WebUi.api.Controllers
                 Name = info.Name,
                 Id = info.Key,
                 Number = info.Number,
-                AvailableChannels = info.Locations,
+                AvailableChannels = info.Locations.ToList()
             };
         }
 
@@ -109,7 +109,7 @@ namespace WebUi.api.Controllers
             if (channel == null) return NotFound();
             var data = channel.AvailableChannels
                 //.AsParallel()
-                .Select(c => _iptvChannel.ReadInfo(c.Url, c.Name))
+                .Select(c => _iptvChannel.ReadInfo(c.Url, c.Bitrate.ToString()))
                 .Where(inf => inf != null)
                 .ToList();
             return Ok(data);
@@ -187,9 +187,22 @@ namespace WebUi.api.Controllers
                     Name = "NPO 1",
                    AvailableChannels = new List<ChannelLocation>
                    {
-                       new ChannelLocation{ Name= "HD+", Url="igmp://224.124.25.128:8426" },
-                       new ChannelLocation{ Name= "SD",Url="igmp://239.115.38.221:5689" },
-                       new ChannelLocation{ Name= "",Url="igmp://224.24.125.12:3421" },
+                       new ChannelLocation {
+                            Bitrate = 12750,
+                            Protocol = "igmp",
+                            Host = "224.124.25.128",
+                            Port = 8426 },
+                       new ChannelLocation {
+                           Bitrate = 3300,
+                           Protocol = "igmp",
+                           Host = "239.115.38.221",
+                           Port = 5689 },
+                       new ChannelLocation {
+                           Bitrate= 7700,
+                           Protocol = "igmp",
+                           Host = "224.24.125.12",
+                           Port = 3421
+                       }
                    },
                    EpgGrabber = true,
                    Keyblock = false,
@@ -205,9 +218,22 @@ namespace WebUi.api.Controllers
                     Name = "NPO 2",
                    AvailableChannels = new List<ChannelLocation>
                    {
-                       new ChannelLocation{ Name= "HD+", Url="gmp://224.124.25.128:8426" },
-                       new ChannelLocation{ Name= "HD", Url="gmp://239.115.38.221:5689" },
-                       new ChannelLocation{ Name= "SD", Url="igmp://224.24.125.12:3421" },
+                       new ChannelLocation {
+                           Bitrate = 12750,
+                           Protocol = "igmp",
+                           Host = "224.124.25.128",
+                           Port = 8426 },
+                       new ChannelLocation {
+                           Bitrate = 3300,
+                           Protocol = "igmp",
+                           Host = "239.115.38.221",
+                           Port = 5689 },
+                       new ChannelLocation {
+                           Bitrate= 7700,
+                           Protocol = "igmp",
+                           Host = "224.24.125.12",
+                           Port = 3421
+                       }
                    },
                    EpgGrabber = true,
                    Keyblock = true,
@@ -223,9 +249,22 @@ namespace WebUi.api.Controllers
                     Name = "NPO 3",
                    AvailableChannels = new List<ChannelLocation>
                    {
-                       new ChannelLocation{ Name= "HD+", Url="igmp://224.124.25.128:8426" },
-                       new ChannelLocation{ Name= "", Url="igmp://239.115.38.221:5689" },
-                       new ChannelLocation{ Name= "", Url="igmp://224.24.125.12:3421" },
+                       new ChannelLocation {
+                           Bitrate = 7700,
+                           Protocol = "igmp",
+                           Host = "224.124.25.128",
+                           Port = 8426 },
+                       new ChannelLocation {
+                           Bitrate = 3300,
+                           Protocol = "igmp",
+                           Host = "239.115.38.221",
+                           Port = 5689 },
+                       new ChannelLocation {
+                           Bitrate= 3300,
+                           Protocol = "igmp",
+                           Host = "224.24.125.12",
+                           Port = 3421 
+                       }
                    },
                    EpgGrabber = false,
                    Keyblock = false,

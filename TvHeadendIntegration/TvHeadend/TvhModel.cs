@@ -77,17 +77,17 @@ namespace TvHeadendIntegration.TvHeadend
             };
         }
 
-        internal void AddChannel(string id, string newUrl, bool epg)
+        public void AddChannel(string id, string newUrl, bool epg)
         {
             _logger.Info($"Add channel '{id}' with url '{newUrl}' to TvHeadend");
         }
 
-        internal void RemoveChannel(string tvhId, string id)
+        public void RemoveChannel(string tvhId, string id)
         {
             _logger.Info($"Remove channel '{id}' with UUID '{tvhId}' from TvHeadend");
         }
 
-        internal void UpdateChannel(string tvhId, string id, string newUrl, bool epg)
+        public void UpdateChannel(string tvhId, string id, string newUrl, bool epg)
         {
             _logger.Info($"Update channel '{id}' with UUID '{tvhId}' in TvHeadend");
             var mux = ResolveMux(tvhId);

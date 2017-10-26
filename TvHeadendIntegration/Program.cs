@@ -46,14 +46,15 @@ namespace TvHeadendIntegration
             if (!string.IsNullOrWhiteSpace(_settings.InitialEpgFile))
             {
                 UpdateEpg(Path.Combine(_settings.DataFolder, _settings.InitialEpgFile));
-                LoadConfiguration();
             }
+            LoadConfiguration();
         }
 
         private void LoadConfiguration()
         {
             _configuration.ReadFromWeb();
             _info.AuthenticationSuccessfull = _configuration.AuthenticationSuccessfull;
+            _info.LastAuthentication = DateTime.Now;
             _info.Channels = _configuration.GetChannelInfo();
         }
 

@@ -37,6 +37,8 @@ export class EpgInfo extends ModuleInfo {
 export class TvheadendInfo extends ModuleInfo {
     LastEpgUpdate: Date;
     LastEpgUpdateSuccessfull: boolean;
+    AuthenticationSuccessfull: boolean;
+    LastAuthentication: Date;
 }
 
 export class ChannelListInfo extends ModuleInfo {

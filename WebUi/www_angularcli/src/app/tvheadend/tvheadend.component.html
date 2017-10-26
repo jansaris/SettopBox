@@ -1,4 +1,4 @@
-<div class="page-header">
+﻿<div class="page-header">
     <div class="clearfix">
         <div class="pull-left">
             <h1>{{module?.Name}}</h1>
@@ -26,10 +26,14 @@
                 <dl>
                     <dt>Status:</dt>
                     <dd>{{module?.Status}}</dd>
-                    <dt>Last update at:</dt>
+                    <dt>Last EPG update at:</dt>
                     <dd>{{info?.LastEpgUpdate | date: 'yyyy-MM-dd HH:mm:ss'}}</dd>
-                    <dt>Last update successfull:</dt>
+                    <dt>Last EPG update successfull:</dt>
                     <dd>{{info?.LastEpgUpdateSuccessfull}}</dd>
+                  <dt>Web authentication at:</dt>
+                  <dd>{{info?.LastAuthentication | date: 'yyyy-MM-dd HH:mm:ss'}}</dd>
+                    <dt>Web authentication successfull:</dt>
+                    <dd>{{info?.AuthenticationSuccessfull}}</dd>
                 </dl>
             </div>
         </div>
