@@ -64,6 +64,7 @@ namespace EpgGrabber
         private void DownloadEpgGrabberLoop()
         {
             _nextRetrieval = _settings.InitialEpgGrab ? DateTime.Now : DetermineNextRetrieval();
+            if (!_settings.InitialEpgGrab && !ModuleShouldStop()) ChangeState(ModuleState.Idle);
             while (!ModuleShouldStop())
             {
                 try

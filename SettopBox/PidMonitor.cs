@@ -88,7 +88,8 @@ namespace SettopBox
             {
                 lock (SyncRoot)
                 {
-                    if (!PidFile.Exists) return;
+                    if (!File.Exists(PidFile.FullName)) return;
+                    File.Delete(PidFile.FullName);
                     PidFile.Delete();
                     _logger.Info($"Removed pid file {PidFile.FullName}");
                 }

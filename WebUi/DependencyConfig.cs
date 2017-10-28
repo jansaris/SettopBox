@@ -3,10 +3,8 @@ using log4net;
 using Owin;
 using SharedComponents.DependencyInjection;
 using SimpleInjector;
-using SimpleInjector.Extensions.ExecutionContextScoping;
 using WebUi.api;
 using WebUi.api.Logging;
-using WebUi.api.Iptv;
 
 namespace WebUi
 {
@@ -20,7 +18,6 @@ namespace WebUi
         {
             container.Register<InMemoryLogger>(Lifestyle.Singleton);
             container.Register<PerformanceMeter>(Lifestyle.Singleton);
-            container.Register<Func<IptvSocket>>(() => () => container.GetInstance<IptvSocket>());
         }
 
         public override Type Module => typeof(Program);
@@ -35,7 +32,7 @@ namespace WebUi
             // Create an OWIN middleware to create an execution context scope
             app.Use(async (context, next) =>
             {
-                using (var scope = container.BeginExecutionContextScope())
+                using (SimpleInjector.Lifestyles.AsyncScopedLifestyle.BeginScope(container))
                 {
                     await next.Invoke();
                 }

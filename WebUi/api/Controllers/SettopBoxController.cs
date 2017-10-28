@@ -7,7 +7,6 @@ using SharedComponents.Module;
 using System.Linq;
 using SharedComponents.Models;
 using System;
-using WebUi.api.Iptv;
 
 namespace WebUi.api.Controllers
 {
@@ -17,14 +16,12 @@ namespace WebUi.api.Controllers
     {
         readonly ILog _logger;
         readonly ModuleCommunication _info;
-        readonly IptvChannel _iptvChannel;
         static List<Channel> _channels;
 
-        public SettopBoxController(ILog logger, ModuleCommunication info, IptvChannel iptvChannel)
+        public SettopBoxController(ILog logger, ModuleCommunication info)
         {
             _logger = logger;
             _info = info;
-            _iptvChannel = iptvChannel;
         }
 
         public IHttpActionResult Get()
@@ -85,7 +82,7 @@ namespace WebUi.api.Controllers
             return new Channel
             {
                 Name = info.Name,
-                Id = info.Key,
+                Id = info.Name,
                 Number = info.Number,
                 AvailableChannels = info.Locations.ToList()
             };
@@ -109,17 +106,33 @@ namespace WebUi.api.Controllers
             if (channel == null) return NotFound();
             var data = channel.AvailableChannels
                 //.AsParallel()
-                .Select(c => _iptvChannel.ReadInfo(c.Url, c.Bitrate.ToString()))
-                .Where(inf => inf != null)
+                .Select(c => new IptvInfo
+                {
+                    Name = GetName(c.Bitrate),
+                    Url = c.Url,
+                    Number = c.KeyblockId,
+                    Provider = "KPM",
+                    KBps = c.Bitrate,
+                    MBps = c.Bitrate / 1024
+                })
                 .ToList();
             return Ok(data);
+        }
+
+        private string GetName(int bitrate)
+        {
+            if (bitrate > 8000) return "Glas";
+            if (bitrate > 4000) return "HD";
+            if (bitrate > 2000) return "SD";
+            return "Radio";
         }
 
         public IHttpActionResult Put(Channel channel)
         {
             try
             {
-                _logger.Info($"Update channel: {channel?.Id}");
+                if (channel == null) return NotFound();
+                _logger.Info($"Update channel: {channel.Id}");
                 LoadChannels(false);
                 var index = _channels.FindIndex(c => c.Id == channel.Id);
                 if (index == -1) return NotFound();
@@ -176,101 +189,101 @@ namespace WebUi.api.Controllers
             thread?.Join();
         }
 
-        private void LoadDummyData()
-        {
-            _channels = new List<Channel>
-            {
-                new Channel
-                {
-                    Id = "ned1",
-                    Number = 1,
-                    Name = "NPO 1",
-                   AvailableChannels = new List<ChannelLocation>
-                   {
-                       new ChannelLocation {
-                            Bitrate = 12750,
-                            Protocol = "igmp",
-                            Host = "224.124.25.128",
-                            Port = 8426 },
-                       new ChannelLocation {
-                           Bitrate = 3300,
-                           Protocol = "igmp",
-                           Host = "239.115.38.221",
-                           Port = 5689 },
-                       new ChannelLocation {
-                           Bitrate= 7700,
-                           Protocol = "igmp",
-                           Host = "224.24.125.12",
-                           Port = 3421
-                       }
-                   },
-                   EpgGrabber = true,
-                   Keyblock = false,
-                   KeyblockId = 661,
-                   TvHeadend = true,
-                   TvHeadendChannel = "igmp://224.124.25.128:8426"
+        //private void LoadDummyData()
+        //{
+        //    _channels = new List<Channel>
+        //    {
+        //        new Channel
+        //        {
+        //            Id = "ned1",
+        //            Number = 1,
+        //            Name = "NPO 1",
+        //           AvailableChannels = new List<ChannelLocation>
+        //           {
+        //               new ChannelLocation {
+        //                    Bitrate = 12750,
+        //                    Protocol = "igmp",
+        //                    Host = "224.124.25.128",
+        //                    Port = 8426 },
+        //               new ChannelLocation {
+        //                   Bitrate = 3300,
+        //                   Protocol = "igmp",
+        //                   Host = "239.115.38.221",
+        //                   Port = 5689 },
+        //               new ChannelLocation {
+        //                   Bitrate= 7700,
+        //                   Protocol = "igmp",
+        //                   Host = "224.24.125.12",
+        //                   Port = 3421
+        //               }
+        //           },
+        //           EpgGrabber = true,
+        //           Keyblock = false,
+        //           KeyblockId = 661,
+        //           TvHeadend = true,
+        //           TvHeadendChannel = "igmp://224.124.25.128:8426"
 
-                },
-                new Channel
-                {
-                    Id = "ned2",
-                    Number = 2,
-                    Name = "NPO 2",
-                   AvailableChannels = new List<ChannelLocation>
-                   {
-                       new ChannelLocation {
-                           Bitrate = 12750,
-                           Protocol = "igmp",
-                           Host = "224.124.25.128",
-                           Port = 8426 },
-                       new ChannelLocation {
-                           Bitrate = 3300,
-                           Protocol = "igmp",
-                           Host = "239.115.38.221",
-                           Port = 5689 },
-                       new ChannelLocation {
-                           Bitrate= 7700,
-                           Protocol = "igmp",
-                           Host = "224.24.125.12",
-                           Port = 3421
-                       }
-                   },
-                   EpgGrabber = true,
-                   Keyblock = true,
-                   KeyblockId = 662,
-                   TvHeadend = true,
-                   TvHeadendChannel = "igmp://224.124.25.128:8426"
+        //        },
+        //        new Channel
+        //        {
+        //            Id = "ned2",
+        //            Number = 2,
+        //            Name = "NPO 2",
+        //           AvailableChannels = new List<ChannelLocation>
+        //           {
+        //               new ChannelLocation {
+        //                   Bitrate = 12750,
+        //                   Protocol = "igmp",
+        //                   Host = "224.124.25.128",
+        //                   Port = 8426 },
+        //               new ChannelLocation {
+        //                   Bitrate = 3300,
+        //                   Protocol = "igmp",
+        //                   Host = "239.115.38.221",
+        //                   Port = 5689 },
+        //               new ChannelLocation {
+        //                   Bitrate= 7700,
+        //                   Protocol = "igmp",
+        //                   Host = "224.24.125.12",
+        //                   Port = 3421
+        //               }
+        //           },
+        //           EpgGrabber = true,
+        //           Keyblock = true,
+        //           KeyblockId = 662,
+        //           TvHeadend = true,
+        //           TvHeadendChannel = "igmp://224.124.25.128:8426"
 
-                },
-                new Channel
-                {
-                    Id = "ned3",
-                    Number = 3,
-                    Name = "NPO 3",
-                   AvailableChannels = new List<ChannelLocation>
-                   {
-                       new ChannelLocation {
-                           Bitrate = 7700,
-                           Protocol = "igmp",
-                           Host = "224.124.25.128",
-                           Port = 8426 },
-                       new ChannelLocation {
-                           Bitrate = 3300,
-                           Protocol = "igmp",
-                           Host = "239.115.38.221",
-                           Port = 5689 },
-                       new ChannelLocation {
-                           Bitrate= 3300,
-                           Protocol = "igmp",
-                           Host = "224.24.125.12",
-                           Port = 3421 
-                       }
-                   },
-                   EpgGrabber = false,
-                   Keyblock = false,
-                   TvHeadend = false
-                }
-            };
-        }
+        //        },
+        //        new Channel
+        //        {
+        //            Id = "ned3",
+        //            Number = 3,
+        //            Name = "NPO 3",
+        //           AvailableChannels = new List<ChannelLocation>
+        //           {
+        //               new ChannelLocation {
+        //                   Bitrate = 7700,
+        //                   Protocol = "igmp",
+        //                   Host = "224.124.25.128",
+        //                   Port = 8426 },
+        //               new ChannelLocation {
+        //                   Bitrate = 3300,
+        //                   Protocol = "igmp",
+        //                   Host = "239.115.38.221",
+        //                   Port = 5689 },
+        //               new ChannelLocation {
+        //                   Bitrate= 3300,
+        //                   Protocol = "igmp",
+        //                   Host = "224.24.125.12",
+        //                   Port = 3421 
+        //               }
+        //           },
+        //           EpgGrabber = false,
+        //           Keyblock = false,
+        //           TvHeadend = false
+        //        }
+        //    };
+        //}
     }
 }

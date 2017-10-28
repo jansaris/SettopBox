@@ -112,7 +112,6 @@
     <Compile Include="api\Controllers\SettingsController.cs" />
     <Compile Include="api\Controllers\SettopBoxController.cs" />
     <Compile Include="api\Extensions.cs" />
-    <Compile Include="api\Iptv\IptvSocket.cs" />
     <Compile Include="api\Logging\InMemoryLogger.cs" />
     <Compile Include="api\Logging\LimitedList.cs" />
     <Compile Include="api\Models\Channel.cs" />
@@ -121,7 +120,6 @@
     <Compile Include="api\Models\Module.cs" />
     <Compile Include="api\Models\PerformanceModel.cs" />
     <Compile Include="api\PerformanceMeter.cs" />
-    <Compile Include="api\Iptv\IptvChannel.cs" />
     <Compile Include="DefaultFileRewriterMiddleware.cs" />
     <Compile Include="DependencyConfig.cs" />
     <Compile Include="MonoPatchingDelegatingHandler.cs" />
