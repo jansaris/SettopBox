@@ -64,11 +64,13 @@ namespace EpgGrabber
             try
             {
                 _logger.Debug($"Download EPG data for {start:s} - {end:s}");
-                var epgString = DownloadEpgJson(start, end);
-                if (_stop()) return null;
-                var jsonData = JsonConvert.DeserializeObject<ItvOnlineJson>(epgString);
-                var data = ConvertToChannelList(jsonData);
-                epgData = _channelList.FilterOnSelectedChannels(data);
+                epgData = DownloadEpgData(start, end);
+                if (epgData.Any(c => c.Programs.Any(p => p.Name == "Programmabeschrijving niet beschikbaar")))
+                {
+                    _logger.Info($"Possible old data for {start:s} - {end:s}, retry");
+                    //We got some wrong data. Ensure it doesn't came from the cache
+                    epgData = DownloadEpgData(start, end, true);
+                }
                 _logger.Info($"Downloaded EPG data for {epgData.SelectMany(channel => channel.Programs).Count()} programs for {start:s} - {end:s}");
             }
             catch (Exception ex)
@@ -85,20 +87,30 @@ namespace EpgGrabber
             return epgData;
         }
 
+        private List<Channel> DownloadEpgData(DateTime start, DateTime end, bool nocache = false)
+        {
+            var epgString = DownloadEpgJson(start, end, nocache);
+            if (_stop()) return new List<Channel>();
+            var jsonData = JsonConvert.DeserializeObject<ItvOnlineJson>(epgString);
+            var data = ConvertToChannelList(jsonData);
+            return _channelList.FilterOnSelectedChannels(data);
+        }
+
         private List<Channel> ConvertToChannelList(ItvOnlineJson jsonData)
         {
             return jsonData.resultObj.channelList.Select(c => new Channel
             {
                 Name = c.channelName,
-                Programs = c.programList.Select(p => new Models.Program
-                {
-                    Name = p.title,
-                    Description = p.contentDescription,
-                    Id = p.contentId.ToString(),
-                    OtherData  = p.subtitle,
-                    Start = FromEpoch(p.startTime),
-                    End = FromEpoch(p.endTime)
-                }).ToList()
+                Programs = c.programList
+                    .Select(p => new Models.Program {
+                        Name = p.title,
+                        Description = p.contentDescription,
+                        Id = p.contentId.ToString(),
+                        OtherData  = p.subtitle,
+                        Start = FromEpoch(p.startTime),
+                        End = FromEpoch(p.endTime)
+                    })
+                    .ToList()
             }).ToList();
         }
 
@@ -107,7 +119,7 @@ namespace EpgGrabber
             return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(epochTime);
         }
 
-        string DownloadEpgJson(DateTime start, DateTime end)
+        string DownloadEpgJson(DateTime start, DateTime end, bool noCache)
         {
             //EPG url example: https://www.itvonline.nl/AVS/besc?action=GetEpg&channel=IPAD&endTimeStamp=1508854352&startTimeStamp=1508852352
             var url = string.Format(_settings.EpgUrl, AsEpoch(end), AsEpoch(start));
@@ -116,7 +128,7 @@ namespace EpgGrabber
             try
             {
                 _logger.Debug($"Download {url}");
-                return _downloader.DownloadString(url);
+                return _downloader.DownloadString(url, noCache);
             }
             catch (Exception err)
             {

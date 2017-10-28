@@ -2,7 +2,7 @@
 {
     public interface IWebDownloader
     {
-        byte[] DownloadBinary(string url);
-        string DownloadString(string url);
+        byte[] DownloadBinary(string url, bool noCache = false);
+        string DownloadString(string url, bool noCache = false);
     }
 }

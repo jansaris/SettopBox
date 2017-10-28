@@ -16,7 +16,7 @@ namespace WebHelper
             _logger = logger;
         }
 
-        public byte[] DownloadBinary(string url)
+        public byte[] DownloadBinary(string url, bool noCache = false)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace WebHelper
             }
         }
 
-        public string DownloadString(string url)
+        public string DownloadString(string url, bool noCache = false)
         {
             try
             {

@@ -23,28 +23,36 @@ namespace EpgGrabber.IO
             _settings = settings;
         }
 
-        public byte[] DownloadBinary(string url)
+        public byte[] DownloadBinary(string url, bool noCache = false)
         {
             var data = GetFromCache(url);
-            if (data != null) return data.ByteData;
+            if (data != null && !noCache) return data.ByteData;
             var webData = _webDownloader.DownloadBinary(url);
             if (webData != null) _cache.Add(url, new CacheObject(url, webData));
             return webData;
         }
 
-        public string DownloadString(string url)
+        public string DownloadString(string url, bool noCache = false)
         {
             var data = GetFromCache(url);
-            if (data != null) return data.StringData;
+            if (data != null && !noCache) return data.StringData;
             var webData = _webDownloader.DownloadString(url);
-            if (webData != null) AddToCache(new CacheObject(url, webData));
+            if (webData != null) UpdateCache(new CacheObject(url, webData));
             return webData;
         }
 
-        void AddToCache(CacheObject obj)
+        void UpdateCache(CacheObject obj)
         {
-            _logger.DebugFormat("Add {0} data to cache for {1}", obj.DataType, obj.Url);
-            _cache.Add(obj.Url, obj);
+            if (_cache.ContainsKey(obj.Url))
+            {
+                _logger.DebugFormat("Update {0} data in cache for {1}", obj.DataType, obj.Url);
+                _cache[obj.Url] = obj;
+            }
+            else
+            {
+                _logger.DebugFormat("Add {0} data to cache for {1}", obj.DataType, obj.Url);
+                _cache.Add(obj.Url, obj);
+            }
         }
 
         CacheObject GetFromCache(string url)

@@ -11,14 +11,14 @@
             _fileDownloader = fileDownloader;
         }
 
-        public byte[] DownloadBinary(string url)
+        public byte[] DownloadBinary(string url, bool noCache = false)
         {
-            return _webDownloader.DownloadBinary(url);
+            return _webDownloader.DownloadBinary(url, noCache);
         }
 
-        public string DownloadString(string url)
+        public string DownloadString(string url, bool noCache = false)
         {
-            return _webDownloader.DownloadString(url);
+            return _webDownloader.DownloadString(url, noCache);
         }
 
         public void DownloadBinaryFile(string url, string localFile)
