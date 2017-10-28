@@ -1,5 +1,6 @@
 ﻿using log4net;
 using System;
+using System.Net.Sockets;
 using System.Text;
 using SharedComponents.Models;
 
@@ -9,6 +10,8 @@ namespace ChannelList {
     {
         private readonly ILog _log;
         private readonly Func<IptvSocket> _socketFactory;
+        public bool OnlySearchForKeys = false;
+        private const int MaxCycles = 2048;
 
         public IptvChannel(ILog logger, Func<IptvSocket> socketFactory)
         {
@@ -34,21 +37,8 @@ namespace ChannelList {
             try
             {
                 _log.Debug($"Try to read data from {channelLocation.Url} for {channel}");
-                using (var s = _socketFactory())
-                {
-                    var start = DateTime.Now;
-                    var previous = new byte[0];
-                    s.Open(channelLocation.Host, channelLocation.Port);
-
-                    while(!info.Complete())
-                    {
-                        var data = s.Receive();
-                        UpdateInfo(info, previous, data);
-                        previous = data;
-                    }
-                    var end = DateTime.Now;
-                    _log.Debug($"Found IPTV Info after {(int)(end - start).TotalMilliseconds}ms");
-                }
+                
+                ReadDataFromSocket(channelLocation, info);
 
                 _log.Info($"Found IPTV Info for {channel} at {channelLocation.Url}: {info.Provider} - {info.Name} (key: {info.Number})");
 
@@ -56,10 +46,48 @@ namespace ChannelList {
             }
             catch(Exception ex)
             {
-                _log.Info($"Failed to read data from {channelLocation.Url} for {channel}");
-                _log.Debug($"Failed to read data from {channelLocation.Url}: {ex.Message}");
+                _log.Warn($"Failed to read data from {channelLocation.Url} for {channel}");
+                _log.Debug($"Failed to read data from {channelLocation.Url}: {ex.Message}", ex);
                 return null;
             }
+        }
+
+        private void ReadDataFromSocket(ChannelLocation channelLocation, IptvInfo info, int retries = 3)
+        {
+            try
+            {
+                using (var s = _socketFactory())
+                {
+                    var start = DateTime.Now;
+                    var previous = new byte[0];
+                    s.Open(channelLocation.Host, channelLocation.Port);
+                    var count = 0;
+                    while (NotAllDataFound(info) && count < MaxCycles)
+                    {
+                        var data = s.Receive();
+                        UpdateInfo(info, previous, data);
+                        previous = data;
+                        count++;
+                    }
+                    var end = DateTime.Now;
+                    _log.Debug($"Found IPTV Info after {(int) (end - start).TotalMilliseconds}ms");
+                }
+            }
+            catch (SocketException)
+            {
+                if (retries == 0)
+                {
+                    throw;
+                }
+                _log.Info($"Failed to read data from {channelLocation.Url}, retry ({retries}x allowed)");
+                ReadDataFromSocket(channelLocation, info, retries - 1);
+            }
+        }
+
+        private bool NotAllDataFound(IptvInfo info)
+        {
+            if (OnlySearchForKeys && info.Number.HasValue) return false;
+            return !info.Complete();
         }
 
         private void UpdateInfo(IptvInfo info, byte[] previous, byte[] current)

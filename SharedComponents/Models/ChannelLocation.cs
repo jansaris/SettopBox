@@ -7,7 +7,7 @@
         public string Protocol { get; set; }
         public string Url => $"{Protocol}://{Host}:{Port}";
         public int Bitrate { get; set; }
-        public int KeyblockId { get; set; }
+        public int KeyblockId { get; set; } = -1;
 
         public override string ToString()
         {

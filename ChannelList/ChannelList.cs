@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using log4net;
 using SharedComponents.Models;
@@ -28,6 +29,7 @@ namespace ChannelList
             {
                 _logger.Info($"Start downloading data from {_settings.Host}:{_settings.Port}");
                 var data = _receiver.ReadDataFromServer(_settings.Host, _settings.Port);
+                if(data.Length == 0) throw new InvalidDataException($"Received no data from {_settings.Host}:{_settings.Port}");
                 _logger.Info($"Received {data.Length} bytes of channel list data");
                 var channels = _parser.ParseChannels(data);
                 _logger.Info($"Parsed the data into {channels.Count} channels");

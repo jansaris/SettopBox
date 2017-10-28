@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using log4net;
+using Newtonsoft.Json;
 using SharedComponents.DependencyInjection;
 using SharedComponents.Helpers;
 using SharedComponents.Module;
@@ -59,6 +61,7 @@ namespace ChannelList
         {
             Logger.Info("Welcome to Keyblock");
             _lastRetrievalState = string.Empty;
+            _channels = null;
             _settings.Load();
             _threadHelper.RunSafeInNewThread(LoadChannelListLoop, Logger, ThreadPriority.BelowNormal);
         }
@@ -69,20 +72,99 @@ namespace ChannelList
             {
                 WaitForSpecificState(ModuleState.Running, () => {});
                 LoadChannelList();
+                LoadChannelsFile();
                 RetrieveKeyblockIds();
+                SaveChannelsFile();
+                if (!ModuleShouldStop()) ChangeState(ModuleState.Idle);
+            }
+        }
+
+        private void SaveChannelsFile()
+        {
+            if (_channels == null) return;
+            try
+            {
+                if (!Directory.Exists(_settings.DataFolder)) Directory.CreateDirectory(_settings.DataFolder);
+                var file = Path.Combine(_settings.DataFolder, _settings.ChannelsFile);
+                var json = JsonConvert.SerializeObject(_channels);
+                File.WriteAllText(file, json);
+                Logger.Info($"Saved updated channellist to {file}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"Something went wrong when saving channels file to disk: {ex.Message}");
+                Logger.Debug("SaveChannelsFile", ex);
+            }
+        }
+
+        private void LoadChannelsFile()
+        {
+            if (ModuleShouldStop()) return;
+            try
+            {
+                var file = Path.Combine(_settings.DataFolder, _settings.ChannelsFile);
+                if (!File.Exists(file))
+                {
+                    Logger.Info($"No channels file available yet: {file}");
+                    return;
+                }
+
+                var json = File.ReadAllText(file);
+                var data = JsonConvert.DeserializeObject<List<ChannelInfo>>(json);
+                Logger.Info($"Read channellist from disk {file}");
+
+                if (_channels == null)
+                {
+                    Logger.Warn($"No channels loaded from the server, use the local channels ({data?.Count})");
+                    _channels = data;
+                    return;
+                }
+
+                foreach (var channel in data)
+                {
+                    var matchedChannel = _channels.FirstOrDefault(c => c.ToString() == channel.ToString());
+                    if (matchedChannel == null)
+                    {
+                        Logger.Info($"Failed to find a match for channel '{channel}'");
+                        continue;
+                    }
+
+                    foreach (var location in channel.Locations.Where(c => c.KeyblockId != -1))
+                    {
+                        var matchedLocation = matchedChannel.Locations.FirstOrDefault(l => l.Url == location.Url);
+                        if (matchedLocation == null)
+                        {
+                            Logger.Info($"Failed to find a match for location '{location}'");
+                            continue;
+                        }
+
+                        Logger.Info($"Resolved Keyblock ID {location.KeyblockId} from disk for {channel.Name}-{location}");
+                        matchedLocation.KeyblockId = location.KeyblockId;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"Something went wrong when reading channels file from disk: {ex.Message}");
+                Logger.Debug("LoadChannelsFile", ex);
             }
         }
 
         private void RetrieveKeyblockIds()
         {
+            if (ModuleShouldStop() || _channels == null) return;
             foreach (var channel in _channels)
             {
+                if(channel.Locations.All(c => c.KeyblockId != -1)) continue;
+
                 foreach (var location in channel.Locations)
                 {
                     if (ModuleShouldStop()) return;
+                    if(location.KeyblockId != -1) continue;
                     var iptv = _channelFactory();
+                    iptv.OnlySearchForKeys = true;
                     var info = iptv.ReadInfo(location, channel.Name);
-                    location.KeyblockId = info.Number.Value;
+                    location.KeyblockId = info?.Number ?? -1;
                 }
                 Logger.Info($"Resolved Keyblock ID's for {channel.Name}");
             }
@@ -90,17 +172,16 @@ namespace ChannelList
 
         private void LoadChannelList()
         {
+            if (ModuleShouldStop()) return;
             _channels = _channelList.Load();
             _lastRetrieval = DateTime.Now;
             _lastRetrievalState = _channels == null
                 ? "Something went wrong, look in the log"
                 : $"Downloaded {_channels.Count} channels";
-            ChangeState(ModuleState.Idle);
         }
 
         protected override void StopModule()
         {
-            _channels = null;
             _lastRetrieval = null;
         }
     }

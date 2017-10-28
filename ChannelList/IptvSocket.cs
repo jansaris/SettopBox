@@ -13,7 +13,7 @@ namespace ChannelList
 
         public IptvSocket()
         {
-            _client = new UdpClient();
+            _client = new UdpClient {Client = {ReceiveTimeout = 5000}};
         }
 
         internal void Open(string host, int port)
