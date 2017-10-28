@@ -130,5 +130,13 @@ namespace SharedComponents.Keyblock
             _logger.Warn("Found NO valid expiration date between in blocks in the future");
             return null;
         }
+
+        public int[] GetChannelIds()
+        {
+            return _blocks
+                .Select(c => c.ChannelId)
+                .Distinct()
+                .ToArray();
+        }
     }
 }

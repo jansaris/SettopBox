@@ -8,6 +8,7 @@
         public string Url => $"{Protocol}://{Host}:{Port}";
         public int Bitrate { get; set; }
         public int KeyblockId { get; set; } = -1;
+        public bool Keyblock { get; set; } = false;
 
         public override string ToString()
         {

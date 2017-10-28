@@ -194,7 +194,8 @@ namespace Keyblock
                 RefreshAfter = _keyblock.BlockRefreshAfter,
                 LastRetrieval = _lastRetrieval,
                 NextRetrieval = _nextRetrieval,
-                ChannelsToMonitor = _settings.GetChannelsToMonitor()
+                ChannelsToMonitor = _settings.GetChannelsToMonitor(),
+                AvailableKeyblockIds = _keyblock.GetAvailableChannelIds()
             };
         }
     }

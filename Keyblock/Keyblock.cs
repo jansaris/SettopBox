@@ -305,5 +305,10 @@ namespace Keyblock
             var blockDate = _block.FirstFutureExpirationDate(_settings.GetChannelNumbersToMonitor(), _settings.GetChannelsToIgnore());
             return blockDate ?? nextRetrieval;
         }
+
+        public int[] GetAvailableChannelIds()
+        {
+            return _block.GetChannelIds();
+        }
     }
 }

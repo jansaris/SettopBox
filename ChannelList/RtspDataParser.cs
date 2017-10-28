@@ -49,7 +49,7 @@ namespace ChannelList
             var retValue = new List<ChannelInfo>();
             foreach (var channel in channels)
             {
-                var match = retValue.FirstOrDefault(c => c.Name == channel.Name);
+                var match = retValue.FirstOrDefault(c => EqualsWithoutWhiteSpaces(c.Name, channel.Name));
                 if (match != null)
                 {
                     foreach (var channelLocation in channel.Locations)
@@ -63,6 +63,13 @@ namespace ChannelList
                 }
             }
             return retValue;
+        }
+
+        private bool EqualsWithoutWhiteSpaces(string value1, string value2)
+        {
+            var val1 = value1.Replace(" ", "");
+            var val2 = value2.Replace(" ", "");
+            return val1.Equals(val2, StringComparison.InvariantCultureIgnoreCase);
         }
 
         private ChannelInfo ParseChannel(IList<string> messageBlock)

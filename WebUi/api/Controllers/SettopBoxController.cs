@@ -53,14 +53,10 @@ namespace WebUi.api.Controllers
             }
             if (_info.Data(nameof(Keyblock)) is KeyblockInfo keyblock)
             {
-                _channels.ForEach(c =>
+                _channels.ForEach(c => c.AvailableChannels.ForEach(location => 
                 {
-                    if (keyblock.ChannelsToMonitor.ContainsKey(c.Id))
-                    {
-                        c.Keyblock = true;
-                        c.KeyblockId = keyblock.ChannelsToMonitor[c.Id];
-                    }
-                });
+                    location.Keyblock = keyblock.AvailableKeyblockIds.Contains(location.KeyblockId);
+                }));
             }
             if(_info.Data(nameof(TvHeadendIntegration)) is TvHeadendIntegrationInfo tvh)
             {
@@ -111,7 +107,7 @@ namespace WebUi.api.Controllers
                     Name = GetName(c.Bitrate),
                     Url = c.Url,
                     Number = c.KeyblockId,
-                    Provider = "KPM",
+                    Provider = "KPN",
                     KBps = c.Bitrate,
                     MBps = c.Bitrate / 1024
                 })

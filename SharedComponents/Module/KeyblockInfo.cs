@@ -12,5 +12,6 @@ namespace SharedComponents.Module
         public DateTime? ValidTo { get; set; }
         public DateTime? RefreshAfter { get; set; }
         public IDictionary<string, int> ChannelsToMonitor { get; set; }
+        public int[] AvailableKeyblockIds { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿import { NgModule }             from '@angular/core';
+import { NgModule }             from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent }   from './dashboard/dashboard.component';
 import { WebUiComponent }   from './webui/webui.component';
@@ -11,7 +11,7 @@ import { TvheadendComponent } from './tvheadend/tvheadend.component';
 import { OverviewComponent } from './overview/overview.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: '/Overview', pathMatch: 'full' },
   { path: 'dashboard',  component: DashboardComponent },
   { path: 'WebUi',  component: WebUiComponent },
   { path: 'Keyblock',  component: KeyblockComponent },
