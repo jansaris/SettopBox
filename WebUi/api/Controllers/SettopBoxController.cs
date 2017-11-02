@@ -33,15 +33,14 @@ namespace WebUi.api.Controllers
 
         private void LoadChannels(bool force)
         {
-            //if(force) LoadDummyData(); return;
-            
             if (_channels != null && !force) return;
-            var channels = _info.Data(nameof(ChannelList)) as ChannelListInfo;
-            if (channels == null)
+            if (!(_info.Data(nameof(ChannelList)) is ChannelListInfo channels))
             {
+                //Failed to retrieve channellist from module
                 _channels = new List<Channel>();
                 return;
             }
+
             _channels = channels.Channels.Select(Convert).ToList();
 
             if (_info.Data(nameof(EpgGrabber)) is EpgGrabberInfo epg)
@@ -51,6 +50,7 @@ namespace WebUi.api.Controllers
                     if (epg.Channels.Contains(c.Name)) c.EpgGrabber = true;
                 });
             }
+
             if (_info.Data(nameof(Keyblock)) is KeyblockInfo keyblock)
             {
                 _channels.ForEach(c => c.AvailableChannels.ForEach(location => 
@@ -58,6 +58,7 @@ namespace WebUi.api.Controllers
                     location.Keyblock = keyblock.AvailableKeyblockIds.Contains(location.KeyblockId);
                 }));
             }
+
             if(_info.Data(nameof(TvHeadendIntegration)) is TvHeadendIntegrationInfo tvh)
             {
                 _channels.ForEach(c =>
@@ -101,7 +102,6 @@ namespace WebUi.api.Controllers
             var channel = _channels.FirstOrDefault(c => c.Id == id);
             if (channel == null) return NotFound();
             var data = channel.AvailableChannels
-                //.AsParallel()
                 .Select(c => new IptvInfo
                 {
                     Name = GetName(c.Bitrate),
@@ -160,9 +160,8 @@ namespace WebUi.api.Controllers
             else if (!newChannel.TvHeadend && oldChannel.TvHeadend) _logger.Info($"Remove from TvHeadend: {oldChannel.Id}");
 
             var tcu = new TvHeadendChannelUpdate { TvhId = newChannel.TvhId, Id = newChannel.Id, OldUrl = oldChannel.TvHeadendChannel, NewUrl = newChannel.TvHeadendChannel, Epg = newChannel.EpgGrabber };
-            var data = new CommunicationData(DataType.TvHeadendChannelUpdate, tcu);
-            var thread = _info.SendData(nameof(WebUi), nameof(TvHeadendIntegration), data);
-            thread?.Join();
+
+            SendData(nameof(TvHeadendIntegration), DataType.TvHeadendChannelUpdate, tcu);
         }
 
         private void UpdateEpg(Channel newChannel, Channel oldChannel)
@@ -170,9 +169,8 @@ namespace WebUi.api.Controllers
             if (newChannel.EpgGrabber == oldChannel.EpgGrabber) return;
             _logger.Info($"{(newChannel.EpgGrabber ? "Add to" : "Remove from")} EpgGrabber - {newChannel.Name}");
             var ecu = new EpgChannelUpdate { Id = newChannel.Id, Name = newChannel.Name, Enabled = newChannel.EpgGrabber };
-            var data = new CommunicationData(DataType.EpgChannelUpdate, ecu);
-            var thread = _info.SendData(nameof(WebUi), nameof(EpgGrabber), data);
-            thread?.Join();
+            
+            SendData(nameof(EpgGrabber), DataType.EpgChannelUpdate, ecu);
         }
 
         private void UpdateKeyblock(Channel newChannel, Channel oldChannel)
@@ -180,8 +178,14 @@ namespace WebUi.api.Controllers
             if (newChannel.Keyblock == oldChannel.Keyblock && newChannel.KeyblockId == oldChannel.KeyblockId) return;
             _logger.Info($"{(newChannel.Keyblock ? "Add to" : "Remove from")} Keyblock - {newChannel.Name}: {newChannel.KeyblockId}");
             var kcu = new KeyblockChannelUpdate { Id = newChannel.Id, Name = newChannel.Name, Enabled = newChannel.Keyblock, OldKey = oldChannel.KeyblockId, NewKey = newChannel.KeyblockId };
-            var data = new CommunicationData(DataType.KeyblockChannelUpdate, kcu);
-            var thread = _info.SendData(nameof(WebUi), nameof(Keyblock), data);
+            
+            SendData(nameof(Keyblock), DataType.KeyblockChannelUpdate, kcu);
+        }
+
+        private void SendData(string module, DataType type, object data)
+        {
+            var communicationData = new CommunicationData(type, data);
+            var thread = _info.SendData(nameof(WebUi), module, communicationData);
             thread?.Join();
         }
 

@@ -192,7 +192,7 @@ namespace Keyblock
                 Logger.Info($"Removed key for {update.Id}");
                 list.Remove(update.Id);
             }
-            KeyblockChannelsToMonitor = String.Join(";", list.Select(kv => $"{kv.Key}:{kv.Value}"));
+            KeyblockChannelsToMonitor = string.Join(";", list.Select(kv => $"{kv.Key}:{kv.Value}"));
             Save();
         }
 
