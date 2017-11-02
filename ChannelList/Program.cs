@@ -73,7 +73,7 @@ namespace ChannelList
                 WaitForSpecificState(ModuleState.Running, () => {});
                 LoadChannelList();
                 LoadChannelsFile();
-                RetrieveKeyblockIds();
+                if(_settings.ScanForKeyblockIds) RetrieveKeyblockIds();
                 SaveChannelsFile();
                 if (!ModuleShouldStop()) ChangeState(ModuleState.Idle);
             }

@@ -13,5 +13,6 @@ namespace ChannelList
         public int Port { get; set; } = 8554;
         public string DataFolder { get; set; } = "Data";
         public string ChannelsFile { get; set; } = "ChannelList.txt";
+        public bool ScanForKeyblockIds { get; set; } = false;
     }
 }
