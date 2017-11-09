@@ -45,9 +45,8 @@
                 <div class="col-md-4 channel" *ngFor="let channel of info?.Channels" (click)="showDetails(channel)">
                     <div [ngClass]="channel.Radio ? 'radio' : 'tv'"></div>
                     <div class="info">
-                        <div class="name">{{channel.Number}}: {{channel.Name}}</div>
-                        <div class="url">{{channel.FirstLocationQuality}}: {{channel.FirstLocationUrl}}</div>
-                        <div *ngIf="channel.Locations.length > 1" class="more">({{channel.Locations.length}})</div>
+                      <div class="name">{{channel.Number}}: {{channel.Name}} <div *ngIf="channel.Locations.length > 1" class="more">({{channel.Locations.length}})</div></div>
+                        <div class="url">{{channel.Locations[0].Bitrate}}: {{channel.Locations[0].Url}} ({{channel.Locations[0].KeyblockId}})</div>
                     </div>
                     <div class="panel panel-success popup" *ngIf="channel.DetailsVisible">
                         <div class="panel-heading" (click)="hideDetails(channel)">
@@ -56,7 +55,7 @@
                         <div class="panel-body">
                             <dl>
                                 <dt class="location" *ngFor="let location of channel.Locations">
-                                    {{location.Name}}: {{location.Url}}
+                                    {{location.Bitrate}}: {{location.Url}}
                                 </dt>
                             </dl>
                         </div>

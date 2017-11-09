@@ -4,7 +4,7 @@ import { HomeService } from '../home.service';
 import { PerformanceService } from '../performance.service';
 import { Module, Performance } from '../models';
 
-import { IntervalObservable } from 'rxjs/Observable/IntervalObservable';
+import { Observable } from 'rxjs/Rx';
 import { Subscription } from 'rxjs/Subscription';
 
 @Component({
@@ -70,7 +70,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     startMonitoring(): void{
         if(this.running) return;
-        this.monitor = IntervalObservable.create(1000).subscribe(n => this.updatePerformance());
+        this.monitor = Observable.interval(1000)
+          .subscribe(() => this.updatePerformance());
         this.running = true;
     }
 

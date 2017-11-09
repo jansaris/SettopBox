@@ -1,4 +1,6 @@
-﻿namespace WebUi.api.Models
+﻿using System;
+
+namespace WebUi.api.Models
 {
     public class IptvInfo
     {
@@ -8,11 +10,6 @@
         public string Name { get; set; }
         public int KBps { get; set; }
         public int MBps { get; internal set; }
-
-        internal bool Complete()
-        {
-            return Number.HasValue &&
-                   !string.IsNullOrWhiteSpace(Name);
-        }
+        public bool Keyblock { get; set; }
     }
 }

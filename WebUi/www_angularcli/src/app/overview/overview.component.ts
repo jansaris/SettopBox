@@ -1,7 +1,7 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { SettopboxService } from '../settopbox.service';
-import { Channel, ChannelLocations } from '../models';
+import { Channel } from '../models';
 
 @Component({
     selector: 'app-overview',
@@ -28,7 +28,7 @@ export class OverviewComponent implements OnInit {
 
     visible(channel: Channel) {
         if (!this.search) return '';
-        if (channel.Name.indexOf(this.search) == -1) return 'hide';
+        if (channel.Name.toLowerCase().indexOf(this.search.toLowerCase()) === -1) return 'hide';
         return '';
     }
 

@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, Input  } from '@angular/core';
+import { Component, OnInit, Input  } from '@angular/core';
 import { Channel, ChannelLocations, IptvInfo } from '../models';
 import { SettopboxService } from '../settopbox.service';
 
@@ -20,8 +20,9 @@ export class ChannelComponent implements OnInit {
     isCollapsed: boolean;
 
     constructor(private settopboxService: SettopboxService) {
-        this.noChannel = null;
-        this.channels = [];
+      this.noChannel = null;
+      this.channels = [];
+      this.isCollapsed = true;
     }
 
     ngOnInit() {

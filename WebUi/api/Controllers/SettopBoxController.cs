@@ -79,7 +79,8 @@ namespace WebUi.api.Controllers
             return new Channel
             {
                 Name = info.Name,
-                Id = info.Name,
+                Names = info.Names,
+                Id = Guid.NewGuid().ToString(),
                 Number = info.Number,
                 AvailableChannels = info.Locations.ToList()
             };
@@ -107,6 +108,7 @@ namespace WebUi.api.Controllers
                     Name = GetName(c.Bitrate),
                     Url = c.Url,
                     Number = c.KeyblockId,
+                    Keyblock = c.Keyblock,
                     Provider = "KPN",
                     KBps = c.Bitrate,
                     MBps = c.Bitrate / 1024
@@ -128,7 +130,7 @@ namespace WebUi.api.Controllers
             try
             {
                 if (channel == null) return NotFound();
-                _logger.Info($"Update channel: {channel.Id}");
+                _logger.Info($"Update channel: {channel.Name}");
                 LoadChannels(false);
                 var index = _channels.FindIndex(c => c.Id == channel.Id);
                 if (index == -1) return NotFound();
@@ -138,7 +140,7 @@ namespace WebUi.api.Controllers
             }
             catch(Exception ex)
             {
-                _logger.Error($"Failed to update {channel?.Id}: {ex.Message}", ex);
+                _logger.Error($"Failed to update {channel?.Name}: {ex.Message}", ex);
                 return InternalServerError(ex);
             }
         }
@@ -155,11 +157,11 @@ namespace WebUi.api.Controllers
             if (newChannel.TvHeadend == oldChannel.TvHeadend &&
                 newChannel.TvHeadendChannel == oldChannel.TvHeadendChannel &&
                 newChannel.EpgGrabber == oldChannel.EpgGrabber) return;
-            if (newChannel.TvHeadend && !oldChannel.TvHeadend) _logger.Info($"Add to TvHeadend: {newChannel.Id} - {newChannel.Name}");
-            else if (newChannel.TvHeadend == oldChannel.TvHeadend) _logger.Info($"Update TvHeadend: {newChannel.Id} to {newChannel.Name}");
-            else if (!newChannel.TvHeadend && oldChannel.TvHeadend) _logger.Info($"Remove from TvHeadend: {oldChannel.Id}");
+            if (newChannel.TvHeadend && !oldChannel.TvHeadend) _logger.Info($"Add to TvHeadend: {newChannel.Number} - {newChannel.Name}");
+            else if (newChannel.TvHeadend == oldChannel.TvHeadend) _logger.Info($"Update TvHeadend: {newChannel.Number} to {newChannel.Name}");
+            else if (!newChannel.TvHeadend && oldChannel.TvHeadend) _logger.Info($"Remove from TvHeadend: {oldChannel.Name}");
 
-            var tcu = new TvHeadendChannelUpdate { TvhId = newChannel.TvhId, Id = newChannel.Id, OldUrl = oldChannel.TvHeadendChannel, NewUrl = newChannel.TvHeadendChannel, Epg = newChannel.EpgGrabber };
+            var tcu = new TvHeadendChannelUpdate { TvhId = newChannel.TvhId, Id = newChannel.Number.ToString(), OldUrl = oldChannel.TvHeadendChannel, NewUrl = newChannel.TvHeadendChannel, Epg = newChannel.EpgGrabber };
 
             SendData(nameof(TvHeadendIntegration), DataType.TvHeadendChannelUpdate, tcu);
         }
@@ -167,17 +169,19 @@ namespace WebUi.api.Controllers
         private void UpdateEpg(Channel newChannel, Channel oldChannel)
         {
             if (newChannel.EpgGrabber == oldChannel.EpgGrabber) return;
-            _logger.Info($"{(newChannel.EpgGrabber ? "Add to" : "Remove from")} EpgGrabber - {newChannel.Name}");
-            var ecu = new EpgChannelUpdate { Id = newChannel.Id, Name = newChannel.Name, Enabled = newChannel.EpgGrabber };
-            
-            SendData(nameof(EpgGrabber), DataType.EpgChannelUpdate, ecu);
+            foreach (var name in newChannel.Names)
+            {
+                _logger.Info($"{(newChannel.EpgGrabber ? "Add to" : "Remove from")} EpgGrabber - {name}");
+                var ecu = new EpgChannelUpdate { Id = newChannel.Number.ToString(), Name = name, Enabled = newChannel.EpgGrabber };
+                SendData(nameof(EpgGrabber), DataType.EpgChannelUpdate, ecu);
+            }
         }
 
         private void UpdateKeyblock(Channel newChannel, Channel oldChannel)
         {
             if (newChannel.Keyblock == oldChannel.Keyblock && newChannel.KeyblockId == oldChannel.KeyblockId) return;
             _logger.Info($"{(newChannel.Keyblock ? "Add to" : "Remove from")} Keyblock - {newChannel.Name}: {newChannel.KeyblockId}");
-            var kcu = new KeyblockChannelUpdate { Id = newChannel.Id, Name = newChannel.Name, Enabled = newChannel.Keyblock, OldKey = oldChannel.KeyblockId, NewKey = newChannel.KeyblockId };
+            var kcu = new KeyblockChannelUpdate { Id = newChannel.Number.ToString(), Name = newChannel.Name, Enabled = newChannel.Keyblock, OldKey = oldChannel.KeyblockId, NewKey = newChannel.KeyblockId };
             
             SendData(nameof(Keyblock), DataType.KeyblockChannelUpdate, kcu);
         }

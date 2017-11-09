@@ -16,5 +16,6 @@ namespace WebUi.api.Models
         public bool EpgGrabber { get; set; }
         public bool TvHeadend { get; set; }
         public int Number { get; set; }
+        public List<string> Names { get; set; }
     }
 }

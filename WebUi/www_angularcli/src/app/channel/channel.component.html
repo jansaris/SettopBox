@@ -1,5 +1,5 @@
-﻿<div class="channel">
-  <div class="row channel-header" data-toggle="collapse" [attr.data-target]="'#' + info.Number" aria-expanded="false" (click)="toggleCollapsed()">
+<div class="channel">
+  <div class="row channel-header" (click)="toggleCollapsed()">
     <h3 class="left">{{info.Number}}: {{info.Name}}<span *ngIf="loading" class="fa fa-spinner fa-spin"></span></h3>
     <div class="right tags">
       <div class="right">
@@ -13,7 +13,7 @@
       <div *ngIf="info.TvHeadend" class="tag">TvHeadend</div>
     </div>
   </div>
-  <div class="row channel-details collapse" [id]="info.Number">
+  <div class="row channel-details" [id]="info.Id" [class.collapse]="isCollapsed">
     <div class="row">
       <app-toggle-button class="col-md-2" [text]="'EPG'" [value]="info.EpgGrabber" (onChanged)="onToggleButtonChange('EPG', $event)"></app-toggle-button>
       <div *ngIf="TvHeadendLoading">
