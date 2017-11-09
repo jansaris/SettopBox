@@ -19,8 +19,7 @@ namespace TvHeadendIntegration.TvHeadend
         private List<Network> _networks = new List<Network>();
         private List<Channel> _channels = new List<Channel>();
         private List<Tag> _tags = new List<Tag>();
-        private List<Epg> _epgs = new List<Epg>(); 
-        private string _tvhFolder = string.Empty;
+        private List<Epg> _epgs = new List<Epg>();
         private string _defaultNetworkName = string.Empty;
         
         public TvhModel(ILog logger, Settings settings, Func<TvhCommunication> communicationFactory)
@@ -79,12 +78,12 @@ namespace TvHeadendIntegration.TvHeadend
 
         public void AddChannel(string id, string newUrl, bool epg)
         {
-            _logger.Info($"Add channel '{id}' with url '{newUrl}' to TvHeadend");
+            _logger.Info($"TODO: Add channel '{id}' with url '{newUrl}' to TvHeadend");
         }
 
         public void RemoveChannel(string tvhId, string id)
         {
-            _logger.Info($"Remove channel '{id}' with UUID '{tvhId}' from TvHeadend");
+            _logger.Info($"TODO: Remove channel '{id}' with UUID '{tvhId}' from TvHeadend");
         }
 
         public void UpdateChannel(string tvhId, string id, string newUrl, bool epg)
@@ -97,7 +96,7 @@ namespace TvHeadendIntegration.TvHeadend
                 mux.iptv_url = newUrl;
                 UpdateOnTvh(mux);
             }
-            //TODO: Update EPG tag
+            if(epg) _logger.Info($"TODO Update channel EPG '{id}' with UUID '{tvhId}' in TvHeadend");
         }
 
         private List<T> ReadFromWeb<T>() where T : TvhObject, new()

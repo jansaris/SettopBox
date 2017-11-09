@@ -49,12 +49,13 @@ namespace ChannelList
             var retValue = new List<ChannelInfo>();
             foreach (var channel in channels)
             {
-                var match = retValue.FirstOrDefault(c => EqualsWithoutWhiteSpaces(c.Name, channel.Name));
+                var match = retValue.FirstOrDefault(c => c.Number == channel.Number);
                 if (match != null)
                 {
                     foreach (var channelLocation in channel.Locations)
                     {
                         match.AddLocation(channelLocation);
+                        match.AddName(channel.Name);
                     }
                 }
                 else
@@ -65,19 +66,13 @@ namespace ChannelList
             return retValue;
         }
 
-        private bool EqualsWithoutWhiteSpaces(string value1, string value2)
-        {
-            var val1 = value1.Replace(" ", "");
-            var val2 = value2.Replace(" ", "");
-            return val1.Equals(val2, StringComparison.InvariantCultureIgnoreCase);
-        }
-
         private ChannelInfo ParseChannel(IList<string> messageBlock)
         {
             var channel = new ChannelInfo();
 
             var nameAndLocation = messageBlock.First(m => m.StartsWith("s"));
-            channel.Name = ExtractChannelName(nameAndLocation);
+            channel.AddName(ExtractChannelName(nameAndLocation));
+            channel.Key = channel.Name;
             channel.Number = ExtractChannelNumber(nameAndLocation);
 
             channel.AddLocation(ExtractLocation(messageBlock));

@@ -10,11 +10,14 @@ namespace SharedComponents.Models
         {
             Icons = new List<string>();
             Locations = new List<ChannelLocation>();
+            Names = new List<string>();
             Number = -1;
         }
 
         public string Key { get; set; }
-        public string Name { get; set; }
+        public string Name => Names.FirstOrDefault();
+
+        public List<string> Names { get; set; }
 
         public List<ChannelLocation> Locations { get; set; }
 
@@ -33,6 +36,11 @@ namespace SharedComponents.Models
         public override string ToString()
         {
             return $"{Name} ({Key}). {Locations?.Count ?? 0} locations";
+        }
+
+        public void AddName(string channelName)
+        {
+            if(!Names.Contains(channelName)) Names.Add(channelName);
         }
     }
 
