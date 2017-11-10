@@ -172,7 +172,7 @@ namespace WebUi.api.Controllers
             foreach (var name in newChannel.Names)
             {
                 _logger.Info($"{(newChannel.EpgGrabber ? "Add to" : "Remove from")} EpgGrabber - {name}");
-                var ecu = new EpgChannelUpdate { Id = newChannel.Number.ToString(), Name = name, Enabled = newChannel.EpgGrabber };
+                var ecu = new EpgChannelUpdate { Name = name, Enabled = newChannel.EpgGrabber };
                 SendData(nameof(EpgGrabber), DataType.EpgChannelUpdate, ecu);
             }
         }

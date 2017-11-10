@@ -66,18 +66,18 @@ namespace EpgGrabber
             if (epgChannelUpdate == null) return;
             if (epgChannelUpdate.Enabled)
             {
-                if (!Channels.Contains(epgChannelUpdate.Id))
+                if (!Channels.Contains(epgChannelUpdate.Name))
                 {
-                    _logger.Info($"Add channel {epgChannelUpdate.Id} - {epgChannelUpdate.Name}");
-                    Channels.Add(epgChannelUpdate.Id);
+                    _logger.Info($"Add channel {epgChannelUpdate.Name}");
+                    Channels.Add(epgChannelUpdate.Name);
                 }
             }
             else
             {
-                if (Channels.Contains(epgChannelUpdate.Id))
+                if (Channels.Contains(epgChannelUpdate.Name))
                 {
-                    _logger.Info($"Remove channel {epgChannelUpdate.Id} - {epgChannelUpdate.Name}");
-                    Channels.Remove(epgChannelUpdate.Id);
+                    _logger.Info($"Remove channel {epgChannelUpdate.Name}");
+                    Channels.Remove(epgChannelUpdate.Name);
                 }
             }
             SaveChannelBocksToDisk();

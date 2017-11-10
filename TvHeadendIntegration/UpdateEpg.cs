@@ -18,6 +18,11 @@ namespace TvHeadendIntegration
 
         public bool SendToTvheadend(string file)
         {
+            if (string.IsNullOrWhiteSpace(_settings.XmlTvSocket))
+            {
+                _logger.Info("No socket information for TvHeadend");
+                return false;
+            }
             var fileinfo = ValidateEpgFile(file);
             var result = WriteXmlToSocket(fileinfo);
             if(result) _logger.Info($"Successfully sended {file} to Tvheadend");
