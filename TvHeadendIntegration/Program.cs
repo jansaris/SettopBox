@@ -82,15 +82,15 @@ namespace TvHeadendIntegration
         {
             if (string.IsNullOrWhiteSpace(tcu.TvhId))
             {
-                _configuration.AddChannel(tcu.Id, tcu.NewUrl, tcu.Epg);
+                _configuration.AddChannel(tcu.Number, tcu.Name, tcu.NewUrl, tcu.Epg);
             }
             else if (string.IsNullOrWhiteSpace(tcu.NewUrl))
             {
-                _configuration.RemoveChannel(tcu.TvhId, tcu.Id);
+                _configuration.RemoveChannel(tcu.TvhId, tcu.Name);
             }
             else
             {
-                _configuration.UpdateChannel(tcu.TvhId, tcu.Id, tcu.NewUrl, tcu.Epg);
+                _configuration.UpdateChannel(tcu.TvhId, tcu.Name, tcu.NewUrl, tcu.Epg);
             }
         }
 

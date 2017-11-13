@@ -22,13 +22,16 @@ namespace TvHeadendIntegration.TvHeadend
         public State State { get; set; }
 
         [JsonIgnore]
-        public virtual string CreateUrl { get { return string.Empty; } }
+        public virtual string CreateUrl => string.Empty;
+
         [JsonIgnore]
-        public virtual string UpdateUrl { get { return "/api/idnode/save"; } }
+        public virtual string UpdateUrl => "/api/idnode/save";
+
         [JsonIgnore]
-        public virtual object CreateData { get { return string.Empty; } }
+        public virtual string CreateData => string.Empty;
+
         [JsonIgnore]
-        public virtual object UpdateData { get { return string.Empty; } }
+        public virtual string UpdateData => string.Empty;
 
         [JsonIgnore]
         public abstract Urls Urls { get; }
@@ -48,10 +51,10 @@ namespace TvHeadendIntegration.TvHeadend
 
         public bool CreateOnTvh(TvhCommunication comm)
         {
-            if (State != State.Created) return false;
+            if (State != State.New) return false;
             if (string.IsNullOrWhiteSpace(CreateUrl)) return false;
-            comm.Post(CreateUrl, CreateData, null);
-            Logger.InfoFormat($"Created {GetType().Name} on tvheadend. Give it 5 sec to initialize");
+            var response = comm.Post(CreateUrl, CreateData);
+            Logger.InfoFormat($"Created {GetType().Name} on tvheadend with id {response}. Give it 5 sec to initialize");
             comm.WaitUntilScanCompleted();
             return true;
         }
@@ -60,8 +63,7 @@ namespace TvHeadendIntegration.TvHeadend
         {
             if (State != State.Loaded) return false;
             if (string.IsNullOrWhiteSpace(UpdateUrl)) return false;
-            Func<string, string> extendUploadData = (data) => string.Concat("node=", data);
-            var response = comm.Post(UpdateUrl, UpdateData, extendUploadData);
+            var response = comm.Post(UpdateUrl, UpdateData);
             if (response == "{}") response = "OK";
             Logger.InfoFormat($"Updated {GetType().Name} on tvheadend with response: {response}");
             return !string.IsNullOrWhiteSpace(response);

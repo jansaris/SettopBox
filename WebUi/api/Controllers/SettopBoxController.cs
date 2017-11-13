@@ -161,7 +161,7 @@ namespace WebUi.api.Controllers
             else if (newChannel.TvHeadend == oldChannel.TvHeadend) _logger.Info($"Update TvHeadend: {newChannel.Number} to {newChannel.Name}");
             else if (!newChannel.TvHeadend && oldChannel.TvHeadend) _logger.Info($"Remove from TvHeadend: {oldChannel.Name}");
 
-            var tcu = new TvHeadendChannelUpdate { TvhId = newChannel.TvhId, Id = newChannel.Number.ToString(), OldUrl = oldChannel.TvHeadendChannel, NewUrl = newChannel.TvHeadendChannel, Epg = newChannel.EpgGrabber };
+            var tcu = new TvHeadendChannelUpdate { TvhId = newChannel.TvhId, Number = newChannel.Number, Name = newChannel.Name, NewUrl = newChannel.TvHeadendChannel, Epg = newChannel.EpgGrabber };
 
             SendData(nameof(TvHeadendIntegration), DataType.TvHeadendChannelUpdate, tcu);
         }

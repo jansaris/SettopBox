@@ -83,21 +83,19 @@ namespace TvHeadendIntegration.TvHeadend.Web
             }
         }
 
-        public string Post(string uri, object data, Func<string, string> extendUploadData)
+        public string Post(string uri, string data)
         {
-            return PostData(uri, data, extendUploadData);
+            return PostData(uri, data);
         }
 
-        private string PostData(string uri, object data, Func<string, string> extendUploadData)
+        private string PostData(string uri, string data)
         {
             try
             {
                 using (var client = CreateWebClient())
                 {
-                    var uploadData = ConvertToQueryString(data);
-                    if(extendUploadData != null) uploadData = extendUploadData(uploadData);
                     var url = string.Concat(_hostAddress, uri);
-                    var result = client.UploadString(url, "POST", uploadData);
+                    var result = client.UploadString(url, "POST", data);
                     _logger.Debug($"Posted object on {url} with result {result}");
                     return result;
                 }
@@ -132,14 +130,14 @@ namespace TvHeadendIntegration.TvHeadend.Web
         {
             var webClient = new WebClient();
 
-            webClient.Headers.Add("Host", _hostName);
-            webClient.Headers.Add("Origin", _hostName);
-            webClient.Headers.Add("X-Requested-With", "XMLHttpRequest");
-            webClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36");
+            //webClient.Headers.Add("Host", _hostName);
+            //webClient.Headers.Add("Origin", _hostName);
+            //webClient.Headers.Add("X-Requested-With", "XMLHttpRequest");
+            //webClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36");
             webClient.Headers.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-            webClient.Headers.Add("referer", string.Concat("http://", _hostAddress, "/extjs.html"));
-            webClient.Headers.Add("Accept-Encoding", "identity");
-            webClient.Headers.Add("Accept-Language", "nl-NL,nl;q=0.8,en-US;q=0.6,en;q=0.4");
+            //webClient.Headers.Add("referer", string.Concat("http://", _hostAddress, "/extjs.html"));
+            //webClient.Headers.Add("Accept-Encoding", "identity");
+            //webClient.Headers.Add("Accept-Language", "nl-NL,nl;q=0.8,en-US;q=0.6,en;q=0.4");
             if(!string.IsNullOrWhiteSpace(_username))
             {
                 NetworkCredential myCreds = new NetworkCredential(_username, _password);
@@ -162,16 +160,7 @@ namespace TvHeadendIntegration.TvHeadend.Web
                 Accept-Language: nl-NL,nl;q=0.8,en-US;q=0.6,en;q=0.4
              */
         }
-
-        private static string ConvertToQueryString(object data)
-        {
-            if (data is string) return data.ToString();
-            var json = TvhJsonConvert.Serialize(data);
-            var query = json.Replace("\n", "").Replace("\t", "");
-            query = HttpUtility.UrlEncode(query);
-            query = query.Replace("+", "%20");
-            return query;
-        }
+        
         public void WaitUntilScanCompleted()
         {
             var count = 0;

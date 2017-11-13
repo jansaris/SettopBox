@@ -21,7 +21,10 @@ namespace ChannelListTest
             _logger = A.Fake<ILog>();
             _settings = new TvHeadendIntegration.Settings(_logger)
             {
-                
+                Username = "settopbox",
+                Password = "settopbox",
+                TvhNetworkName = "KPN",
+                WebUrl = "http://192.168.10.54:9981"
             };
             configuration = new TvhModel(_logger, _settings, () => new TvhCommunication(_logger, _settings));
         }
@@ -39,7 +42,7 @@ namespace ChannelListTest
         public void LoadNode()
         {
             var comm = new TvhCommunication(_logger, _settings);
-            var response = comm.Post("/api/idnode/load", "uuid=f9a34473d1930d2ecd82c10ccbdb42f7&meta=1", null);
+            var response = comm.Post("/api/idnode/load", "uuid=f9a34473d1930d2ecd82c10ccbdb42f7&meta=1");
             response.Should().NotBeNull();
         }
 
@@ -63,7 +66,7 @@ namespace ChannelListTest
             configuration.UpdateOnTvh(mux);
         }
 
-        //[Test]
+        [Test]
         public void AddChannel()
         {
             //Add channel 'rtlz' with url 'rtp://224.0.251.115:8230' to TvHeadend
@@ -73,7 +76,7 @@ namespace ChannelListTest
 
             model.ReadFromWeb();
 
-            model.AddChannel("rtlz", "rtp://224.0.251.115:8230", true);
+            model.AddChannel(8, "rtlz", "rtp://224.0.251.115:8230", true);
 
 
         }

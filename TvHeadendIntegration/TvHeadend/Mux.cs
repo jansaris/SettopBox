@@ -1,17 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using TvHeadendIntegration.TvHeadend.Web;
-using log4net;
 using Newtonsoft.Json;
+using TvHeadendIntegration.TvHeadend.Web;
 
 namespace TvHeadendIntegration.TvHeadend
 {
     public class Mux : TvhObject
     {
-        [JsonIgnore]
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(Mux));
-
         public override string CreateUrl
         {
             get { return "/api/mpegts/network/mux_create"; }
@@ -29,25 +24,21 @@ namespace TvHeadendIntegration.TvHeadend
             }
         }
 
-        public override object CreateData
-        {
-            get
+        public override string CreateData => TvhFormBuilder.Create()
+            .Add("uuid", network_uuid)
+            .AddJson("conf", new
             {
-                return new
-                {
-                    uuid = network_uuid,
-                    conf = this
-                };
-            }
-        }
+                enabled = 1,
+                epg,
+                iptv_url,
+                iptv_atsc = false,
+                iptv_muxname,
+                channel_number,
+                iptv_sname
+            })
+            .ToString();
 
-        public override object UpdateData
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override string UpdateData => TvhFormBuilder.Create().AddJson("node", this).ToString();
 
         [JsonIgnore]
         public List<Service> Services { get; set; }
@@ -55,31 +46,21 @@ namespace TvHeadendIntegration.TvHeadend
         /*TvHeadend properties*/
         public string network_uuid { get; set; }
         public string iptv_url { get; set; }
-        public string iptv_interface { get; set; }
         public string iptv_muxname { get; set; }
+        public int channel_number { get; set; }
         public string iptv_sname { get; set; }
-        public bool? iptv_atsc { get; set; }
-        public bool? iptv_respawn { get; set; }
-        public bool? enabled { get; set; }
-        public int? epg { get; set; }
-        public int? onid { get; set; }
-        public int? tsid { get; set; }
-        public int? scan_result { get; set; }
-        public int? scan_state { get; set; }
-        public int? pmt_06_ac3 { get; set; }
-        
+        public bool iptv_atsc { get; set; }
+        public bool enabled { get; set; }
+        public int epg { get; set; }
+        public int scan_state { get; set; }
+
         public Mux()
         {
             Services = new List<Service>();
 
             iptv_atsc = false;
-            iptv_respawn = false;
             enabled = true;
             epg = 1;
-            onid = 0;
-            tsid = 0;
-            scan_result = 0;
-            pmt_06_ac3 = 0;
         }
 
         public Service ResolveService(string name)

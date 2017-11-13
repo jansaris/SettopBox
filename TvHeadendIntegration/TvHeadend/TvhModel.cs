@@ -76,27 +76,39 @@ namespace TvHeadendIntegration.TvHeadend
             };
         }
 
-        public void AddChannel(string id, string newUrl, bool epg)
+        public void AddChannel(int number, string name, string url, bool epg)
         {
-            _logger.Info($"TODO: Add channel '{id}' with url '{newUrl}' to TvHeadend");
+            var mux = new Mux
+            {
+                network_uuid = DefaultNetwork.uuid,
+                enabled = true,
+                epg = epg ? 1 : 0,
+                iptv_url = url,
+                iptv_atsc = false,
+                iptv_muxname = name,
+                channel_number = number,
+                iptv_sname = name
+            };
+            mux.CreateOnTvh(_communicationFactory());
+            _logger.Info($"TODO: Add channel '{number}: {name}' with url '{url}' to TvHeadend");
         }
 
-        public void RemoveChannel(string tvhId, string id)
+        public void RemoveChannel(string tvhId, string name)
         {
-            _logger.Info($"TODO: Remove channel '{id}' with UUID '{tvhId}' from TvHeadend");
+            _logger.Info($"TODO: Remove channel '{name}' with UUID '{tvhId}' from TvHeadend");
         }
 
-        public void UpdateChannel(string tvhId, string id, string newUrl, bool epg)
+        public void UpdateChannel(string tvhId, string name, string newUrl, bool epg)
         {
-            _logger.Info($"Update channel '{id}' with UUID '{tvhId}' in TvHeadend");
+            _logger.Info($"Update channel '{name}' with UUID '{tvhId}' in TvHeadend");
             var mux = ResolveMux(tvhId);
             if(mux.iptv_url != newUrl)
             {
-                _logger.Info($"Update mux ({id}) url from '{mux.iptv_url}' to '{newUrl}'");
+                _logger.Info($"Update mux ({name}) url from '{mux.iptv_url}' to '{newUrl}'");
                 mux.iptv_url = newUrl;
                 UpdateOnTvh(mux);
             }
-            if(epg) _logger.Info($"TODO Update channel EPG '{id}' with UUID '{tvhId}' in TvHeadend");
+            if(epg) _logger.Info($"TODO Update channel EPG '{name}' with UUID '{tvhId}' in TvHeadend");
         }
 
         private List<T> ReadFromWeb<T>() where T : TvhObject, new()

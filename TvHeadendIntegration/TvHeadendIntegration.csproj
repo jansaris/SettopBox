@@ -72,7 +72,7 @@
     <Compile Include="TvHeadend\TvhJsonTextWriter.cs" />
     <Compile Include="TvHeadend\TvhObject.cs" />
     <Compile Include="TvHeadend\Web\TvhCommunication.cs" />
-    <Compile Include="TvHeadend\Web\TvhJsonConvert.cs" />
+    <Compile Include="TvHeadend\Web\TvhFormBuilder.cs" />
     <Compile Include="TvHeadend\Web\TvhTable.cs" />
     <Compile Include="TvHeadend\Web\Urls.cs" />
     <Compile Include="UnixEndPoint.cs" />
