@@ -38,10 +38,6 @@ namespace TvHeadendIntegration.TvHeadend
 
         [JsonIgnore] private string _originalJson;
 
-        /*Tvheadend extra properties*/
-        [JsonExtensionData]
-        private IDictionary<string, JToken> _additionalData;
-
         protected TvhObject()
         {
             uuid = Guid.NewGuid().ToString("N");

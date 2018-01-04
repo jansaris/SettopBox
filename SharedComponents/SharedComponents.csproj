@@ -56,6 +56,7 @@
     <Compile Include="DependencyInjection\DependecyContext.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Helpers\LinuxSignal.cs" />
+    <Compile Include="Iptv\IptvSocket.cs" />
     <Compile Include="Keyblock\Block.cs" />
     <Compile Include="Keyblock\Channel.cs" />
     <Compile Include="Models\ChannelInfo.cs" />

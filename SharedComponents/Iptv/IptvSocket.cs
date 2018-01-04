@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace ChannelList
+namespace SharedComponents.Iptv
 {
     public class IptvSocket : IDisposable
     {
@@ -16,7 +16,7 @@ namespace ChannelList
             _client = new UdpClient {Client = {ReceiveTimeout = 5000}};
         }
 
-        internal void Open(string host, int port)
+        public void Open(string host, int port)
         {
             _client.ExclusiveAddressUse = false;
             _localEndPoint = new IPEndPoint(IPAddress.Any, port);

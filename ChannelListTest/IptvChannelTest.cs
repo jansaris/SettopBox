@@ -5,6 +5,7 @@ using FakeItEasy;
 using FluentAssertions;
 using log4net;
 using NUnit.Framework;
+using SharedComponents.Iptv;
 using SharedComponents.Models;
 
 namespace ChannelListTest

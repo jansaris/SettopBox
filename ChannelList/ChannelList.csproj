@@ -56,7 +56,6 @@
     <Compile Include="DependencyConfig.cs" />
     <Compile Include="IptvChannel.cs" />
     <Compile Include="IptvInfo.cs" />
-    <Compile Include="IptvSocket.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RtspDataParser.cs" />

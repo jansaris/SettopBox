@@ -2,6 +2,7 @@
 using System;
 using System.Net.Sockets;
 using System.Text;
+using SharedComponents.Iptv;
 using SharedComponents.Models;
 
 namespace ChannelList { 

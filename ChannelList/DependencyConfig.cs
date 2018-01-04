@@ -1,6 +1,7 @@
 ﻿using System;
 using log4net;
 using SharedComponents.DependencyInjection;
+using SharedComponents.Iptv;
 using SimpleInjector;
 
 namespace ChannelList

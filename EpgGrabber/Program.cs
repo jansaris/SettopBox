@@ -98,6 +98,11 @@ namespace EpgGrabber
             {
                 Logger.Warn("Load EPG has been aborted");
             }
+            catch (EpgGrabberException ex)
+            {
+                Logger.Error(ex.Message);
+                Error();
+            }
             catch (Exception ex)
             {
                 Logger.Fatal($"An unhandled exception occured: {ex.Message}", ex);

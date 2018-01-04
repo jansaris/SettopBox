@@ -59,10 +59,13 @@
   <ItemGroup>
     <Compile Include="ChannelList.cs" />
     <Compile Include="DependencyConfig.cs" />
+    <Compile Include="EpgGrabberException.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="GrabberFactory.cs" />
     <Compile Include="IGrabber.cs" />
     <Compile Include="ItvOnlineGrabber.cs" />
+    <Compile Include="KpnDownloader.cs" />
+    <Compile Include="KpnGrabber.cs" />
     <Compile Include="Models\ItvOnlineJson.cs" />
     <Compile Include="ObnGrabber.cs" />
     <Compile Include="IO\CachedWebDownloader.cs" />
