@@ -32,7 +32,7 @@ namespace EpgGrabber.Models
         /// <param name="value">The value.</param>
         public void SetStart(string value)
         {
-            Start = new DateTime(1970, 1, 1).AddSeconds(double.Parse(value));
+            Start = new DateTime(1970, 1, 1).AddSeconds(long.Parse(value));
         }
         /// <summary>
         /// Sets the end date based on the start EPG string
@@ -40,7 +40,7 @@ namespace EpgGrabber.Models
         /// <param name="value">The value.</param>
         public void SetEnd(string value)
         {
-            End = new DateTime(1970, 1, 1).AddSeconds(double.Parse(value));
+            End = new DateTime(1970, 1, 1).AddSeconds(long.Parse(value));
         }
 
         public override string ToString()

@@ -67,6 +67,8 @@
     <Compile Include="KpnDownloader.cs" />
     <Compile Include="KpnGrabber.cs" />
     <Compile Include="Models\ItvOnlineJson.cs" />
+    <Compile Include="Models\Kpn\Program.cs" />
+    <Compile Include="Models\Kpn\Schedule.cs" />
     <Compile Include="ObnGrabber.cs" />
     <Compile Include="IO\CachedWebDownloader.cs" />
     <Compile Include="IO\CacheObject.cs" />
@@ -109,6 +111,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

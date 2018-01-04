@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using log4net;
 using SharedComponents.Iptv;
+using System.IO.Compression;
 
 namespace EpgGrabber
 {
@@ -20,14 +22,38 @@ namespace EpgGrabber
             _logger = logger;
         }
 
-        public string DownloadEpgData()
+        public string DownloadEpgData(Func<bool> stopProcessing)
         {
-            var data = RetrieveDataFromCarousel();
+            var data = DownloadRawData(stopProcessing);
+            if (stopProcessing()) return string.Empty;
             var unzipped = UnzipData(data);
-            return Encoding.ASCII.GetString(unzipped);
+            if (stopProcessing()) return string.Empty;
+            var epgData = Encoding.ASCII.GetString(unzipped);
+            var file = Path.Combine(_settings.DataFolder, "rawepgdata.txt");
+            _logger.Debug($"Write unzipped EPG data to disk: {file}");
+            File.WriteAllText(file, epgData);
+            return epgData;
         }
 
-        private byte[] RetrieveDataFromCarousel()
+        private byte[] DownloadRawData(Func<bool> stopProcessing)
+        {
+            var rawFile = Path.Combine(_settings.DataFolder, "rawepgdata.gzip");
+            if (stopProcessing()) return null;
+            if (File.Exists(rawFile))
+            {
+                _logger.Debug($"Use data from disk: {rawFile}");
+                return File.ReadAllBytes(rawFile);
+            }
+
+            var rawData = RetrieveDataFromCarousel(stopProcessing);
+
+            _logger.Debug($"Write raw data to disk: {rawFile}");
+            File.WriteAllBytes(rawFile, rawData);
+
+            return rawData;
+        }
+
+        private byte[] RetrieveDataFromCarousel(Func<bool> stopProcessing)
         {
             try
             {
@@ -43,6 +69,8 @@ namespace EpgGrabber
                     var count = 1;
                     while (!complete)
                     {
+                        if (stopProcessing()) return null;
+
                         var packet = socket.Receive();
                         var id = BitConverter.ToInt32(packet.Skip(4).Take(4).Reverse().ToArray(), 0);
                         if (!dictionary.ContainsKey(id))
@@ -53,12 +81,12 @@ namespace EpgGrabber
                         {
                             complete = ValidateIfWeHaveAllPackages(dictionary);
                         }
-                        if(count++ % 50 == 0) _logger.Debug($"Received {count} packtes");
+                        if(++count % 50 == 0) _logger.Debug($"Received {count} packtes");
                         if(count > 10240) throw new EpgGrabberException($"It took to many cycles ({count}) to collect all the data from the EPG carousel");
                     }
 
                     _logger.Info($"Collected {dictionary.Count} packets from the EPG carousel");
-                    for (var i = 0; i <= dictionary.Keys.Max(); i++)
+                    for (var i = dictionary.Keys.Min(); i <= dictionary.Keys.Max(); i++)
                     {
                         data.AddRange(dictionary[i]);
                     }
@@ -74,8 +102,7 @@ namespace EpgGrabber
 
         private bool ValidateIfWeHaveAllPackages(Dictionary<int, byte[]> dictionary)
         {
-            var max = dictionary.Keys.Max();
-            for (var i = 0; i < max; i++)
+            for (var i = dictionary.Keys.Min(); i < dictionary.Keys.Max(); i++)
             {
                 if (dictionary.ContainsKey(i)) continue;
 
@@ -104,7 +131,15 @@ namespace EpgGrabber
 
         private byte[] UnzipData(byte[] data)
         {
-            throw new System.NotImplementedException();
+            using (var outputStream = new MemoryStream())
+            using (var inputStream = new MemoryStream(data))
+            {
+                using (var zipInputStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                {
+                    zipInputStream.CopyTo(outputStream);
+                }
+                return outputStream.ToArray();
+            }
         }
     }
 }
