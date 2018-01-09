@@ -30,6 +30,8 @@ namespace ChannelList
                 _logger.Info($"Start downloading data from {_settings.Host}:{_settings.Port}");
                 var data = _receiver.ReadDataFromServer(_settings.Host, _settings.Port);
                 if(data.Length == 0) throw new InvalidDataException($"Received no data from {_settings.Host}:{_settings.Port}");
+                var file = Path.Combine(_settings.DataFolder, _settings.RawChannelsFile);
+                File.WriteAllBytes(file, data);
                 _logger.Info($"Received {data.Length} bytes of channel list data");
                 var channels = _parser.ParseChannels(data);
                 _logger.Info($"Parsed the data into {channels.Count} channels");

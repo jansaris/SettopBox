@@ -63,6 +63,7 @@ namespace ChannelList
             _lastRetrievalState = string.Empty;
             _channels = null;
             _settings.Load();
+            if (!Directory.Exists(_settings.DataFolder)) Directory.CreateDirectory(_settings.DataFolder);
             _threadHelper.RunSafeInNewThread(LoadChannelListLoop, Logger, ThreadPriority.BelowNormal);
         }
 
@@ -84,7 +85,6 @@ namespace ChannelList
             if (_channels == null) return;
             try
             {
-                if (!Directory.Exists(_settings.DataFolder)) Directory.CreateDirectory(_settings.DataFolder);
                 var file = Path.Combine(_settings.DataFolder, _settings.ChannelsFile);
                 var json = JsonConvert.SerializeObject(_channels);
                 File.WriteAllText(file, json);
