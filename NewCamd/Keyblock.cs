@@ -47,7 +47,7 @@ namespace NewCamd
             if (channelBlock == null)
             {
                 _logger.Warn($"No valid block found for channel {channel}");
-                return null;
+                return new byte[0];
             }
 
             var block1 = _crypto.AesDecrypt(data.Skip(24).Take(16).ToArray(), channelBlock.Key);
@@ -57,7 +57,7 @@ namespace NewCamd
             if (!Encoding.ASCII.GetString(block1).StartsWith("CEB", StringComparison.Ordinal))
             {
                 _logger.Warn($"Failed to decrypt block for channel {channel}");
-                return null;
+                return new byte[0];
             }
 
             _logger.Info($"Decryption of channel {channel} succeeded");
