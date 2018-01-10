@@ -4,6 +4,7 @@ using System.IO;
 using log4net;
 using log4net.Config;
 using SharedComponents.Helpers;
+using SharedComponents.Iptv;
 using SharedComponents.Module;
 using SharedComponents.Settings;
 using SimpleInjector;
@@ -52,6 +53,7 @@ namespace SharedComponents.DependencyInjection
             var container = Create(log4Netconfig);
             container.Register<LinuxSignal>(Lifestyle.Singleton);
             container.RegisterInitializer<LinuxSignal>(signal => signal.Listen());
+            container.Register<Func<IptvSocket>>(() => container.GetInstance<IptvSocket>);
 
             var modules = new List<Type>();
             foreach (var type in configurators)
