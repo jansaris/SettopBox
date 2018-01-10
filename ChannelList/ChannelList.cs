@@ -28,7 +28,7 @@ namespace ChannelList
             try
             {
                 _logger.Info($"Start downloading data from {_settings.Host}:{_settings.Port}");
-                var data = _receiver.ReadDataFromServer(_settings.Host, _settings.Port);
+                var data = _receiver.ReadDataFromServer(_settings.Host, _settings.Port, _settings.GetMacAddress());
                 if(data.Length == 0) throw new InvalidDataException($"Received no data from {_settings.Host}:{_settings.Port}");
                 var file = Path.Combine(_settings.DataFolder, _settings.RawChannelsFile);
                 File.WriteAllBytes(file, data);

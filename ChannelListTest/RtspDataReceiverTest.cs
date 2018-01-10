@@ -12,7 +12,7 @@ namespace ChannelListTest
         public void TestConnection()
         {
             var receiver = new RtspDataReceiver();
-            var data = receiver.ReadDataFromServer("213.75.116.138", 8554);
+            var data = receiver.ReadDataFromServer("213.75.116.138", 8554, "");
             data.Length.Should().BeGreaterThan(0);
         }
 

@@ -6,9 +6,9 @@ namespace ChannelList
 {
     public class RtspDataReceiver
     {
-        public byte[] ReadDataFromServer(string host, int port)
+        public byte[] ReadDataFromServer(string host, int port, string macAddress)
         {
-            var message = Encoding.ASCII.GetBytes($"DESCRIBE rtsp://{host}/vqe-channels/ RTSP/1.0\r\nCSeq: 1\r\nAccept: application/sdp\r\n\r\n");
+            var message = Encoding.ASCII.GetBytes($"DESCRIBE rtsp://{host}/vqe-channels/{macAddress} RTSP/1.0\r\nCSeq: 1\r\nAccept: application/sdp\r\n\r\n");
 
             var client = new TcpClient(host, port);
             using (var stream = client.GetStream())
